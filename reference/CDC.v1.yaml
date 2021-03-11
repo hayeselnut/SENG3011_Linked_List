@@ -2,6 +2,10 @@ openapi: 3.0.0
 info:
   title: Get Reports
   version: '1.0'
+  contact:
+    name: Hayes Choy
+    email: hayeselnut2127@gmail.com
+  description: 'This is the documentation that describes our API endpoints to access our teams disease and syndrome data form the CDC '
 servers:
   - url: 'http://localhost:3000'
 paths:
@@ -60,11 +64,11 @@ paths:
                         diseases:
                           type: array
                           items:
-                            type: object
+                            type: string
                         syndromes:
                           type: array
                           items:
-                            type: object
+                            type: string
                       required:
                         - event_date
                 required:
@@ -86,7 +90,7 @@ paths:
                           - country: China
                             location: 'Wuhan, Hubei Province'
                           - country: Japan
-                            location: ''
+                            location: Tokyo
                         diseases:
                           - 2019-nCoV
                         syndromes:
