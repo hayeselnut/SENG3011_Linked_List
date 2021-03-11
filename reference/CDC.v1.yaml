@@ -198,24 +198,24 @@ paths:
                 example-1:
                   value:
                     errorMessage: Server did not respond in time
-      description: 'Endpoint for getting reports from, period of interest, key disease terms and location'
+      description: 'Endpoint for getting reports from, period of interest, key disease terms and location.'
       parameters:
         - schema:
             type: array
           in: query
-          description: period of interest
+          description: Period of interest
           name: poi
           required: true
         - schema:
             type: array
           in: query
           name: key_terms
-          description: disease search
+          description: Disease search
           required: true
         - schema:
             type: string
           in: query
-          description: 'location of interest '
+          description: ':ocation of interest '
           name: location
           required: true
       requestBody:
