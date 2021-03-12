@@ -77,10 +77,3 @@ for url in link_list:
     print(article)
 # with open('mydata.json', 'w') as f:
 #     json.dump(all_articles, f)
-
-
-
-#
-
-
-# 
