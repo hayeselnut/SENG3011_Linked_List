@@ -44,7 +44,7 @@ const parseQuery = (queryParams) => {
 
     let location;
     if ("location" in queryParams) {
-        location = queryParams.location;
+        location = parseLocation(queryParams.location);
     } else {
         location = "";
     }
@@ -67,8 +67,12 @@ const parseDate = (field, dateString) => {
 
 const parseKeyTerms = (keyTermsString) => {
     const keyTermsArray = keyTermsString.split(",");
-    return keyTermsArray.map((word) => word.trim().toLowerCase());
+    return keyTermsArray.map((word) => {
+        word.trim().toLowerCase();
+    }).filter((word) => word != "");
 };
+
+const parseLocation = (locationString) => (locationString.toLowerCase());
 
 const getArticles = async (request) => {
     functions.logger.info("retrieving articles");
