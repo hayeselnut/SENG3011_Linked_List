@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 const functions = require("firebase-functions");
 const express = require("express");
 const admin = require("firebase-admin");
@@ -39,6 +40,7 @@ const parseQuery = (queryParams) => {
     if ("key_terms" in queryParams) {
         keyTerms = parseKeyTerms(queryParams.key_terms);
     } else {
+        functions.logger.debug("no key terms specified");
         keyTerms = [];
     }
 
@@ -46,6 +48,7 @@ const parseQuery = (queryParams) => {
     if ("location" in queryParams) {
         location = parseLocation(queryParams.location);
     } else {
+        functions.logger.debug("no location specified");
         location = "";
     }
 
@@ -66,19 +69,29 @@ const parseDate = (field, dateString) => {
 };
 
 const parseKeyTerms = (keyTermsString) => {
+    if (!keyTermsString) return [];
+
     const keyTermsArray = keyTermsString.split(",");
-    return keyTermsArray.map((word) => {
-        word.trim().toLowerCase();
-    }).filter((word) => word != "");
+    return keyTermsArray
+        .map((word) => word.trim().toLowerCase()).filter((word) => word != "");
 };
 
 const parseLocation = (locationString) => (locationString.toLowerCase());
 
 const getArticles = async (request) => {
-    functions.logger.info("retrieving articles");
-    const snapshot = await db.collection("articles").get();
-    const reports = await getReports(request);
+    functions.logger.info(`retrieving articles between ${request.startDate} and ${request.endDate}`);
+    const snapshot = await db.collection("articles")
+        .where("date_of_publication", ">=", request.startDate)
+        .where("date_of_publication", "<=", request.endDate)
+        .get();
 
+    const articles = await extractArticlesFromSnapshot(snapshot, request);
+    const filteredArticles = filterArticles(articles, request);
+    return filteredArticles;
+};
+
+const extractArticlesFromSnapshot = async (snapshot, request) => {
+    const reports = await getReports(request);
     const articles = [];
     snapshot.forEach((doc) => {
         const id = doc.id;
@@ -90,6 +103,57 @@ const getArticles = async (request) => {
     });
 
     return articles;
+};
+
+const filterArticles = (articles, request) => {
+    return articles.filter((article) => {
+        // KEY TERMS (results must satisfy ALL key terms)
+        if (request.keyTerms.length === 0) return true;
+
+        for (const keyTerm of request.keyTerms) {
+            if (article.url.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in url`);
+                continue;
+            }
+            if (article.headline.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in headline`);
+                continue;
+            }
+            if (article.main_text.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in main_text`);
+                continue;
+            }
+            if (isKeyTermInReports(article.reports, keyTerm)) {
+                continue;
+            }
+            functions.logger.debug(`key term '${keyTerm}' not found in this article`);
+            return false;
+        }
+        return true;
+    }).filter((article) => {
+        // LOCATION : TODO stub
+        return true;
+    });
+};
+
+const isKeyTermInReports = (reports, keyTerm) => {
+    // returns TRUE if any report contains key term
+    for (const report of reports) {
+        for (const disease of report.diseases) {
+            if (disease.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in diseases`);
+                return true;
+            }
+        }
+
+        for (const syndrome of report.syndromes) {
+            if (syndrome.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in syndrome`);
+                return true;
+            }
+        }
+    }
+    return false;
 };
 
 const getReports = async (request) => {
