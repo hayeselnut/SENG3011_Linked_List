@@ -1,46 +1,20 @@
 /* eslint-disable guard-for-in */
 const functions = require("firebase-functions");
-const express = require("express");
-const admin = require("firebase-admin");
-const response = require("../responses");
-const parser = require("./parsers");
 
-admin.initializeApp();
-const db = admin.firestore();
-
-const app = express();
-
-app.get("/", async (req, res) => {
-    let request;
-    try {
-        functions.logger.info(req.query);
-        request = parser.parseQuery(req.query);
-    } catch (e) {
-        functions.logger.error(`400 BAD REQUEST could not parse request: ${e.message}`);
-        res.status(400).send(response.error(400, e.message));
-        return;
-    }
-    functions.logger.info(`/articles received request object: ${JSON.stringify(request)}`);
-    const articles = await getArticles(request);
-
-    functions.logger.info("200 OK processed request and returning matching articles");
-    res.status(200).send(response.success(articles, "articles"));
-});
-
-const getArticles = async (request) => {
+const getArticles = async (db, request) => {
     functions.logger.info(`retrieving articles between ${request.startDate} and ${request.endDate}`);
     const snapshot = await db.collection("articles")
         .where("date_of_publication", ">=", request.startDate)
         .where("date_of_publication", "<=", request.endDate)
         .get();
 
-    const articles = await extractArticlesFromSnapshot(snapshot, request);
+    const articles = await extractArticlesFromSnapshot(db, snapshot, request);
     const filteredArticles = filterArticles(articles, request);
     return filteredArticles;
 };
 
-const extractArticlesFromSnapshot = async (snapshot, request) => {
-    const reports = await getReports(request);
+const extractArticlesFromSnapshot = async (db, snapshot, request) => {
+    const reports = await getReports(db, request);
     const articles = [];
     snapshot.forEach((doc) => {
         const id = doc.id;
@@ -75,7 +49,7 @@ const isDateMatchedWithWildcards = (dateString, wildcardedDate) => {
     functions.logger.info(`comparing ${dateString} and ${wildcardedDate}`);
 
     if (dateString.length !== wildcardedDate.length) {
-        throw new Error(`date string ${dateString} (${dateString.length}) is different length to ${wildcardedDate} (${wildcardedDate.length})`);
+        throw new Error(`date string ${dateString} is different length to ${wildcardedDate}`);
     }
 
     for (let i = 0; i < dateString.length; i++) {
@@ -132,7 +106,7 @@ const isKeyTermInReports = (reports, keyTerm) => {
     return false;
 };
 
-const getReports = async (request) => {
+const getReports = async (db, request) => {
     functions.logger.info("retrieving reports");
     const snapshot = await db.collection("reports").get();
 
@@ -148,4 +122,4 @@ const getReports = async (request) => {
     return reports;
 };
 
-exports.app = functions.https.onRequest(app);
+exports.getArticles = getArticles;
