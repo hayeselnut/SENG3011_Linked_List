@@ -68,6 +68,16 @@ def get_headline(url):
 
 #     return "unknown"
 
+def get_maintext(url):
+    page_soup = get_page_html(url)
+    container = page_soup.findAll('p') 
+    if container != None:
+        container = re.sub('<[^>]+>', '', str(container))
+        container = re.sub(r'\s+\-.*|\s+\|.*|\n*|\r*',"", container)
+        container = container.replace(u'\xa0', u' ')
+    else:
+        container = "unknown"
+    return container
 
 
 link_list = []
@@ -104,24 +114,47 @@ get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
 
 
 
+def main():
+    all_articles = {}
+    count = 0
+    #print(link_list[0])
+    # now goto the first link and be able to use beautiful soup to get the main text
+    #print(get_maintext(link_list[0]))
 
-all_articles = {}
-count = 0
-for url in link_list:
-    #get_publish_date(url)
-    article = {}
-    report = {}
-    article['url'] = url
-    article['date_of_publication'] = url
-    article['headline'] = get_headline(url)
-    article['maintext'] = "blah"
-    article['report'] = report
-    all_articles['article'+ str(count)] = article
-    count += 1
-    print(article)
-# with open('mydata.json', 'w') as f:
-#     json.dump(all_articles, f)
+    #print(get_maintext(all_articles)
+    #article = link_list[-2]
+    #print(article)
+    #print(get_maintext(article))
+    for url in link_list:
+        #get_publish_date(url)
+        article = {}
+        report = {}
+        article['url'] = url
+        article['date_of_publication'] = "not done atm"
+        article['headline'] = get_headline(url)
+        article['maintext'] = get_maintext(url)
+        article['report'] = report
+        all_articles['article'+ str(count)] = article
+        count += 1
+        #print(article)
+        printArticle(article)
+    # with open('mydata.json', 'w') as f:
+    #     json.dump(all_articles, f)
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
+def printArticle(article):
+    print("----------------------------------")
+    print(article["url"])
+    print(article["date_of_publication"])
+    print(article["headline"])
+    print(article["maintext"])
+    print(article["report"])
+
+
+
+
+# Calling main function
+if __name__ == "__main__":
+    main()
