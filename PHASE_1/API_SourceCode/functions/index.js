@@ -25,23 +25,35 @@ app.get("/", async (req, res) => {
 });
 
 const parseQuery = (queryParams) => {
-    const queryFields = ["start_date", "end_date", "key_terms", "location"];
-    for (const field of queryFields) {
-        if (!(field in queryParams)) throw new Error(`'${field}' must not be null`);
-    }
-
+    if (!("start_date" in queryParams)) throw new Error("'start_date' must not be null");
     const startDate = parseDate("start_date", queryParams.start_date);
+
+    if (!("end_date" in queryParams)) throw new Error("'end_date' must not be null");
     const endDate = parseDate("end_date", queryParams.end_date);
 
     if (startDate.getTime() > endDate.getTime()) {
         throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
     }
 
+    let keyTerms;
+    if ("key_terms" in queryParams) {
+        keyTerms = parseKeyTerms(queryParams.key_terms);
+    } else {
+        keyTerms = [];
+    }
+
+    let location;
+    if ("location" in queryParams) {
+        location = queryParams.location;
+    } else {
+        location = "";
+    }
+
     return {
         startDate: startDate,
         endDate: endDate,
-        keyTerms: queryParams.key_terms.split(","),
-        location: queryParams.location,
+        keyTerms: keyTerms,
+        location: location,
     };
 };
 
@@ -51,6 +63,11 @@ const parseDate = (field, dateString) => {
     if (isNaN(timestamp)) throw new Error(`'${field}' is an invalid date format`);
 
     return new Date(timestamp);
+};
+
+const parseKeyTerms = (keyTermsString) => {
+    const keyTermsArray = keyTermsString.split(",");
+    return keyTermsArray.map((word) => word.trim().toLowerCase());
 };
 
 const getArticles = async (request) => {
