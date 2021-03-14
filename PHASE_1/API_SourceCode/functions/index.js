@@ -7,37 +7,35 @@ const db = admin.firestore();
 
 const app = express();
 
-const errorResponse = (statusCode, errorMessage) => ({
-    errorMessage: `${statusCode} ${errorMessage}`,
-});
-
 app.get("/", async (req, res) => {
-    functions.logger.info("/articles has been called with request: " + req);
     let request;
     try {
         functions.logger.info(req.query);
         request = parseQuery(req.query);
     } catch (e) {
+        functions.logger.error(`400 BAD REQUEST could not parse request: ${e.message}`);
         res.status(400).send(errorResponse(400, e.message));
         return;
     }
-
-    functions.logger.info(request, {structuredData: true});
+    functions.logger.info(`/articles received request object: ${JSON.stringify(request)}`);
     const articles = await getArticles(request);
 
+    functions.logger.info("200 OK processed request and returning matching articles");
     res.status(200).send(articles);
 });
 
 const parseQuery = (queryParams) => {
-    if (!("start_date" in queryParams)) throw new Error("'start_date' must not be null");
-    if (!("end_date" in queryParams)) throw new Error("'end_date' must not be null");
-    if (!("key_terms" in queryParams)) throw new Error("'key_terms' must not be null");
-    if (!("location" in queryParams)) throw new Error("'location' must not be null");
+    const queryFields = ["start_date", "end_date", "key_terms", "location"];
+    for (const field of queryFields) {
+        if (!(field in queryParams)) throw new Error(`'${field}' must not be null`);
+    }
 
-    const startDate = parseDate(queryParams.start_date);
-    const endDate = parseDate(queryParams.end_date);
+    const startDate = parseDate("start_date", queryParams.start_date);
+    const endDate = parseDate("end_date", queryParams.end_date);
 
-    if (startDate.getTime() > endDate.getTime()) throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
+    if (startDate.getTime() > endDate.getTime()) {
+        throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
+    }
 
     return {
         startDate: startDate,
@@ -47,17 +45,17 @@ const parseQuery = (queryParams) => {
     };
 };
 
-const parseDate = (dateString) => {
+const parseDate = (field, dateString) => {
     const timestamp = Date.parse(dateString);
 
-    if (isNaN(timestamp)) throw new Error("invalid date format");
+    if (isNaN(timestamp)) throw new Error(`'${field}' is an invalid date format`);
 
     return new Date(timestamp);
 };
 
 const getArticles = async (request) => {
+    functions.logger.info("retrieving articles");
     const snapshot = await db.collection("articles").get();
-
     const reports = await getReports(request);
 
     const articles = [];
@@ -74,6 +72,7 @@ const getArticles = async (request) => {
 };
 
 const getReports = async (request) => {
+    functions.logger.info("retrieving reports");
     const snapshot = await db.collection("reports").get();
 
     const reports = [];
@@ -88,4 +87,9 @@ const getReports = async (request) => {
     return reports;
 };
 
+const errorResponse = (statusCode, errorMessage) => ({
+    errorMessage: `${statusCode} ${errorMessage}`,
+});
+
 exports.articles = functions.https.onRequest(app);
+
