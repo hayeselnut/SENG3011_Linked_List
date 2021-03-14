@@ -117,14 +117,7 @@ get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
 def main():
     all_articles = {}
     count = 0
-    #print(link_list[0])
-    # now goto the first link and be able to use beautiful soup to get the main text
-    #print(get_maintext(link_list[0]))
-
-    #print(get_maintext(all_articles)
-    #article = link_list[-2]
-    #print(article)
-    #print(get_maintext(article))
+    
     for url in link_list:
         #get_publish_date(url)
         article = {}
@@ -136,7 +129,7 @@ def main():
         article['report'] = report
         all_articles['article'+ str(count)] = article
         count += 1
-        #print(article)
+        
         printArticle(article)
     # with open('mydata.json', 'w') as f:
     #     json.dump(all_articles, f)
