@@ -1,20 +1,18 @@
 const functions = require("firebase-functions");
 const express = require("express");
-// const cors = require("cors");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
+const db = admin.firestore();
 
 const app = express();
 
-const errorResponse = (statusCode, errorMessage) => {
-    return {
-        errorMessage: `${statusCode} ${errorMessage}`,
-    };
-};
+const errorResponse = (statusCode, errorMessage) => ({
+    errorMessage: `${statusCode} ${errorMessage}`,
+});
 
 app.get("/", async (req, res) => {
-    functions.logger.info(req.query, {structuredData: true});
+    functions.logger.info("/articles has been called with request: " + req);
     let request;
     try {
         functions.logger.info(req.query);
@@ -25,15 +23,7 @@ app.get("/", async (req, res) => {
     }
 
     functions.logger.info(request, {structuredData: true});
-    const snapshot = await admin.firestore().collection("articles").get();
-
-    const articles = [];
-    snapshot.forEach((doc) => {
-        const id = doc.id;
-        const data = doc.data();
-
-        articles.push({id, ...data});
-    });
+    const articles = await getArticles(request);
 
     res.status(200).send(articles);
 });
@@ -65,54 +55,37 @@ const parseDate = (dateString) => {
     return new Date(timestamp);
 };
 
+const getArticles = async (request) => {
+    const snapshot = await db.collection("articles").get();
+
+    const reports = await getReports(request);
+
+    const articles = [];
+    snapshot.forEach((doc) => {
+        const id = doc.id;
+        const data = doc.data();
+        const article = {id, ...data};
+        article.reports = [...reports];
+        article.date_of_publication = article.date_of_publication.toDate();
+        articles.push(article);
+    });
+
+    return articles;
+};
+
+const getReports = async (request) => {
+    const snapshot = await db.collection("reports").get();
+
+    const reports = [];
+    snapshot.forEach((doc) => {
+        const id = doc.id;
+        const data = doc.data();
+        const report = {id, ...data};
+        report.event_date = report.event_date.toDate();
+        reports.push(report);
+    });
+
+    return reports;
+};
+
 exports.articles = functions.https.onRequest(app);
-
-
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-/*
-    app.get("/:id", async (req, res) => {
-const snapshot = await admin.firestore().collection(
-    'users').doc(req.query.id).get();
-
-        const userId = snapshot.id;
-        const userData = snapshot.data();
-
-        res.status(200).send(JSON.stringify({id: userId, ...userData}));
-    })
-
-    app.post("/", async (req, res) => {
-        const user = req.body;
-
-        await admin.firestore().collection("users").add(user);
-
-        res.status(201).send();
-    });
-
-    app.put("/:id", async (req, res) => {
-        const body = req.body;
-
-        await admin.firestore().collection('users').d
-        oc(req.query.id).update(body);
-
-        res.status(200).send()
-    });
-
-    app.delete("/:id", async (req, res) => {
-        await admin.firestore().collection("users").doc(req.query.id).delete();
-
-        res.status(200).send();
-    })
-
-
-    // // Create and Deploy Your First Cloud Functions
-    // // https://firebase.google.com/docs/functions/write-firebase-functions
-    //
-    exports.helloWorld = functions.https.onRequest((request, response) => {
-    response.send("Hello from Firebase!");
-    });
-
-*/
