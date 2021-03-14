@@ -1,5 +1,5 @@
-const articles = require("./articles");
-const article = require("./article");
+const articles = require("./articles/articles");
+const article = require("./article/article");
 
 exports.articles = articles.app;
 exports.article = article.app;

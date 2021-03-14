@@ -2,7 +2,7 @@
 const functions = require("firebase-functions");
 const express = require("express");
 // const admin = require("firebase-admin");
-const response = require("./responses");
+const response = require("../responses");
 
 // admin.initializeApp();
 // const db = admin.firestore();
