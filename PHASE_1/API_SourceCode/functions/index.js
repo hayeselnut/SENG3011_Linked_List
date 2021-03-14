@@ -33,7 +33,7 @@ app.get("/article/:id", async (req, res) => {
     const articleData = snapshot.data();
 
     if (!articleData) {
-        res.status(200).send(response.success({}, "article"));
+        res.status(400).send(response.error(404, `article with id ${req.params.id} not found`));
     } else {
         const article = {id: articleId, ...articleData};
         res.status(200).send(response.success(article, "article"));
