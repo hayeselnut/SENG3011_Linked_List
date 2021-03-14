@@ -21,7 +21,7 @@ app.get("/", async (req, res) => {
     const articles = await getArticles(request);
 
     functions.logger.info("200 OK processed request and returning matching articles");
-    res.status(200).send(successResponse(articles));
+    res.status(200).send(successResponse(articles, "articles"));
 });
 
 const parseQuery = (queryParams) => {
@@ -95,7 +95,7 @@ const successResponse = (response, responseField) => {
     const successResponse = {
         "log": {
             "team": "SENG3011_LINKED_LIST",
-            "time_accessed": Date.now(),
+            "time_accessed": new Date(Date.now()).toISOString(),
         },
     };
     successResponse[responseField] = response;
