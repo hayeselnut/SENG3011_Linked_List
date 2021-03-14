@@ -28,14 +28,18 @@ app.get("/articles", async (req, res) => {
 });
 
 app.get("/article/:id", async (req, res) => {
+    functions.logger.info(`/article received request to get article with id ${req.params.id}`);
+
     const snapshot = await db.collection("articles").doc(req.params.id).get();
     const articleId = snapshot.id;
     const articleData = snapshot.data();
 
     if (!articleData) {
+        functions.logger.error(`404 NOT FOUND could not find article with id ${req.params.id}`);
         res.status(400).send(response.error(404, `article with id ${req.params.id} not found`));
     } else {
         const article = {id: articleId, ...articleData};
+        functions.logger.info(`200 OK processed request and returning article with id ${req.params.id}`);
         res.status(200).send(response.success(article, "article"));
     }
 });
