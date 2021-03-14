@@ -76,7 +76,7 @@ const parseKeyTerms = (keyTermsString) => {
         .map((word) => word.trim().toLowerCase()).filter((word) => word != "");
 };
 
-const parseLocation = (locationString) => (locationString.toLowerCase());
+const parseLocation = (locationString) => (locationString.trim().toLowerCase());
 
 const getArticles = async (request) => {
     functions.logger.info(`retrieving articles between ${request.startDate} and ${request.endDate}`);
@@ -107,6 +107,8 @@ const extractArticlesFromSnapshot = async (snapshot, request) => {
 
 const filterArticles = (articles, request) => {
     return articles.filter((article) => {
+        // DATE if the date has x's
+    }).filter((article) => {
         // KEY TERMS (results must satisfy ALL key terms)
         if (request.keyTerms.length === 0) return true;
 
