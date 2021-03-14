@@ -1,118 +1,127 @@
 const functions = require("firebase-functions");
 const express = require("express");
-// const cors = require("cors");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
+const db = admin.firestore();
 
 const app = express();
 
-const errorResponse = (statusCode, errorMessage) => {
-    return {
-        errorMessage: `${statusCode} ${errorMessage}`,
-    };
-};
-
 app.get("/", async (req, res) => {
-    functions.logger.info(req.query, {structuredData: true});
     let request;
     try {
         functions.logger.info(req.query);
         request = parseQuery(req.query);
     } catch (e) {
+        functions.logger.error(`400 BAD REQUEST could not parse request: ${e.message}`);
         res.status(400).send(errorResponse(400, e.message));
         return;
     }
+    functions.logger.info(`/articles received request object: ${JSON.stringify(request)}`);
+    const articles = await getArticles(request);
 
-    functions.logger.info(request, {structuredData: true});
-    const snapshot = await admin.firestore().collection("articles").get();
+    functions.logger.info("200 OK processed request and returning matching articles");
+    res.status(200).send(successResponse(articles, "articles"));
+});
+
+const parseQuery = (queryParams) => {
+    if (!("start_date" in queryParams)) throw new Error("'start_date' must not be null");
+    const startDate = parseDate("start_date", queryParams.start_date);
+
+    if (!("end_date" in queryParams)) throw new Error("'end_date' must not be null");
+    const endDate = parseDate("end_date", queryParams.end_date);
+
+    if (startDate.getTime() > endDate.getTime()) {
+        throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
+    }
+
+    let keyTerms;
+    if ("key_terms" in queryParams) {
+        keyTerms = parseKeyTerms(queryParams.key_terms);
+    } else {
+        keyTerms = [];
+    }
+
+    let location;
+    if ("location" in queryParams) {
+        location = parseLocation(queryParams.location);
+    } else {
+        location = "";
+    }
+
+    return {
+        startDate: startDate,
+        endDate: endDate,
+        keyTerms: keyTerms,
+        location: location,
+    };
+};
+
+const parseDate = (field, dateString) => {
+    const timestamp = Date.parse(dateString);
+
+    if (isNaN(timestamp)) throw new Error(`'${field}' is an invalid date format`);
+
+    return new Date(timestamp);
+};
+
+const parseKeyTerms = (keyTermsString) => {
+    const keyTermsArray = keyTermsString.split(",");
+    return keyTermsArray.map((word) => {
+        word.trim().toLowerCase();
+    }).filter((word) => word != "");
+};
+
+const parseLocation = (locationString) => (locationString.toLowerCase());
+
+const getArticles = async (request) => {
+    functions.logger.info("retrieving articles");
+    const snapshot = await db.collection("articles").get();
+    const reports = await getReports(request);
 
     const articles = [];
     snapshot.forEach((doc) => {
         const id = doc.id;
         const data = doc.data();
-
-        articles.push({id, ...data});
+        const article = {id, ...data};
+        article.reports = [...reports];
+        article.date_of_publication = article.date_of_publication.toDate();
+        articles.push(article);
     });
 
-    res.status(200).send(articles);
-});
-
-const parseQuery = (queryParams) => {
-    if (!("start_date" in queryParams)) throw new Error("'start_date' must not be null");
-    if (!("end_date" in queryParams)) throw new Error("'end_date' must not be null");
-    if (!("key_terms" in queryParams)) throw new Error("'key_terms' must not be null");
-    if (!("location" in queryParams)) throw new Error("'location' must not be null");
-
-    const startDate = parseDate(queryParams.start_date);
-    const endDate = parseDate(queryParams.end_date);
-
-    if (startDate.getTime() > endDate.getTime()) throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
-
-    return {
-        startDate: startDate,
-        endDate: endDate,
-        keyTerms: queryParams.key_terms.split(","),
-        location: queryParams.location,
-    };
+    return articles;
 };
 
-const parseDate = (dateString) => {
-    const timestamp = Date.parse(dateString);
+const getReports = async (request) => {
+    functions.logger.info("retrieving reports");
+    const snapshot = await db.collection("reports").get();
 
-    if (isNaN(timestamp)) throw new Error("invalid date format");
+    const reports = [];
+    snapshot.forEach((doc) => {
+        const id = doc.id;
+        const data = doc.data();
+        const report = {id, ...data};
+        report.event_date = report.event_date.toDate();
+        reports.push(report);
+    });
 
-    return new Date(timestamp);
+    return reports;
+};
+
+const errorResponse = (statusCode, errorMessage) => ({
+    errorMessage: `${statusCode} ${errorMessage}`,
+});
+
+const successResponse = (response, responseField) => {
+    const successResponse = {
+        "log": {
+            "team": "SENG3011_LINKED_LIST",
+            "time_accessed": new Date(Date.now()).toISOString(),
+        },
+    };
+    successResponse[responseField] = response;
+    return successResponse;
 };
 
 exports.articles = functions.https.onRequest(app);
 
-
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-/*
-    app.get("/:id", async (req, res) => {
-const snapshot = await admin.firestore().collection(
-    'users').doc(req.query.id).get();
-
-        const userId = snapshot.id;
-        const userData = snapshot.data();
-
-        res.status(200).send(JSON.stringify({id: userId, ...userData}));
-    })
-
-    app.post("/", async (req, res) => {
-        const user = req.body;
-
-        await admin.firestore().collection("users").add(user);
-
-        res.status(201).send();
-    });
-
-    app.put("/:id", async (req, res) => {
-        const body = req.body;
-
-        await admin.firestore().collection('users').d
-        oc(req.query.id).update(body);
-
-        res.status(200).send()
-    });
-
-    app.delete("/:id", async (req, res) => {
-        await admin.firestore().collection("users").doc(req.query.id).delete();
-
-        res.status(200).send();
-    })
-
-
-    // // Create and Deploy Your First Cloud Functions
-    // // https://firebase.google.com/docs/functions/write-firebase-functions
-    //
-    exports.helloWorld = functions.https.onRequest((request, response) => {
-    response.send("Hello from Firebase!");
-    });
-
-*/
