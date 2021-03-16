@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup as soup
 import re
 import json
+from datetime import datetime
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -57,16 +58,24 @@ def get_headline(url):
         container = "unknown"
     return container
 
-# def get_publish_date(url):
-#     #page = requests.get("https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json")
+def get_publish_date(url):
+    page_soup = get_page_html(url)
     
-#     if get_page_html(url) in l1:
-#         return t1[l1.index(url)] 
+    date = page_soup.find('meta', {"name": "DC.date"}, content=True)
 
-#     # if get_page_html(url) in l2:
-#     #     return t2[l2.index(get_page_html(url))]
+    if date != None:
+        return date['content']
+    elif page_soup.find('div', {"class": "col last-reviewed"}) != None: 
+        container = page_soup.find('div', {"class": "col last-reviewed"})
+        match = re.search(r'Page last updated: \<span\>(.*)\<\/span\>', str(container))
 
-#     return "unknown"  
+        return re.search(r'\<span\>(.*?)\<\/span\>',str(match)).group(1)
+    else:
+    #except:
+        return 'unknown'
+    #time_str = date.find('time')['datetime']
+
+    #return date  
 
 def get_maintext(url):
     page_soup = get_page_html(url)
@@ -126,30 +135,33 @@ def main():
         article = {}
         report = []
         #article['ID'] = count
-        article['url'] = url
-        article['date_of_publication'] = "not done atm"
-        article['headline'] = get_headline(url)
-        article['maintext'] = get_maintext(url)
-        article['report'] = report
-        #all_articles['article'+ str(count)] = article
-        all_articles.append(article)
-        count += 1
-        
-        #print(article)
+        try:
+            article['url'] = url
+            article['date_of_publication'] = get_publish_date(url)
+            article['headline'] = get_headline(url)
+            article['maintext'] = "la"
+            article['report'] = report
+            #all_articles['article'+ str(count)] = article
+            all_articles.append(article)
+            count += 1
+            
+            print(article)
+        except ConnectionError:
+            print("connection error - maximum time exceeds somethingsomething")
         #printArticle(article)
-    with open('./files/mydata.json', 'w') as f:
-        json.dump(all_articles, f)
+    # with open('./files/mydata.json', 'w') as f:
+    #     json.dump(all_articles, f)
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
-def printArticle(article):
-    print("----------------------------------")
-    print(article["url"])
-    print(article["date_of_publication"])
-    print(article["headline"])
-    print(article["maintext"])
-    print(article["report"])
+# def printArticle(article):
+#     print("----------------------------------")
+#     print(article["url"])
+#     print(article["date_of_publication"])
+#     print(article["headline"])
+#     print(article["maintext"])
+#     print(article["report"])
 
 
 
