@@ -35,6 +35,7 @@ def get_USAndTravel(url, link_list):
         link_list.append(url)
 
 
+
 # def get_foodSafety(url, link_list):
 #     soup = get_page_html(url)
 #     containers = soup.find_all("a", {"ng-click": "clickThrough(article.link)"}, href=True)
@@ -80,8 +81,6 @@ def get_maintext(url):
     return container
 
 
-link_list = []
-get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
 
 #get_foodSafety("https://www.cdc.gov/outbreaks/", link_list)
 # print(link_list)
@@ -113,24 +112,44 @@ get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
 #     t2.append(item['pubdate'])
 
 
+def get_all_embedded_links(url):
+    page_soup = get_page_html(url)
+    list = []
+    for a_tag in page_soup.findAll('a'):
+        href = a_tag.attrs.get("href")
+        if href == "" or href is None:
+            continue
+        else:
+            list.append(href)
 
+    return list
+
+
+
+    
 def main():
+    link_list = []
+    get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
+
     all_articles = {}
     count = 0
     
-    for url in link_list:
-        #get_publish_date(url)
-        article = {}
-        report = {}
-        article['url'] = url
-        article['date_of_publication'] = "not done atm"
-        article['headline'] = get_headline(url)
-        article['maintext'] = get_maintext(url)
-        article['report'] = report
-        all_articles['article'+ str(count)] = article
-        count += 1
-        
-        printArticle(article)
+    #article = link_list[0]
+    #print(get_all_embedded_links(article))
+    
+    #for url in link_list:
+    #    #get_publish_date(url)
+    #    article = {}
+    #    report = {}
+    #    article['url'] = url
+    #    article['date_of_publication'] = "not done atm"
+    #    article['headline'] = get_headline(url)
+    #    article['maintext'] = get_maintext(url)
+    #    article['report'] = report
+    #    all_articles['article'+ str(count)] = article
+    #    count += 1
+    #    
+    #    printArticle(article)
     # with open('mydata.json', 'w') as f:
     #     json.dump(all_articles, f)
 
@@ -146,7 +165,7 @@ def printArticle(article):
     print(article["report"])
 
 
-
+# TODO need to put main in a different py file
 
 # Calling main function
 if __name__ == "__main__":
