@@ -3,6 +3,10 @@ from bs4 import BeautifulSoup as soup
 import re
 import json
 from datetime import datetime
+from dateutil import parser, tz
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -47,6 +51,15 @@ def get_USAndTravel(url, link_list):
 #         url = fix_url(url)
 
 #         link_list.append(url)
+
+def get_report_url(url):
+    report_list = []
+    soup = get_page_html(url)
+
+    return [el.find('a').get('href') for el in soup.find_all('li', {'class': 'list-group-item'})]
+
+
+
         
 def get_headline(url):
     page_soup = get_page_html(url)
@@ -66,16 +79,18 @@ def get_publish_date(url):
     if date != None:
         return date['content']
     elif page_soup.find('div', {"class": "col last-reviewed"}) != None: 
+
         container = page_soup.find('div', {"class": "col last-reviewed"})
-        match = re.search(r'Page last updated: \<span\>(.*)\<\/span\>', str(container))
+        match_line = re.search(r'Page last updated: \<span\>(.*)\<\/span\>', str(container))
+        match_date = re.search(r'\<span\>(.*?)\<\/span\>',str(match_line)).group(1)
 
-        return re.search(r'\<span\>(.*?)\<\/span\>',str(match)).group(1)
+        PYCON_DATE = parser.parse(match_date)
+        PYCON_DATE = PYCON_DATE.replace(tzinfo=tz.gettz("Australia"))
+
+        return str(PYCON_DATE).replace(' ','T') + "Z"
     else:
-    #except:
         return 'unknown'
-    #time_str = date.find('time')['datetime']
 
-    #return date  
 
 def get_maintext(url):
     page_soup = get_page_html(url)
@@ -92,65 +107,61 @@ def get_maintext(url):
     return str(container)
 
 
-link_list = []
-get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
-
-#get_foodSafety("https://www.cdc.gov/outbreaks/", link_list)
-# print(link_list)
-# print(len(link_list))
-
 # url1 = "https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json"
-
 # r1 = requests.get(url1)
-
-# l1 = []
-# t1 = []
 # json_data = r1.json()
-# count = 0
-# for item in json_data['entries']:
-#     l1.append(get_page_html(item['link']))
-#     t1.append(item['pubdate'])
-
-
-# url2 = "https://www2c.cdc.gov/podcasts/feed.asp?feedid=66&format=json"
-
-# r2 = requests.get(url2)
-
-# l2 = []
-# t2 = []
-# json_data = r2.json()
-# count = 0
-# for item in json_data['entries']:
-#     l2.append(get_page_html(item['link']))
-#     t2.append(item['pubdate'])
 
 
 
 def main():
+
+
     all_articles = []
-    count = 0
-    
+
+    link_list = []
+    get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
+
     for url in link_list:
-        #get_publish_date(url)
         article = {}
         report = []
-        #article['ID'] = count
+
+        #print(get_report_url(url))
+
         try:
             article['url'] = url
             article['date_of_publication'] = get_publish_date(url)
             article['headline'] = get_headline(url)
-            article['maintext'] = "la"
+            article['maintext'] = get_maintext(url)
             article['report'] = report
-            #all_articles['article'+ str(count)] = article
             all_articles.append(article)
-            count += 1
             
-            print(article)
-        except ConnectionError:
-            print("connection error - maximum time exceeds somethingsomething")
-        #printArticle(article)
-    # with open('./files/mydata.json', 'w') as f:
+            #print(article)
+        except requests.ConnectionError as e:
+            print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
+            print(str(e))
+        except requests.Timeout as e:
+            print("OOPS!! Timeout Error")
+            print(str(e))
+        except requests.RequestException as e:
+            print("OOPS!! General Error")
+            print(str(e))
+        except KeyboardInterrupt:
+            print("Someone closed the program")
+
+    # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
+
+    cred = credentials.Certificate('./still-resource-306306-firebase-adminsdk-q6e0r-8eeb8df3d5.json')
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
+
+
+    count = 0
+
+    for obj in all_articles:
+        db.collection(u'articles').document(str(count)).set(obj)
+        count += 1
+
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
