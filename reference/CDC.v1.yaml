@@ -7,7 +7,7 @@ info:
     email: hayeselnut2127@gmail.com
   description: 'This is the documentation that describes our API endpoints to access our teams disease and syndrome data form the CDC '
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'https://us-central1-still-resource-306306.cloudfunctions.net'
 paths:
   /articles:
     parameters: []
@@ -219,7 +219,7 @@ paths:
         - schema:
             type: string
           in: query
-          description: ':ocation of interest '
+          description: 'location of interest '
           name: location
           required: true
       requestBody:
