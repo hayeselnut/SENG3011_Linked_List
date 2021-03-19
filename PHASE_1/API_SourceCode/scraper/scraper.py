@@ -7,7 +7,6 @@ from dateutil import parser, tz
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-import uuid
 import hashlib
 
 CDC_PREFIX = "https://www.cdc.gov"
@@ -112,6 +111,11 @@ def get_maintext(url):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
+def generate_unique_article_id(counter):
+    unique = hashlib.md5(str(counter).encode('utf-8'))
+
+    return unique.hexdigest()
+
 def main():
 
 
@@ -119,6 +123,7 @@ def main():
 
     link_list = []
     get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
+    counter  = 0
 
     for url in link_list:
         article = {}
@@ -127,10 +132,11 @@ def main():
         #print(get_report_url(url))
 
         try:
-            article['main_text'] = get_maintext(url)
+            article['id'] = generate_unique_article_id(counter)
+            article['headline'] = get_headline(url)
             article['date_of_publication'] = get_publish_date(url)
             article['url'] = url
-            article['headline'] = get_headline(url)
+            article['main_text'] = get_maintext(url)
             article['reports'] = report
             all_articles.append(article)
             
@@ -147,6 +153,7 @@ def main():
         except KeyboardInterrupt:
             print("Someone closed the program")
 
+        counter += 1
     # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
 
@@ -159,8 +166,7 @@ def main():
 
     for obj in all_articles:
 
-        unique = hashlib.md5(str(count).encode('utf-8'))
-        db.collection(u'articles').document(unique.hexdigest()).set(obj)
+        db.collection(u'articles').document(obj['id']).set(obj)
         count += 1
 
 
