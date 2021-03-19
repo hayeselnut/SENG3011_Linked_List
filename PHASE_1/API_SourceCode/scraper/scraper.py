@@ -7,6 +7,7 @@ from dateutil import parser, tz
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import hashlib
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -60,7 +61,6 @@ def get_report_url(url):
 
 
 
-        
 def get_headline(url):
     page_soup = get_page_html(url)
     container = page_soup.find("title")
@@ -111,7 +111,10 @@ def get_maintext(url):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
+def generate_unique_article_id(counter):
+    unique = hashlib.md5(str(counter).encode('utf-8'))
 
+    return unique.hexdigest()
 
 def main():
 
@@ -120,6 +123,7 @@ def main():
 
     link_list = []
     get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
+    counter  = 0
 
     for url in link_list:
         article = {}
@@ -128,14 +132,15 @@ def main():
         #print(get_report_url(url))
 
         try:
-            article['url'] = url
-            article['date_of_publication'] = get_publish_date(url)
+            article['id'] = generate_unique_article_id(counter)
             article['headline'] = get_headline(url)
-            article['maintext'] = get_maintext(url)
-            article['report'] = report
+            article['date_of_publication'] = get_publish_date(url)
+            article['url'] = url
+            article['main_text'] = get_maintext(url)
+            article['reports'] = report
             all_articles.append(article)
             
-            #print(article)
+            
         except requests.ConnectionError as e:
             print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
             print(str(e))
@@ -148,10 +153,11 @@ def main():
         except KeyboardInterrupt:
             print("Someone closed the program")
 
+        counter += 1
     # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
 
-    cred = credentials.Certificate('./still-resource-306306-firebase-adminsdk-q6e0r-8eeb8df3d5.json')
+    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
@@ -159,20 +165,14 @@ def main():
     count = 0
 
     for obj in all_articles:
-        db.collection(u'articles').document(str(count)).set(obj)
+
+        db.collection(u'articles').document(obj['id']).set(obj)
         count += 1
 
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
-# def printArticle(article):
-#     print("----------------------------------")
-#     print(article["url"])
-#     print(article["date_of_publication"])
-#     print(article["headline"])
-#     print(article["maintext"])
-#     print(article["report"])
 
 
 

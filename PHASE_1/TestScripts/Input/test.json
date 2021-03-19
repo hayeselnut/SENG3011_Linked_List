@@ -1,98 +1,100 @@
 [
+  {
+    "period_of_interest": [ "2021-01-xx 13:00:00" ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+  {
+    "period_of_interest": [ "2021-01-xx xx:xx:xx to 2021-02-xx xx:xx:xx" ],
+    "key_terms": [],
+    "check": [ "400" ]
+  },
+  {
+    "period_of_interest": [ "2021-01-02 13:00:00" ],
+    "key_terms": [],
+    "check": [ "400" ]
+  },
+  {
+    "period_of_interest": [ "2019-01-02 13:00:00 to 2021-03-17" ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+  {
+    "period_of_interest": [ "2019-01-02 13:00:00 to 2021-03-17 13:00:00" ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+  {
+    "period_of_interest": [ "2021-01-02 13:00:00 to 2019-03-17 13:00:00" ],
+    "key_terms": [],
+    "check": [ "400" ]
+  },
+  {
+    "period_of_interest": [ "2019-02-30 13:00:00 to 2021-04-30 13:00:00" ],
+    "key_terms": [],
+    "check": [ "400" ]
+  },
+  {
+    "period_of_interest": [ "2019-01-32 to 2021-02-20 " ],
+    "key_terms": [],
+    "check": [ "400"]
+  },
+  {
+    "period_of_interest": [ "2020-01-30 14:00:00 to 2021-02-32 14:00:00" ],
+    "key_terms": [],
+    "check": [ "400" ]
+  },
+  {
+    "period_of_interest": [ "2020-01-30  to 2021-03-15 " ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+  {
+    "period_of_interest": [ "2020-01-16 12:59:59  to 2021-01-16 13:00:01" ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+  {
+    "period_of_interest": [ "2020-01-16 13:00:00  to 2021-01-16 13:00:00" ],
+    "key_terms": [],
+    "check": [ "200", "key", "time" ]
+  },
+
+  {
+    "period_of_interest": [ "2020-01-16 13:00:00  to 2021-01-16 13:00:00" ],
+    "key_terms": [ "2019-nCoV" ],
+    "check": [ "200",  "key", "time" ]
+  },
 {
-  "period_of_interest": ["2021-01-xx 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": 2021-01-xx xx:xx:xx to 2021-02-xx xx:xx:xx"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2021-01-02 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2019-01-02 13:00:00 to 2021-03-17"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2019-01-02 13:00:00 to 2021-03-17 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2021-01-02 13:00:00 to 2019-03-17 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2019-02-30 13:00:00 to 2021-04-30 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2019-01-32 to 2021-02-20 "],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-30 14:00:00 to 2021-02-32 14:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-30  to 2021-03-15 "],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-16 12:59:59  to 2021-01-16 13:00:01"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2018-02-17T22:41:00","2019-03-30T22:41:00"],
-  "location": ["China"],
-  "key_terms": ["Flu","Pain"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
-  "key_terms": ["2019-nCoV"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
+  "period_of_interest": [ "2020-01-16 13:00:00  to 2021-01-16 13:00:00" ],
   "key_terms": ["2019-ncov"],
-  "check": ["200","400","key","time"]
+  "check": ["200","key","time"]
 },
-{
-  "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
-  "key_terms": ["wuhan"],
-  "check": ["200","400","key","time"]
-},
-{
-  "period_of_interest": ["2018-02-17T22:41:00","2019-03-30T22:41:00"],
-  "location": ["China"],
-  "key_terms": ["Flu","Pain"],
-  "check": ["200","400","key","time"]
-},
+  {
+    "period_of_interest": [ "2020-01-16 13:00:00  to 2021-01-16 13:00:00" ],
+    "key_terms": [ "wuhan" ],
+    "check": [ "200", "key", "time" ]
+  },
+
 {
   "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
   "key_terms": ["Fever of unknown Origin"],
-  "check": ["200","400","key","time"]
+  "check": ["200","key","time"]
 },
 {
   "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
   "key_terms": ["fever"],
-  "check": ["200","400","key","time"]
+  "check": ["200","key","time"]
 },
 {
   "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
   "key_terms": ["covid-19"],
-  "check": ["200","400","key","time"]
+  "check": ["200","key","time"]
 },
 {
   "period_of_interest": ["2020-01-16 13:00:00  to 2021-01-16 13:00:00"],
   "key_terms": ["China,fever"],
-  "check": ["200","400","key","time"]
+  "check": ["200","key","time"]
 }
 
 ]
