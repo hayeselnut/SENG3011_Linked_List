@@ -112,10 +112,6 @@ def get_maintext(url):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
-
-def generate_article_id():
-    return uuid.uuid1().hex 
-
 def main():
 
 
@@ -131,7 +127,6 @@ def main():
         #print(get_report_url(url))
 
         try:
-            article['id'] = generate_article_id()
             article['main_text'] = get_maintext(url)
             article['date_of_publication'] = get_publish_date(url)
             article['url'] = url
@@ -155,7 +150,7 @@ def main():
     # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
 
-    cred = credentials.Certificate('./still-resource-306306-firebase-adminsdk-q6e0r-8eeb8df3d5.json')
+    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
@@ -165,7 +160,7 @@ def main():
     for obj in all_articles:
 
         unique = hashlib.md5(str(count).encode('utf-8'))
-        db.collection(u'articles').document(unique.hexdigest).set(obj)
+        db.collection(u'articles').document(unique.hexdigest()).set(obj)
         count += 1
 
 
