@@ -60,7 +60,6 @@ def get_report_url(url):
 
 
 
-        
 def get_headline(url):
     page_soup = get_page_html(url)
     container = page_soup.find("title")
@@ -131,7 +130,7 @@ def main():
             article['url'] = url
             article['date_of_publication'] = get_publish_date(url)
             article['headline'] = get_headline(url)
-            article['maintext'] = get_maintext(url)
+            article['main_text'] = get_maintext(url)
             article['report'] = report
             all_articles.append(article)
             
