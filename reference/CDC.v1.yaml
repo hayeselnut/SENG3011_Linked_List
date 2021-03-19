@@ -268,7 +268,6 @@ paths:
           in: query
           name: key_terms
           description: Diseases comma separated
-          required: true
           allowEmptyValue: true
         - schema:
             type: string
