@@ -65,10 +65,6 @@ const isKeyTermInArticle = (article, request) => {
     if (request.keyTerms.length === 0) return true;
 
     for (const keyTerm of request.keyTerms) {
-        if (article.url.toLowerCase().includes(keyTerm)) {
-            functions.logger.debug(`key term '${keyTerm}' found in url`);
-            continue;
-        }
         if (article.headline.toLowerCase().includes(keyTerm)) {
             functions.logger.debug(`key term '${keyTerm}' found in headline`);
             continue;
