@@ -117,24 +117,35 @@ def main():
 
 
     all_articles = []
-
+    report = []
     link_list = []
     get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
 
     for url in link_list:
         article = {}
-        report = []
-
+        
         #print(get_report_url(url))
 
         try:
             article['url'] = url
             article['date_of_publication'] = get_publish_date(url)
             article['headline'] = get_headline(url)
-            article['maintext'] = get_maintext(url)
-            article['report'] = report
+            article['main_text'] = get_maintext(url)
+            article['reports'] = report
             all_articles.append(article)
             
+            # a report object:
+            # - id: string (auto gen)
+            # - syndromes: array<string>
+            # - diseases: array<string>
+            # - locations array< location ids>
+            # - event_date: string/date
+            report_obj = {}
+            report_obj['syndromes'] = ['dummy - fever']
+            report_obj['diseases'] = ['dummy - corona']
+            report_obj['locations'] = ['dummy - VTabSvJyA8rx6pGNb17h']
+            report_obj['event_date'] = ''
+            report.append(report_obj)
             #print(article)
         except requests.ConnectionError as e:
             print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
@@ -162,8 +173,10 @@ def main():
         db.collection(u'articles').document(str(count)).set(obj)
         count += 1
 
-
-
+    count = 0
+    for obj in report:
+        db.collection(u'reports').document(str(count)).set(obj)
+        count += 1
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
 # def printArticle(article):
