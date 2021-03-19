@@ -7,6 +7,7 @@ from dateutil import parser, tz
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import uuid
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -111,6 +112,8 @@ def get_maintext(url):
 # json_data = r1.json()
 
 
+def generate_article_id():
+    return uuid.uuid1().hex 
 
 def main():
 
@@ -127,7 +130,7 @@ def main():
         #print(get_report_url(url))
 
         try:
-            article['id'] = ""
+            article['id'] = generate_article_id()
             article['main_text'] = get_maintext(url)
             article['date_of_publication'] = get_publish_date(url)
             article['url'] = url
