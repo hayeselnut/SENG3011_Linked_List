@@ -10,8 +10,8 @@ const articlesProcessor = require("./articles/articles");
 const response = require("./responses");
 const parser = require("./articles/parsers");
 
-const logReader = require("./logs/logReader");
-const logWriter = require("./logs/logWriter");
+const logReader = require("./logHelpers/logReader");
+const logWriter = require("./logHelpers/logWriter");
 
 app.get("/articles", async (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
