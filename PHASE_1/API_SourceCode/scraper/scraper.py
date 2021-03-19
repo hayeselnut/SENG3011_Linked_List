@@ -8,6 +8,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import uuid
+import hashlib
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -136,7 +137,6 @@ def main():
             article['url'] = url
             article['headline'] = get_headline(url)
             article['reports'] = report
-            print(article)
             all_articles.append(article)
             
             
@@ -163,7 +163,9 @@ def main():
     count = 0
 
     for obj in all_articles:
-        db.collection(u'articles').document(str(count)).set(obj)
+
+        unique = hashlib.md5(str(count).encode('utf-8'))
+        db.collection(u'articles').document(unique.hexdigest).set(obj)
         count += 1
 
 
