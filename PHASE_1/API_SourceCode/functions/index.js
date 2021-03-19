@@ -14,6 +14,11 @@ const logReader = require("./logs/logReader");
 const logWriter = require("./logs/logWriter");
 
 app.get("/articles", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", true);
+
     functions.logger.info(req);
     let request;
     try {
@@ -35,6 +40,11 @@ app.get("/articles", async (req, res) => {
 });
 
 app.get("/article/:id", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", true);
+
     functions.logger.info(`/article received request to get article with id ${req.params.id}`);
 
     const snapshot = await db.collection("articles").doc(req.params.id).get();
@@ -49,6 +59,7 @@ app.get("/article/:id", async (req, res) => {
         return;
     }
 
+    articleData.date_of_publication = articleData.date_of_publication.toDate();
     const article = {id: articleId, ...articleData};
     functions.logger.info(`200 OK processed request and returning article with id ${req.params.id}`);
     res.status(200).send(response.success(article, "article"));
@@ -56,6 +67,11 @@ app.get("/article/:id", async (req, res) => {
 });
 
 app.get("/logs", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", true);
+
     functions.logger.info("/log received request to get logs");
     const logs = await logReader.getLogs(db);
     functions.logger.info("200 OK processed request and returning matching articles");
