@@ -127,11 +127,12 @@ def main():
         #print(get_report_url(url))
 
         try:
-            article['url'] = url
-            article['date_of_publication'] = get_publish_date(url)
-            article['headline'] = get_headline(url)
+            article['id'] = ""
             article['main_text'] = get_maintext(url)
-            article['report'] = report
+            article['date_of_publication'] = get_publish_date(url)
+            article['url'] = url
+            article['headline'] = get_headline(url)
+            article['reports'] = report
             all_articles.append(article)
             
             #print(article)
