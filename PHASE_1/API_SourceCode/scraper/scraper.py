@@ -136,9 +136,10 @@ def main():
             article['url'] = url
             article['headline'] = get_headline(url)
             article['reports'] = report
+            print(article)
             all_articles.append(article)
             
-            #print(article)
+            
         except requests.ConnectionError as e:
             print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
             print(str(e))
@@ -169,13 +170,6 @@ def main():
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
-# def printArticle(article):
-#     print("----------------------------------")
-#     print(article["url"])
-#     print(article["date_of_publication"])
-#     print(article["headline"])
-#     print(article["maintext"])
-#     print(article["report"])
 
 
 
