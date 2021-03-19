@@ -55,6 +55,12 @@ const parsePeriodOfInterest = (periodOfInterestString) => {
         // START TO END
         startDate = parseDate("start_date", splitDates[0].trim());
         endDate = parseDate("end_date", splitDates[1].trim());
+
+        if (startDate.getTime() > endDate.getTime()) {
+            throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
+        }
+
+        // TODO: date isnt 31st Feb
     } else {
         throw new Error(`'${periodOfInterestString}' must match date regex ${dateRegex} or must be "<start_date> to <end_date>"`);
     }

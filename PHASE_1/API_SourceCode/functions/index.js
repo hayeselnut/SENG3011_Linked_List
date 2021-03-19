@@ -10,14 +10,20 @@ const articlesProcessor = require("./articles/articles");
 const response = require("./responses");
 const parser = require("./articles/parsers");
 
+const logReader = require("./logs/logReader");
+const logWriter = require("./logs/logWriter");
+
 app.get("/articles", async (req, res) => {
+    functions.logger.info(req);
     let request;
     try {
         functions.logger.info(req.query);
         request = parser.parseQuery(req.query);
     } catch (e) {
         functions.logger.error(`400 BAD REQUEST could not parse request: ${e.message}`);
-        res.status(400).send(response.error(400, e.message));
+        const errorResponse = response.error(400, e.message);
+        res.status(400).send(errorResponse);
+        await logWriter.writeLog(db, req, errorResponse);
         return;
     }
     functions.logger.info(`/articles received request object: ${JSON.stringify(request)}`);
@@ -25,6 +31,7 @@ app.get("/articles", async (req, res) => {
 
     functions.logger.info("200 OK processed request and returning matching articles");
     res.status(200).send(response.success(articles, "articles"));
+    await logWriter.writeLog(db, req, {"status": 200});
 });
 
 app.get("/article/:id", async (req, res) => {
@@ -36,12 +43,24 @@ app.get("/article/:id", async (req, res) => {
 
     if (!articleData) {
         functions.logger.error(`404 NOT FOUND could not find article with id ${req.params.id}`);
-        res.status(400).send(response.error(404, `article with id ${req.params.id} not found`));
-    } else {
-        const article = {id: articleId, ...articleData};
-        functions.logger.info(`200 OK processed request and returning article with id ${req.params.id}`);
-        res.status(200).send(response.success(article, "article"));
+        const errorResponse = response.error(404, `article with id ${req.params.id} not found`);
+        res.status(400).send(errorResponse);
+        await logWriter.writeLog(db, req, errorResponse);
+        return;
     }
+
+    const article = {id: articleId, ...articleData};
+    functions.logger.info(`200 OK processed request and returning article with id ${req.params.id}`);
+    res.status(200).send(response.success(article, "article"));
+    await logWriter.writeLog(db, req, {"status": 200});
+});
+
+app.get("/logs", async (req, res) => {
+    functions.logger.info("/log received request to get logs");
+    const logs = await logReader.getLogs(db);
+    functions.logger.info("200 OK processed request and returning matching articles");
+    res.status(200).send(response.success(logs, "logs"));
+    await logWriter.writeLog(db, req, {"status": 200});
 });
 
 exports.api = functions.https.onRequest(app);
