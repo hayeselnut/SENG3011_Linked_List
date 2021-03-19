@@ -9,11 +9,11 @@ info:
 servers:
   - url: 'https://us-central1-still-resource-306306.cloudfunctions.net'
 paths:
-  /articles:
+  /api/articles:
     parameters: []
     get:
       summary: Report
-      operationId: get-reports-poi-key_terms-location
+      operationId: get-articles-poi-key_terms-location
       responses:
         '200':
           description: OK
@@ -23,78 +23,127 @@ paths:
                 description: ''
                 type: object
                 properties:
-                  url:
-                    type: string
-                    minLength: 1
-                  date_of_publication:
-                    type: string
-                    minLength: 1
-                  headline:
-                    type: string
-                    minLength: 1
-                  main_text:
-                    type: string
-                    minLength: 1
-                  reports:
+                  log:
+                    type: object
+                    properties:
+                      team:
+                        type: string
+                        minLength: 1
+                      time_accessed:
+                        type: string
+                        minLength: 1
+                    required:
+                      - team
+                      - time_accessed
+                  articles:
                     type: array
                     uniqueItems: true
                     minItems: 1
                     items:
-                      type: object
+                      required:
+                        - id
+                        - main_text
+                        - url
+                        - date_of_publication
+                        - headline
                       properties:
-                        event_date:
+                        id:
                           type: string
                           minLength: 1
-                        locations:
+                        main_text:
+                          type: string
+                          minLength: 1
+                        url:
+                          type: string
+                          minLength: 1
+                        date_of_publication:
+                          type: string
+                          minLength: 1
+                        reports:
                           type: array
                           uniqueItems: true
                           minItems: 1
                           items:
-                            type: object
-                            properties:
-                              country:
-                                type: string
-                                minLength: 1
-                              location:
-                                type: string
-                                minLength: 1
                             required:
-                              - country
-                              - location
-                        diseases:
-                          type: array
-                          items:
-                            type: string
-                        syndromes:
-                          type: array
-                          items:
-                            type: string
-                      required:
-                        - event_date
+                              - id
+                              - event_date
+                            properties:
+                              id:
+                                type: string
+                                minLength: 1
+                              syndromes:
+                                type: array
+                                items:
+                                  type: string
+                              diseases:
+                                type: array
+                                items:
+                                  type: string
+                              locations:
+                                type: array
+                                uniqueItems: true
+                                minItems: 1
+                                items:
+                                  required:
+                                    - country
+                                    - location
+                                  properties:
+                                    country:
+                                      type: string
+                                      minLength: 1
+                                    location:
+                                      type: string
+                                      minLength: 1
+                              event_date:
+                                type: string
+                                minLength: 1
+                        headline:
+                          type: string
+                          minLength: 1
                 required:
-                  - url
-                  - date_of_publication
-                  - headline
-                  - main_text
-                  - reports
+                  - log
+                  - articles
               examples:
-                example_from_overview:
+                example1:
                   value:
-                    url: 'https://www.who.int/csr/don/17-january-2020-novel-coronavirus-japan-ex-chila/en/'
-                    date_of_publication: '2020-01-17 00:00:00'
-                    headline: Novel Coronavirus - Japan (ex-China)
-                    main_text: 'On 15 January 2020, the Ministry of Health, Labour and Welfare, Japan (MHLW) reported an imported case of laboratory-confirmed 2019-novel coronavirus (2019-nCoV) from Wuhan, Hubei Province, China. The case-patient is male, between the age of 30-39 years, living in Japan. The case-patient travelled to Wuhan, China in late December and developed fever on 3 January 2020 while staying in Wuhan. He did not visit the Huanan Seafood Wholesale Market or any other live animal markets in Wuhan. He has indicated that he was in close contact with a person with pneumonia. On 6 January, he traveled back to Japan and tested negative for influenza when he visited a local clinic on the same day.'
-                    reports:
-                      - event_date: '2020-01-03 00:00:00 to 2020-01-15'
-                        locations:
-                          - country: China
-                            location: 'Wuhan, Hubei Province'
-                          - country: Japan
-                            location: Tokyo
-                        diseases:
-                          - 2019-nCoV
-                        syndromes:
-                          - Fever of unknown Origin
+                    log:
+                      team: SENG3011_LINKED_LIST
+                      time_accessed: '2021-03-19T02:24:15.080Z'
+                    articles:
+                      - id: g67edVI2X90bWQ4yUSJ7
+                        main_text: 'On 15 January 2020, the Ministry of Health, Labour and Welfare, Japan (MHLW) reported an imported case of laboratory-confirmed 2019-novel coronavirus (2019-nCoV) from Wuhan, Hubei Province, China. The case-patient is male, between the age of 30-39 years, living in Japan. The case-patient travelled to Wuhan, China in late December and developed fever on 3 January 2020 while staying in Wuhan. He did not visit the Huanan Seafood Wholesale Market or any other live animal markets in Wuhan. He has indicated that he was in close contact with a person with pneumonia. On 6 January, he traveled back to Japan and tested negative for influenza when he visited a local clinic on the same day.'
+                        url: 'https://www.who.int/csr/don/17-january-2020-novel-coronavirus-japan-ex-chila/en/'
+                        date_of_publication: '2021-01-16T13:00:00.000Z'
+                        reports:
+                          - id: eWNmTwDbDmE396xk7sV6
+                            syndromes:
+                              - Haemorrhagic Fever
+                              - Acute Flacid Paralysis
+                            diseases:
+                              - anthrax cutaneous
+                              - anthrax gastrointestinous
+                            locations:
+                              - country: Australia
+                                location: Sydney
+                            event_date: '2020-01-02T13:00:00.000Z'
+                        headline: Novel Coronavirus - Japan (ex-China)
+                      - id: g67edVI2X90bWQ4yUSJ8
+                        main_text: 'On 15 January 2021, the Ministry of Health, Labour and Welfare, Japan (MHLW) reported an imported case of laboratory-confirmed 2019-novel coronavirus (2019-nCoV) from Wuhan, Hubei Province, China. The case-patient is male, between the age of 30-39 years, living in Japan. The case-patient travelled to Wuhan, China in late December and developed fever on 3 January 2020 while staying in Wuhan. He did not visit the Huanan Seafood Wholesale Market or any other live animal markets in Wuhan. He has indicated that he was in close contact with a person with pneumonia. On 6 January, he traveled back to Japan and tested negative for influenza when he visited a local clinic on the same day.'
+                        url: 'https://www.who.int/csr/don/17-january-2020-novel-coronavirus-japan-ex-chila/en/'
+                        date_of_publication: '2021-01-16T13:00:00.000Z'
+                        reports:
+                          - id: eWNmTwDbDmE396xk7sV6
+                            syndromes:
+                              - Haemorrhagic Fever
+                              - Acute Flacid Paralysis
+                            diseases:
+                              - anthrax cutaneous
+                              - anthrax gastrointestinous
+                            locations:
+                              - country: Australia
+                                location: Sydney
+                            event_date: '2020-01-02T13:00:00.000Z'
+                        headline: Novel Coronavirus - Japan (ex-China)
         '201':
           description: Created
         '400':
@@ -205,32 +254,433 @@ paths:
       description: 'Endpoint for getting reports from, period of interest, key disease terms and location.'
       parameters:
         - schema:
-            type: array
+            type: string
+            pattern: '^(\d{4})-(\d\d|xx)-(\d\d|xx) (\d\d|xx):(\d\d|xx):(\d\d|xx) (to)? (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)$'
+            example: '2019-01-02 13:00:00 to 2020-01-03 13:00:00'
           in: query
           description: Period of interest
           name: poi
           required: true
         - schema:
-            type: array
+            type: string
+            pattern: '^[a-zA-Z\-\ \'']*[,[a-zA-Z\-\ \'']*]*$'
+            example: 'Corona, Ebola, Influenza'
           in: query
           name: key_terms
-          description: Disease search
+          description: Diseases comma separated
           required: true
+          allowEmptyValue: true
         - schema:
             type: string
+            pattern: '^[a-zA-Z\-\ \'']*$'
+            example: China
           in: query
-          description: 'location of interest '
+          description: Location of interest
           name: location
           required: true
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties: {}
-            examples:
-              example-1:
-                value: {}
+          allowEmptyValue: true
+  '/api/articles/{id}':
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  log:
+                    type: object
+                    properties:
+                      team:
+                        type: string
+                        minLength: 1
+                      time_accessed:
+                        type: string
+                        minLength: 1
+                    required:
+                      - team
+                      - time_accessed
+                  article:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        minLength: 1
+                      main_text:
+                        type: string
+                        minLength: 1
+                      url:
+                        type: string
+                        minLength: 1
+                      date_of_publication:
+                        type: string
+                        minLength: 1
+                      reports:
+                        type: array
+                        uniqueItems: true
+                        minItems: 1
+                        items:
+                          required:
+                            - id
+                            - event_date
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                            syndromes:
+                              type: array
+                              items:
+                                type: string
+                            diseases:
+                              type: array
+                              items:
+                                type: string
+                            locations:
+                              type: array
+                              uniqueItems: true
+                              minItems: 1
+                              items:
+                                required:
+                                  - country
+                                  - location
+                                properties:
+                                  country:
+                                    type: string
+                                    minLength: 1
+                                  location:
+                                    type: string
+                                    minLength: 1
+                            event_date:
+                              type: string
+                              minLength: 1
+                      headline:
+                        type: string
+                        minLength: 1
+                    required:
+                      - id
+                      - main_text
+                      - url
+                      - date_of_publication
+                      - reports
+                      - headline
+                required:
+                  - log
+                  - article
+              examples:
+                example-1:
+                  value:
+                    log:
+                      team: SENG3011_LINKED_LIST
+                      time_accessed: '2021-03-19T02:24:15.080Z'
+                    article:
+                      id: g67edVI2X90bWQ4yUSJ7
+                      main_text: 'On 15 January 2020, the Ministry of Health, Labour and Welfare, Japan (MHLW) reported an imported case of laboratory-confirmed 2019-novel coronavirus (2019-nCoV) from Wuhan, Hubei Province, China. The case-patient is male, between the age of 30-39 years, living in Japan. The case-patient travelled to Wuhan, China in late December and developed fever on 3 January 2020 while staying in Wuhan. He did not visit the Huanan Seafood Wholesale Market or any other live animal markets in Wuhan. He has indicated that he was in close contact with a person with pneumonia. On 6 January, he traveled back to Japan and tested negative for influenza when he visited a local clinic on the same day.'
+                      url: 'https://www.who.int/csr/don/17-january-2020-novel-coronavirus-japan-ex-chila/en/'
+                      date_of_publication: '2021-01-16T13:00:00.000Z'
+                      reports:
+                        - id: eWNmTwDbDmE396xk7sV6
+                          syndromes:
+                            - Haemorrhagic Fever
+                            - Acute Flacid Paralysis
+                          diseases:
+                            - anthrax cutaneous
+                            - anthrax gastrointestinous
+                          locations:
+                            - country: Australia
+                              location: Sydney
+                          event_date: '2020-01-02T13:00:00.000Z'
+                      headline: Novel Coronavirus - Japan (ex-China)
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 400 'key terms' are required
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 401 Please provide a valid api key
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 404 ‘/foo/bar’ does not exist
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Internal server error
+        '501':
+          description: Not Implemented
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 502 Server returned invalid response
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Server returned invalid response
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Server did not respond in time
+      operationId: get-article-id
+      description: Gets the article that corresponds to the input id
+      parameters: []
+    parameters:
+      - schema:
+          type: string
+          example: '1'
+          pattern: '^[a-zA-Z0-9]$'
+        name: id
+        in: path
+        required: true
+        description: id corresponding to an article id
+  /api/logs:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - timestamp
+                        - endpoint
+                      properties:
+                        timestamp:
+                          type: string
+                          minLength: 1
+                        endpoint:
+                          type: string
+                          minLength: 1
+                required:
+                  - logs
+              examples:
+                example-1:
+                  value:
+                    logs:
+                      - timestamp: '15'
+                        endpoint: /api/articles/1
+                      - timestamp: '15'
+                        endpoint: /api/logs
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 400 'key terms' are required
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 401 Please provide a valid api key
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 404 ‘/foo/bar’ does not exist
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Internal server error
+        '501':
+          description: Not Implemented
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 501 ‘/foo/bar’ is still in development
+        '502':
+          description: Bad Gateway
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                example-1:
+                  value:
+                    errorMessage: 502 Server returned invalid response
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Server returned invalid response
+        '504':
+          description: Gateway Timeout
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  errorMessage:
+                    type: string
+                    minLength: 1
+                required:
+                  - errorMessage
+              examples:
+                example-1:
+                  value:
+                    errorMessage: Server did not respond in time
+      operationId: get-api-logs
+      description: 'Gets the last 10 20 API calls '
 components:
   schemas:
     User:
