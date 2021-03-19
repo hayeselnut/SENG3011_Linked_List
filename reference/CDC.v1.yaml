@@ -541,9 +541,7 @@ paths:
                     uniqueItems: true
                     minItems: 1
                     items:
-                      required:
-                        - timestamp
-                        - endpoint
+                      type: object
                       properties:
                         timestamp:
                           type: string
@@ -551,16 +549,40 @@ paths:
                         endpoint:
                           type: string
                           minLength: 1
+                        queryParams:
+                          type: object
+                        pathParams:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                      required:
+                        - timestamp
+                        - endpoint
                 required:
                   - logs
               examples:
                 example-1:
                   value:
                     logs:
-                      - timestamp: '15'
+                      - timestamp: '2021-03-19T02:24:15.080Z'
                         endpoint: /api/articles/1
-                      - timestamp: '15'
+                        queryParams: {}
+                        pathParams:
+                          id: '1'
+                      - timestamp: '2021-03-19T02:24:15.080Z'
+                        endpoint: '/api/articles?period_of_interest=2021-03-19T02:24:15.080Z&key_terms=corona&location=Sydney'
+                        queryParams:
+                          period_of_interest: '2021-03-19T02:24:15.080Z'
+                          key_terms: corona
+                          location: Sydney
+                        pathParams:
+                          id: '1'
+                      - timestamp: '2021-03-19T02:24:15.089Z'
                         endpoint: /api/logs
+                        queryParams: {}
+                        pathParams: {}
         '400':
           description: Bad Request
           content:
