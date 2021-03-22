@@ -2,7 +2,7 @@
 const functions = require("firebase-functions");
 
 const getArticles = async (db, request) => {
-    functions.logger.info(`retrieving articles between ${request.startDate} and ${request.endDate}`);
+    functions.logger.debug(`retrieving articles between ${request.startDate} and ${request.endDate}`);
     const snapshot = await db.collection("articles")
         .where("date_of_publication", ">=", request.startDate)
         .where("date_of_publication", "<=", request.endDate)
@@ -16,6 +16,7 @@ const getArticles = async (db, request) => {
 const extractArticlesFromSnapshot = async (db, snapshot, request) => {
     const reports = await getReports(db, request);
     const articles = [];
+
     snapshot.forEach((doc) => {
         const id = doc.id;
         const data = doc.data();
@@ -24,6 +25,15 @@ const extractArticlesFromSnapshot = async (db, snapshot, request) => {
         article.date_of_publication = article.date_of_publication.toDate();
         articles.push(article);
     });
+    // const toWait = [];
+    // dataSnapshot.forEach(childSnapshot => {
+    //     toWait.push(childFunction((childSnapshot)));
+    // });
+    // await Promise.all(toWait);
+
+    // snap.forEach(function wrapper(){async val => {
+    //     await console.log(val.key)
+    //   }})
 
     return articles;
 };
@@ -31,10 +41,7 @@ const extractArticlesFromSnapshot = async (db, snapshot, request) => {
 const filterArticles = (articles, request) => (
     articles.filter((article) => isArticleInPeriodOfInterest(article, request))
         .filter((article) => isKeyTermInArticle(article, request))
-        .filter((article) => {
-            // LOCATION : TODO stub
-            return true;
-        })
+        .filter((article) => isLocationInArticle(article, request))
 );
 
 const isArticleInPeriodOfInterest = (article, request) => {
@@ -103,7 +110,7 @@ const isKeyTermInReports = (reports, keyTerm) => {
 };
 
 const getReports = async (db, request) => {
-    functions.logger.info("retrieving reports");
+    functions.logger.debug("retrieving reports");
     const snapshot = await db.collection("reports").get();
 
     const reports = [];
@@ -111,11 +118,20 @@ const getReports = async (db, request) => {
         const id = doc.id;
         const data = doc.data();
         const report = {id, ...data};
-        report.event_date = report.event_date.toDate();
+        // report.event_date = report.event_date.toDate();
         reports.push(report);
     });
 
     return reports;
 };
+
+const isLocationInArticle = (article, request) => {
+    // LOCATION : TODO stub
+    return true;
+};
+
+// const getLocations = async (db, request) => {
+//     functions.logger.debug("retrieving locations");
+// };
 
 exports.getArticles = getArticles;
