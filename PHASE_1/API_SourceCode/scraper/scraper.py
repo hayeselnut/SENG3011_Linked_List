@@ -7,6 +7,10 @@ from dateutil import parser, tz
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
+import hashlib
+import datefinder
+from fuzzywuzzy import process
+
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -22,6 +26,11 @@ def get_page_html(url):
 
     return page_soup
 
+def body_has_content(page):
+    containers = page.find_all("body")
+    if str(containers) == '[<body></body>]':
+        return False
+    return True
 
 def get_USAndTravel(url, link_list):
     page_soup = get_page_html(url)
@@ -40,39 +49,26 @@ def get_USAndTravel(url, link_list):
         link_list.append(url)
 
 
-# def get_foodSafety(url, link_list):
-#     soup = get_page_html(url)
-#     containers = soup.find_all("a", {"ng-click": "clickThrough(article.link)"}, href=True)
-#     print(containers)
-#     for container in containers:
-#         # extract urls from html containers
-#         url = container['href']
-#         # add prefix for broken url
-#         url = fix_url(url)
-
-#         link_list.append(url)
-
-def get_report_url(url):
-    report_list = []
-    soup = get_page_html(url)
+def get_report_url(page_soup):
 
     return [el.find('a').get('href') for el in soup.find_all('li', {'class': 'list-group-item'})]
 
 
 
-        
-def get_headline(url):
-    page_soup = get_page_html(url)
+def get_headline(page_soup):
+    #page_soup = get_page_html(url)
     container = page_soup.find("title")
+    #print(container)
     if container != None:
+        #print(container)
         container = re.sub('<[^>]+>', '', str(container))
         container = re.sub(r'\s+\-.*|\s+\|.*',"", container)
     else:
         container = "unknown"
     return container
 
-def get_publish_date(url):
-    page_soup = get_page_html(url)
+def get_publish_date(page_soup):
+    #page_soup = get_page_html(url)
     
     date = page_soup.find('meta', {"name": "DC.date"}, content=True)
 
@@ -89,11 +85,11 @@ def get_publish_date(url):
 
         return str(PYCON_DATE).replace(' ','T') + "Z"
     else:
-        return 'unknown'
+        return '1000-01-01T00:00:00Z'
 
 
-def get_maintext(url):
-    page_soup = get_page_html(url)
+def get_maintext(page_soup):
+    #page_soup = get_page_html(url)
     container = page_soup.findAll('p') 
     if container != None:
         container = re.sub('<[^>]+>', '', str(container))
@@ -111,41 +107,94 @@ def get_maintext(url):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
+def generate_unique_article_id(counter):
+    unique = hashlib.md5(str(counter).encode('utf-8'))
+
+    return unique.hexdigest()
+
+def get_disease(title, all_diseases):
+    disease_list = []
+
+    splited_title = title.lower().split(" ")
+
+    highest_percent = 80
+    target_disease = ''
+    for each in splited_title:
+        if each.endswith('a'):
+            tmp_name = each[:-1]+'osis'
+            if tmp_name in all_diseases:
+                target_disease = tmp_name
+                break
+
+        matching_percent = process.extractOne(each, all_diseases)
+        if matching_percent[1] > highest_percent:
+            highest_percent = matching_percent[1]
+            target_disease = matching_percent[0]
+
+    disease_list.append(target_disease)
+    return disease_list
+    
+def get_eventDate(maintext, publish_date):
+    try: 
+        matches = datefinder.find_dates(maintext)
+        match_list = []
+        for match in matches:
+            match_list.append(match)
+        earliest_date = min(match_list)
+        return earliest_date
+    except Exception:  
+        return publish_date
 
 
 def main():
 
-
     all_articles = []
-    report = []
+    all_reports = []
+
+    all_diseases = []
+    with open('./files/disease_list.json') as json_file:
+        disease_dict = json.load(json_file)
+    for each in disease_dict:
+        all_diseases.append(each['name'])
+
     link_list = []
     get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
+    counter  = 0
 
     for url in link_list:
         article = {}
-        
-        #print(get_report_url(url))
+        single_report = []
 
+        #get html of each url
+        page = get_page_html(url)
+
+        if (body_has_content(page) == False):
+            continue
+        
+    
         try:
+            #print(get_publish_date(page))
+            article['id'] = generate_unique_article_id(counter)
+            title = get_headline(page)
+            article['headline'] = title
+            date_of_publication = parser.isoparse(get_publish_date(page))
+            article['date_of_publication'] = date_of_publication
             article['url'] = url
-            article['date_of_publication'] = get_publish_date(url)
-            article['headline'] = get_headline(url)
-            article['main_text'] = get_maintext(url)
-            article['reports'] = report
+            main_text = get_maintext(page)
+            article['main_text'] = main_text
+            article['reports'] = single_report
             all_articles.append(article)
             
-            # a report object:
-            # - id: string (auto gen)
-            # - syndromes: array<string>
-            # - diseases: array<string>
-            # - locations array< location ids>
-            # - event_date: string/date
             report_obj = {}
             report_obj['syndromes'] = ['dummy - fever']
-            report_obj['diseases'] = ['dummy - corona']
+            diseases = get_disease(title, all_diseases)
+            report_obj['diseases'] = diseases
             report_obj['locations'] = ['dummy - VTabSvJyA8rx6pGNb17h']
-            report_obj['event_date'] = ''
-            report.append(report_obj)
+            report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication)))
+            single_report.append(report_obj)
+            all_reports.append(report_obj)
+
+
             #print(article)
         except requests.ConnectionError as e:
             print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
@@ -159,33 +208,35 @@ def main():
         except KeyboardInterrupt:
             print("Someone closed the program")
 
+        counter += 1
     # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
 
-    cred = credentials.Certificate('./still-resource-306306-firebase-adminsdk-q6e0r-8eeb8df3d5.json')
+
+
+#################
+    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
-
 
     count = 0
 
     for obj in all_articles:
-        db.collection(u'articles').document(str(count)).set(obj)
+        db.collection(u'articles').document(obj['id']).set(obj)
         count += 1
 
     count = 0
-    for obj in report:
+    for obj in all_reports:
         db.collection(u'reports').document(str(count)).set(obj)
         count += 1
+###################
+
+    # db.collection(u'articles').document(u'0').delete()
+    # db.collection(u'articles').document(u'1').delete()
+
+
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
 
-# def printArticle(article):
-#     print("----------------------------------")
-#     print(article["url"])
-#     print(article["date_of_publication"])
-#     print(article["headline"])
-#     print(article["maintext"])
-#     print(article["report"])
 
 
 
