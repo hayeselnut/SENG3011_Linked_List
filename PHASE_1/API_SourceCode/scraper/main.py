@@ -234,7 +234,7 @@ def main():
     all_reports = []
 
     all_diseases = []
-    with open('./files/disease_list.json') as json_file:
+    with open('disease_list.json') as json_file:
         disease_dict = json.load(json_file)
     for each in disease_dict:
         all_diseases.append(each['name'])
