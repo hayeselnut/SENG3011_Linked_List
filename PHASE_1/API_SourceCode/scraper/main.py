@@ -1,3 +1,4 @@
+from typing import ClassVar
 import requests
 from bs4 import BeautifulSoup as soup
 import re
@@ -48,12 +49,9 @@ def get_USAndTravel(url, link_list):
 
         link_list.append(url)
 
-
 def get_report_url(page_soup):
 
     return [el.find('a').get('href') for el in soup.find_all('li', {'class': 'list-group-item'})]
-
-
 
 def get_headline(page_soup):
     #page_soup = get_page_html(url)
@@ -146,6 +144,90 @@ def get_eventDate(maintext, publish_date):
         return publish_date
 
 
+def get_syndrome_list():
+    data = {}
+    syndrome_list = []
+    with open('syndrome_list.json') as json_file:
+        data = json.load(json_file)
+        for x in data: 
+            syndrome = x['name']
+
+            # used top lower case everything
+            y = syndrome.lower()
+
+            # used to remove any spacing
+            y = re.sub('-',' ', y)
+
+            syndrome_list.append(y)
+
+
+    return syndrome_list
+
+
+# checks the html for the words 
+def checkSyndrome(page):
+    
+    # it's not gonna be super accurate, but freak it, I needa deploy this shit 
+    syndromeList = get_syndrome_list()
+    mentionedSyndromes = []
+    p = page.lower()
+
+
+    #
+    for syndrome in syndromeList:
+
+        if isSyndromeInText(syndrome, p) == True:
+            mentionedSyndromes.append(syndrome)
+
+    
+    print(mentionedSyndromes)
+    return syndromeList
+
+# checks if the given syndrome is in the main text, and uses stupid logic to determine, thus WHATEVER
+def isSyndromeInText(syndrome, text):
+
+    # get the syndrome and remove of, like, and 
+    modified = re.sub('like|and|of', '', syndrome)
+
+
+    # then make a counter for that syndrome
+    size = len(modified.split())
+    
+    # initialize a counter
+    counter = 0
+
+    # SORT THE WHOLE THING
+
+    # REMOVE ANYTHING THAT IS NOT IN THE LIST
+
+    # 
+
+    # then go thru the text and find the ones that match, and check the count at the end
+    #for word in modified.split():
+    #    re.search(r"\b\L<word>\b", )
+    #        counter += 1
+    
+    print (syndrome + " " + str(counter))
+
+    # if the count is the same as the sizez of the syndrome, return true 
+    if counter == size:
+        return True
+    # return false
+
+    return False
+
+
+#for word in syndrome.split(" "):
+#            
+#            if word in page:
+#                counter += 1
+#                if syndrome not in mentionedSyndromes:
+#                    if counter == size:
+#                        mentionedSyndromes.append(syndrome)
+                
+
+
+
 def main():
 
     all_articles = []
@@ -174,6 +256,7 @@ def main():
     
         try:
             #print(get_publish_date(page))
+            article['last_web_scrapped'] = datetime.now()
             article['id'] = generate_unique_article_id(counter)
             title = get_headline(page)
             article['headline'] = title
@@ -194,6 +277,9 @@ def main():
             single_report.append(report_obj)
             all_reports.append(report_obj)
 
+            #print(url)
+            #checkSyndrome(page.prettify())
+
 
             #print(article)
         except requests.ConnectionError as e:
@@ -209,12 +295,14 @@ def main():
             print("Someone closed the program")
 
         counter += 1
+
+    # what's this? 
     # with open('./files/articles.json', 'w') as f:
     #     json.dump(all_articles, f)
 
 
 
-#################
+################
     cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
@@ -229,7 +317,7 @@ def main():
     for obj in all_reports:
         db.collection(u'reports').document(str(count)).set(obj)
         count += 1
-###################
+##################
 
     # db.collection(u'articles').document(u'0').delete()
     # db.collection(u'articles').document(u'1').delete()
