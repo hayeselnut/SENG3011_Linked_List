@@ -1,5 +1,14 @@
 Test by Postman/Newman.
 =================================== 
+for use newman,use this command for install newman (need node.js)
+-----------------------------------------------------------------
+###
+npm install -g newman
+###
+for html
+###
+npm install newman-reporter-html
+###
 here is test url for Postman:
 -----------------------------------
 ###
@@ -17,10 +26,4 @@ for load test
 ###
 newman run Load-Seng3011.postman_collection.json -r -n 60
 ###
-for use newman,use this command for install newman (need node.js)
------------------------------------------------------------------
-###
-npm install -g newman
-###
-npm install newman-reporter-html
-###
+
