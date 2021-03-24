@@ -13,6 +13,9 @@ from fuzzywuzzy import process
 from geotext import GeoText
 import geocoder
 from geopy.geocoders import Nominatim
+from langdetect import detect
+import geograpy
+import nltk
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -38,6 +41,7 @@ def body_has_content(page):
     return True
 
 def get_USAndTravel(url, link_list):
+
     page_soup = get_page_html(url)
     if page_soup == None:
         page_soup = get_page_html(url)
@@ -52,20 +56,30 @@ def get_USAndTravel(url, link_list):
         # add prefix for broken url
         url = fix_url(url)
 
+        link_list.append(url)
+        #print(url)
         html = get_page_html(url)
         nested_links = get_nested_url(html)
-        nested_links_fixed = []
+
         for each in nested_links:
-            each = fix_url(each)
-            nested_links_fixed.append(each)
+            if any ([each.endswith('/index.html'), 
+                     each.endswith('/index.htm'),
+                     each.isdigit(),
+                     ]) and '2019-ncov/' not in each:
+                each = fix_url(each)
+                link_list.append(each)
 
-        #print(nested_links_fixed)
-
+    #add E coli urls
+    E_coli_url = 'https://www2c.cdc.gov/podcasts/feed.asp?feedid=280&format=json'
+    r1 = requests.get(E_coli_url)
+    json_data = r1.json()
+    for each in json_data['entries']:
+        url = fix_url(each['link'])
         link_list.append(url)
-        link_list = link_list + nested_links_fixed
 
-        #print(link_list)
-        return link_list
+
+    #print(link_list)
+    return link_list
 
 
 def get_nested_url(page_soup):
@@ -173,17 +187,23 @@ def get_eventDate(maintext, publish_date, title):
     except Exception:  
         return publish_date
 
-def get_location(title, main_text):
+def get_location(title, main_text, url):
     locations_list = []
     cities = ''
     countries = ''
+    splited_url = re.split(r'\/|\-',url)
+    splited_url = " ".join(splited_url)
 
-    places = GeoText(main_text)
-    places2 = GeoText(title)
+    places = geograpy.get_place_context(text=main_text)
+    places2 = geograpy.get_place_context(text=title)
+    places3 = geograpy.get_place_context(text=splited_url)
+
     cities = places.cities
     countries = places.countries
     cities2 = places2.cities
     countries2 = places2.countries
+    cities3 = places3.cities
+    countries3 = places3.countries
 
     if cities:
         locations_list = get_location_objects_from_cities(cities, locations_list)
@@ -193,6 +213,10 @@ def get_location(title, main_text):
         locations_list = get_location_objects_from_countries(countries, locations_list)
     if countries2:
         locations_list = get_location_objects_from_countries(countries2, locations_list)
+    if cities3:
+        locations_list = get_location_objects_from_cities(cities3, locations_list)
+    if countries3:
+        locations_list = get_location_objects_from_countries(countries3, locations_list)
         
     if not locations_list:
         # set up as default locatoin - US, unknown city
@@ -210,11 +234,9 @@ def get_location_objects_from_countries(countries, locations_list):
         location = {}
         location['country'] = country
         location['city'] = 'unknown'
-        if location not in locations_list:
-            #print("UHHHHHHHHHHHH   ", location, locations_list)
+    
+        if not any(obj['country'] == country for obj in locations_list):
             locations_list.append(location)
-
-            #print(locations_list)
 
     return locations_list
 
@@ -227,6 +249,7 @@ def get_location_objects_from_cities(cities, locations_list):
         geolocator = Nominatim(user_agent = "geoapiExercises")
         location = geolocator.geocode(city)
         country = str(location).split (",")[-1]
+        country = country.strip()
         location = {}
         location['country'] = country
         location['city'] = city
@@ -251,6 +274,8 @@ def main():
     link_list = []
     link_list = get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
     
+    #print(link_list)
+    #return
     counter  = 0
 
     all_articles = []
@@ -269,8 +294,9 @@ def main():
     
         try:
             #print(get_publish_date(page))
-            article['id'] = generate_unique_article_id(counter)
             title = get_headline(page)
+
+            article['id'] = generate_unique_article_id(counter)
             #print(url)
             #print(title)
             article['headline'] = title
@@ -279,7 +305,7 @@ def main():
             article['date_of_publication'] = date_of_publication
             article['url'] = url
             main_text = get_maintext(page)
-            article['main_text'] = "la"
+            article['main_text'] = main_text
             article['reports'] = single_report
             all_articles.append(article)
             
@@ -287,7 +313,7 @@ def main():
             report_obj['syndromes'] = ['dummy - fever']
             diseases = get_disease(title, all_diseases)
             report_obj['diseases'] = diseases
-            locations = get_location(title, main_text)
+            locations = get_location(title, main_text, url)
             #print(locations)
             # set of two lists
             for loc in locations:
@@ -301,7 +327,7 @@ def main():
             all_reports.append(report_obj)
 
             # print("all locations", all_locations)
-            # print(article)
+            print(article)
             counter += 1
 
         except Exception:
