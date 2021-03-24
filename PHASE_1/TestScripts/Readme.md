@@ -5,9 +5,7 @@ for use newman,use this command for install newman (need node.js)
 ###
 npm install -g newman
 ###
-for html
-###
-npm install newman-reporter-html
+for html ： npm install newman-reporter-html
 ###
 here is test url for Postman:
 -----------------------------------
