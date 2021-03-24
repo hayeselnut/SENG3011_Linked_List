@@ -3,7 +3,9 @@ Test by Postman/Newman.
 here is test url for Postman:
 -----------------------------------
 ###
-https://www.getpostman.com/collections/1a5d1dae4538a1553d66
+Unit ：https://www.getpostman.com/collections/1a5d1dae4538a1553d66
+###
+Load ：https://www.getpostman.com/collections/4b2958b34f3261e9cc7e
 ###
 for unit test
 --------------
