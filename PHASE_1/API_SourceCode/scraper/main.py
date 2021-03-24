@@ -335,24 +335,24 @@ def main():
             continue
     
     
-    with open('myfile.txt', 'w') as f:
-        print(all_articles, file=f)
+#    with open('myfile.txt', 'w') as f:
+#        print(all_articles, file=f)
 
 
 
 #################
-    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
-
-
-
-    for obj in all_articles:
-        db.collection(u'articles').document(obj['id']).set(obj)
-
-
-    for obj in all_reports:
-        db.collection(u'reports').document(obj['id']).set(obj)
+#    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
+#    firebase_admin.initialize_app(cred)
+#    db = firestore.client()
+#
+#
+#
+#    for obj in all_articles:
+#        db.collection(u'articles').document(obj['id']).set(obj)
+#
+#
+#    for obj in all_reports:
+#        db.collection(u'reports').document(obj['id']).set(obj)
 
 ###################
 
