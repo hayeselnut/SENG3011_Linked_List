@@ -1,4 +1,4 @@
-Test by Postman.
+Test by Postman/Newman.
 =================================== 
 ###
 here is test url for Postman:
