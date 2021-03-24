@@ -22,3 +22,5 @@ for use newman,use this command for install newman (need node.js)
 ###
 npm install -g newman
 ###
+npm install newman-reporter-html
+###
