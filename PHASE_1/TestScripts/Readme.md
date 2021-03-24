@@ -9,3 +9,7 @@ for unit test use
 ###
 newman run Seng3011-Api.postman_collection.json -r
 ###
+for use newman,use this command for install newman (need node.js)
+###
+npm install -g newman
+###
