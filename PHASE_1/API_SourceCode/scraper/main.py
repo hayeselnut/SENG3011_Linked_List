@@ -1,4 +1,3 @@
-from typing import ClassVar
 import requests
 from bs4 import BeautifulSoup as soup
 import re
@@ -14,6 +13,9 @@ from fuzzywuzzy import process
 from geotext import GeoText
 import geocoder
 from geopy.geocoders import Nominatim
+from langdetect import detect
+import geograpy
+import nltk
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -39,6 +41,7 @@ def body_has_content(page):
     return True
 
 def get_USAndTravel(url, link_list):
+
     page_soup = get_page_html(url)
     if page_soup == None:
         page_soup = get_page_html(url)
@@ -53,25 +56,37 @@ def get_USAndTravel(url, link_list):
         # add prefix for broken url
         url = fix_url(url)
 
+        link_list.append(url)
+        #print(url)
         html = get_page_html(url)
         nested_links = get_nested_url(html)
-        nested_links_fixed = []
+
         for each in nested_links:
-            each = fix_url(each)
-            nested_links_fixed.append(each)
+            if any ([each.endswith('/index.html'), 
+                     each.endswith('/index.htm'),
+                     each.isdigit(),
+                     ]) and '2019-ncov/' not in each:
+                each = fix_url(each)
+                link_list.append(each)
 
-        #print(nested_links_fixed)
-
+    #add E coli urls
+    E_coli_url = 'https://www2c.cdc.gov/podcasts/feed.asp?feedid=280&format=json'
+    r1 = requests.get(E_coli_url)
+    json_data = r1.json()
+    for each in json_data['entries']:
+        url = fix_url(each['link'])
         link_list.append(url)
-        link_list = link_list + nested_links_fixed
 
-        #print(link_list)
-        return link_list
+
+    #print(link_list)
+    return link_list
 
 
 def get_nested_url(page_soup):
 
     return [el.find('a').get('href') for el in page_soup.find_all('li', {'class': 'list-group-item'})]
+
+
 
 def get_headline(page_soup):
     container = page_soup.find("title")
@@ -123,10 +138,6 @@ def get_maintext(page_soup):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
-def generate_unique_article_id(counter):
-    unique = hashlib.md5(str(counter).encode('utf-8'))
-
-    return unique.hexdigest()
 
 def get_disease(title, all_diseases):
     disease_list = []
@@ -172,17 +183,23 @@ def get_eventDate(maintext, publish_date, title):
     except Exception:  
         return publish_date
 
-def get_location(title, main_text):
+def get_location(title, main_text, url):
     locations_list = []
     cities = ''
     countries = ''
+    splited_url = re.split(r'\/|\-',url)
+    splited_url = " ".join(splited_url)
 
-    places = GeoText(main_text)
-    places2 = GeoText(title)
+    places = geograpy.get_place_context(text=main_text)
+    places2 = geograpy.get_place_context(text=title)
+    places3 = geograpy.get_place_context(text=splited_url)
+
     cities = places.cities
     countries = places.countries
     cities2 = places2.cities
     countries2 = places2.countries
+    cities3 = places3.cities
+    countries3 = places3.countries
 
     if cities:
         locations_list = get_location_objects_from_cities(cities, locations_list)
@@ -192,6 +209,10 @@ def get_location(title, main_text):
         locations_list = get_location_objects_from_countries(countries, locations_list)
     if countries2:
         locations_list = get_location_objects_from_countries(countries2, locations_list)
+    if cities3:
+        locations_list = get_location_objects_from_cities(cities3, locations_list)
+    if countries3:
+        locations_list = get_location_objects_from_countries(countries3, locations_list)
         
     if not locations_list:
         # set up as default locatoin - US, unknown city
@@ -199,87 +220,9 @@ def get_location(title, main_text):
         location['country'] = 'United States'
         location['city'] = 'unknown'
 
-def get_syndrome_list():
-    data = {}
-    syndrome_list = []
-    with open('syndrome_list.json') as json_file:
-        data = json.load(json_file)
-        for x in data: 
-            syndrome = x['name']
+        locations_list.append(location)
 
-            # used top lower case everything
-            y = syndrome.lower()
-
-            # used to remove any spacing
-            y = re.sub('-',' ', y)
-
-            syndrome_list.append(y)
-
-
-    return syndrome_list
-
-
-# checks the html for the words 
-def checkSyndrome(page):
-    
-    # it's not gonna be super accurate, but freak it, I needa deploy this shit 
-    syndromeList = get_syndrome_list()
-    mentionedSyndromes = []
-    p = page.lower()
-
-
-    #
-    for syndrome in syndromeList:
-
-        if isSyndromeInText(syndrome, p) == True:
-            mentionedSyndromes.append(syndrome)
-
-    
-    print(mentionedSyndromes)
-    return syndromeList
-
-# checks if the given syndrome is in the main text, and uses stupid logic to determine, thus WHATEVER
-def isSyndromeInText(syndrome, text):
-
-    # get the syndrome and remove of, like, and 
-    modified = re.sub('like|and|of', '', syndrome)
-
-
-    # then make a counter for that syndrome
-    size = len(modified.split())
-    
-    # initialize a counter
-    counter = 0
-
-    # SORT THE WHOLE THING
-
-    # REMOVE ANYTHING THAT IS NOT IN THE LIST
-
-    # 
-
-    # then go thru the text and find the ones that match, and check the count at the end
-    #for word in modified.split():
-    #    re.search(r"\b\L<word>\b", )
-    #        counter += 1
-    
-    print (syndrome + " " + str(counter))
-
-    # if the count is the same as the sizez of the syndrome, return true 
-    if counter == size:
-        return True
-    # return false
-
-    return False
-
-
-#for word in syndrome.split(" "):
-#            
-#            if word in page:
-#                counter += 1
-#                if syndrome not in mentionedSyndromes:
-#                    if counter == size:
-#                        mentionedSyndromes.append(syndrome)
-                
+    return locations_list
 
 def get_location_objects_from_countries(countries, locations_list):
     #locations_list = []
@@ -287,11 +230,9 @@ def get_location_objects_from_countries(countries, locations_list):
         location = {}
         location['country'] = country
         location['city'] = 'unknown'
-        if location not in locations_list:
-            #print("UHHHHHHHHHHHH   ", location, locations_list)
+    
+        if not any(obj['country'] == country for obj in locations_list):
             locations_list.append(location)
-
-            #print(locations_list)
 
     return locations_list
 
@@ -304,6 +245,7 @@ def get_location_objects_from_cities(cities, locations_list):
         geolocator = Nominatim(user_agent = "geoapiExercises")
         location = geolocator.geocode(city)
         country = str(location).split (",")[-1]
+        country = country.strip()
         location = {}
         location['country'] = country
         location['city'] = city
@@ -317,6 +259,10 @@ def Union(lst1, lst2):
     final_list = list(set(lst1) | set(lst2))
     return final_list
 
+def create_unique_id(type, url):
+    uniqueString = str(type) + " " + str(url)
+    return hashlib.sha3_256(str(uniqueString).encode()).hexdigest()
+
 def main():
 
     all_diseases = []
@@ -328,6 +274,8 @@ def main():
     link_list = []
     link_list = get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
     
+    #print(link_list)
+    #return
     counter  = 0
 
     all_articles = []
@@ -344,10 +292,11 @@ def main():
         if (page == None or body_has_content(page) == False):
             continue
     
-        try:_publish_date(page)):
-            article['last_web_scrapped'] = datetime.now()
-            article['id'] = generate_unique_article_id(counter)
+        try:
+            
             title = get_headline(page)
+
+            article['id'] = create_unique_id("article", url)
             #print(url)
             #print(title)
             article['headline'] = title
@@ -356,15 +305,16 @@ def main():
             article['date_of_publication'] = date_of_publication
             article['url'] = url
             main_text = get_maintext(page)
-            article['main_text'] = "la"
+            article['main_text'] = main_text
             article['reports'] = single_report
             all_articles.append(article)
             
             report_obj = {}
+            report_obj['id'] = create_unique_id("report", url)
             report_obj['syndromes'] = ['dummy - fever']
             diseases = get_disease(title, all_diseases)
             report_obj['diseases'] = diseases
-            locations = get_location(title, main_text)
+            locations = get_location(title, main_text, url)
             #print(locations)
             # set of two lists
             for loc in locations:
@@ -373,55 +323,44 @@ def main():
 
             report_obj['locations'] = locations
             report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication, title)))
+
             single_report.append(report_obj)
             all_reports.append(report_obj)
 
-            #print(url)
-            #checkSyndrome(page.prettify())
 
-
-            #print(article)
-        except requests.ConnectionError as e:
-            print("OOPS!! Connection Error. Make sure you are connected to Internet. Technical Details given below.\n")
-            print(str(e))
-        except requests.Timeout as e:
-            print("OOPS!! Timeout Error")
-            print(str(e))
-        except requests.RequestException as e:
-            print("OOPS!! General Error")
-            print(str(e))
-        except KeyboardInterrupt:
-            print("Someone closed the program")
+            print(article)
+            counter += 1
 
         except Exception:
             continue
-    # with open('./files/articles.json', 'w') as f:
-    #     json.dump(all_articles, f)
+    
+    
+    with open('myfile.txt', 'w') as f:
+        print(all_articles, file=f)
 
-################
+
+
+#################
     cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
-    # count = 0
 
-    # for obj in all_articles:
-    #     db.collection(u'articles').document(obj['id']).set(obj)
-    #     count += 1
 
-    count = 0
+    for obj in all_articles:
+        db.collection(u'articles').document(obj['id']).set(obj)
+
+
     for obj in all_reports:
-        db.collection(u'reports').document(str(count)).set(obj)
-        count += 1
-##################
+        db.collection(u'reports').document(obj['id']).set(obj)
+
+###################
 
     # db.collection(u'articles').document(u'0').delete()
     # db.collection(u'articles').document(u'1').delete()
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
-
-
 
 
 
