@@ -189,18 +189,18 @@ def get_location(title, main_text, url):
     countries = ''
     splited_url = re.split(r'\/|\-',url)
     splited_url = " ".join(splited_url)
-
+    print('hello')
     places = geograpy.get_place_context(text=main_text)
     places2 = geograpy.get_place_context(text=title)
     places3 = geograpy.get_place_context(text=splited_url)
-
+    print('dick')
     cities = places.cities
     countries = places.countries
     cities2 = places2.cities
     countries2 = places2.countries
     cities3 = places3.cities
     countries3 = places3.countries
-
+    print('smol dick')
     if cities:
         locations_list = get_location_objects_from_cities(cities, locations_list)
     if cities2:
@@ -213,12 +213,12 @@ def get_location(title, main_text, url):
         locations_list = get_location_objects_from_cities(cities3, locations_list)
     if countries3:
         locations_list = get_location_objects_from_countries(countries3, locations_list)
-        
+    print('smoller dick')
     if not locations_list:
         # set up as default locatoin - US, unknown city
         location = {}
         location['country'] = 'United States'
-        location['city'] = 'unknown'
+        location['location'] = 'unknown'
 
         locations_list.append(location)
 
@@ -229,7 +229,7 @@ def get_location_objects_from_countries(countries, locations_list):
     for country in countries:
         location = {}
         location['country'] = country
-        location['city'] = 'unknown'
+        location['location'] = 'unknown'
     
         if not any(obj['country'] == country for obj in locations_list):
             locations_list.append(location)
@@ -248,16 +248,13 @@ def get_location_objects_from_cities(cities, locations_list):
         country = country.strip()
         location = {}
         location['country'] = country
-        location['city'] = city
+        location['location'] = city
         if location not in locations_list:
             
             locations_list.append(location)
 
     return locations_list
 
-def Union(lst1, lst2):
-    final_list = list(set(lst1) | set(lst2))
-    return final_list
 
 def create_unique_id(type, url):
     uniqueString = str(type) + " " + str(url)
@@ -306,16 +303,18 @@ def main():
             article['url'] = url
             main_text = get_maintext(page)
             article['main_text'] = main_text
-            article['reports'] = single_report
-            all_articles.append(article)
-            
+
+
+            #print(article)
             report_obj = {}
             report_obj['id'] = create_unique_id("report", url)
             report_obj['syndromes'] = ['dummy - fever']
             diseases = get_disease(title, all_diseases)
             report_obj['diseases'] = diseases
+
+            print('wtaf')
             locations = get_location(title, main_text, url)
-            #print(locations)
+
             # set of two lists
             for loc in locations:
                 if loc not in all_locations:
@@ -323,13 +322,19 @@ def main():
 
             report_obj['locations'] = locations
             report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication, title)))
-
+            
             single_report.append(report_obj)
-            all_reports.append(report_obj)
+            
+            article['reports'] = single_report
 
-
-            print(article)
-            counter += 1
+            #print(article['reports'])
+#            
+#            all_articles.append(article)
+#            all_reports.append(report_obj)
+#
+#
+#            print(article)
+#            counter += 1
 
         except Exception:
             continue
@@ -341,19 +346,23 @@ def main():
 
 
 #################
-#    cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
-#    firebase_admin.initialize_app(cred)
-#    db = firestore.client()
-#
-#
-#
-#    for obj in all_articles:
-#        db.collection(u'articles').document(obj['id']).set(obj)
-#
-#
-#    for obj in all_reports:
-#        db.collection(u'reports').document(obj['id']).set(obj)
+    # cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
+    # firebase_admin.initialize_app(cred)
+    # db = firestore.client()
 
+
+
+    # for obj in all_articles:
+    #     db.collection(u'articles').document(obj['id']).set(obj)
+
+
+    # for obj in all_reports:
+    #     db.collection(u'reports').document(obj['id']).set(obj)
+
+    # for obj in all_locations:
+    #     location_id = create_unique_id(obj['country'], obj['location'])
+    #     obj['id'] = location_id
+    #     db.collection(u'locations').document(obj['id']).set(obj)
 ###################
 
     # db.collection(u'articles').document(u'0').delete()
