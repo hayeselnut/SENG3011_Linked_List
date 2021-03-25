@@ -13,7 +13,6 @@ from fuzzywuzzy import process
 from geotext import GeoText
 import geocoder
 from geopy.geocoders import Nominatim
-from langdetect import detect
 import geograpy
 import nltk
 
@@ -40,6 +39,29 @@ def body_has_content(page):
         return False
     return True
 
+def get_valuable_nested_links(url, link_list):
+
+    link_list.append(url)
+    html = get_page_html(url)
+    nested_links = get_nested_url(html)
+
+    for each in nested_links:
+        if any ([each.endswith('/index.html'), 
+                each.endswith('/index.htm'),
+                each.isdigit(),
+                '/2011/' in each,
+                '/2010/' in each,
+                '/2009/' in each,
+                '/2008/' in each,
+                '/2007/' in each,
+                '/2006/' in each,
+                ]) and '2019-ncov/' not in each:
+            each = fix_url(each)
+            link_list.append(each)
+
+    return link_list
+
+
 def get_USAndTravel(url, link_list):
 
     page_soup = get_page_html(url)
@@ -55,29 +77,30 @@ def get_USAndTravel(url, link_list):
         url = container['href']
         # add prefix for broken url
         url = fix_url(url)
-
-        link_list.append(url)
         #print(url)
-        html = get_page_html(url)
-        nested_links = get_nested_url(html)
+        # html = get_page_html(url)
+        # nested_links = get_nested_url(html)
 
-        for each in nested_links:
-            if any ([each.endswith('/index.html'), 
-                     each.endswith('/index.htm'),
-                     each.isdigit(),
-                     ]) and '2019-ncov/' not in each:
-                each = fix_url(each)
-                link_list.append(each)
+        # for each in nested_links:
+        #     if any ([each.endswith('/index.html'), 
+        #              each.endswith('/index.htm'),
+        #              each.isdigit(),
+        #              ]) and '2019-ncov/' not in each:
+        #         each = fix_url(each)
+        #         link_list.append(each)
+        link_list = get_valuable_nested_links(url, link_list)
 
     #add E coli urls
-    E_coli_url = 'https://www2c.cdc.gov/podcasts/feed.asp?feedid=280&format=json'
-    r1 = requests.get(E_coli_url)
-    json_data = r1.json()
-    for each in json_data['entries']:
-        url = fix_url(each['link'])
-        link_list.append(url)
+    # E_coli_url = 'https://www2c.cdc.gov/podcasts/feed.asp?feedid=280&format=json'
+    # r1 = requests.get(E_coli_url)
+    # json_data = r1.json()
+    # for each in json_data['entries']:
+    #     url = fix_url(each['link'])
+    #     link_list.append(url)
+    E_coli_url = 'https://www.cdc.gov/ecoli/2021/o157h7-02-21/index.html'
+    link_list = get_valuable_nested_links(E_coli_url, link_list)
 
-
+    #print(link_list)
     #print(link_list)
     return link_list
 
@@ -142,13 +165,23 @@ def get_maintext(page_soup):
 def get_disease(title, all_diseases):
     disease_list = []
 
+    if 'E. coli' in title:
+        disease_list.append('ehec (e.coli)')
+        return disease_list
+    elif 'tobacco' in title.lower():
+        disease_list.append('other')
+        return disease_list
+
     title = re.sub(r'\|','', title)
 
     splited_title = title.lower().split()
 
     highest_percent = 80
-    target_disease = ''
+    target_disease = 'unknown'
     for each in splited_title:
+        if each == '-':
+            continue
+
         if each.endswith('a'):
             tmp_name = each[:-1]+'osis'
             if tmp_name in all_diseases:
@@ -161,6 +194,7 @@ def get_disease(title, all_diseases):
             target_disease = matching_percent[0]
 
     disease_list.append(target_disease)
+
     return disease_list
     
 def get_eventDate(maintext, publish_date, title):
@@ -174,10 +208,14 @@ def get_eventDate(maintext, publish_date, title):
         if not match_list:
             matches2 = datefinder.find_dates(maintext)
             for match in matches2:
-                match_list.append(match)
+                if match.year > '2000':
+                    match_list.append(match)
+
         res = min(match_list)
+
         if res is None:
             return publish_date
+        # elif res.year() < ''
         return res
  
     except Exception:  
@@ -203,16 +241,22 @@ def get_location(title, main_text, url):
 
     if cities:
         locations_list = get_location_objects_from_cities(cities, locations_list)
+
     if cities2:
         locations_list = get_location_objects_from_cities(cities2, locations_list)
-    if countries:
-        locations_list = get_location_objects_from_countries(countries, locations_list)
-    if countries2:
-        locations_list = get_location_objects_from_countries(countries2, locations_list)
+
     if cities3:
         locations_list = get_location_objects_from_cities(cities3, locations_list)
+
+    if countries:
+        locations_list = get_location_objects_from_countries(countries, locations_list)
+
+    if countries2:
+        locations_list = get_location_objects_from_countries(countries2, locations_list)
+
     if countries3:
         locations_list = get_location_objects_from_countries(countries3, locations_list)
+
         
     if not locations_list:
         # set up as default locatoin - US, unknown city
@@ -237,10 +281,10 @@ def get_location_objects_from_countries(countries, locations_list):
     return locations_list
 
 def get_location_objects_from_cities(cities, locations_list):
-    locations_list = []
-
+    #locations_list = []
+    bad_city_words = ['Date', 'Of', 'Diamond', 'Most','March', 'Black', 'Media', 'Standard', 'Turkey', 'Early', 'English', 'Central', 'University', 'Long', 'Best', 'Ask', 'Page', 'Broken Arrow', 'Research', 'Strong', 'Sunshine', 'West', 'Man', 'Rice','Point', 'Gay', 'Blue Bell', 'High Level', 'Michael', 'Low', 'Plan', 'Williams', 'Tyler', 'See', 'Young', 'Bell', 'All', 'Level']
     for city in cities:
-        if city == 'Date' or city == 'Of' or city == 'Most' or city == 'March':
+        if city in bad_city_words:
             continue
         geolocator = Nominatim(user_agent = "geoapiExercises")
         location = geolocator.geocode(city)
@@ -250,7 +294,6 @@ def get_location_objects_from_cities(cities, locations_list):
         location['country'] = country
         location['location'] = city
         if location not in locations_list:
-            
             locations_list.append(location)
 
     return locations_list
@@ -273,11 +316,11 @@ def main():
     
     #print(link_list)
     #return
-    counter  = 0
-
     all_articles = []
     all_reports = []
     all_locations = []
+
+    #link_list.append('https://www.cdc.gov/listeria/outbreaks/cantaloupes-jensen-farms/index.html')
 
     for url in link_list:
         article = {}
@@ -310,17 +353,21 @@ def main():
             report_obj['syndromes'] = ['dummy - fever']
             diseases = get_disease(title, all_diseases)
             report_obj['diseases'] = diseases
+            report_obj['locations'] = []
             locations = get_location(title, main_text, url)
             #print(locations)
             # set of two lists
             for loc in locations:
+                loc_id = create_unique_id(loc['country'], loc['location'])
+                report_obj['locations'].append(loc_id)
+                loc['id'] = loc_id
                 if loc not in all_locations:
                     all_locations.append(loc)
 
-            report_obj['locations'] = locations
+            #report_obj['locations'] = locations
             report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication, title)))
             
-            single_report.append(report_obj)
+            single_report.append(report_obj['id'])
             
             article['reports'] = single_report
 
@@ -329,7 +376,6 @@ def main():
 
 
             print(article)
-            counter += 1
 
         except Exception:
             continue
@@ -346,11 +392,9 @@ def main():
     #     print(all_locations, file=f)
 
 #################
-    cred = credentials.Certificate('./still-resource-306306-524a6554abdb.json')
+    cred = credentials.Certificate('./linked-list2-firebase-adminsdk-2z1uo-bf78a7be2c.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
-
-
 
     for obj in all_articles:
         db.collection(u'articles').document(obj['id']).set(obj)
@@ -360,8 +404,6 @@ def main():
         db.collection(u'reports').document(obj['id']).set(obj)
 
     for obj in all_locations:
-        location_id = create_unique_id(obj['country'], obj['location'])
-        obj['id'] = location_id
         db.collection(u'locations').document(obj['id']).set(obj)
 ###################
 
