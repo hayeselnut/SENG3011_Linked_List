@@ -29,11 +29,11 @@ for postman client
 ###
 To use postman to see the tests, you need to import the collection into your client. To do that you:
 ###
-Click file -> then import.
+-Click file -> then import.
 ###
-Click choose file
+-Click choose file
 ###
-Navigate to and select the collection json file.
+-Navigate to and select the collection json file.
 ###
 The collection will now be imported into your client, and can be run through the client.
 ###
