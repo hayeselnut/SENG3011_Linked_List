@@ -16,6 +16,8 @@ from geopy.geocoders import Nominatim
 import geograpy
 import nltk
 
+from flask import Flask
+
 CDC_PREFIX = "https://www.cdc.gov"
 
 def fix_url(url):
@@ -303,6 +305,10 @@ def create_unique_id(type, url):
     uniqueString = str(type) + " " + str(url)
     return hashlib.sha3_256(str(uniqueString).encode()).hexdigest()
 
+
+app = Flask(__name__)
+
+@app.route('/main')
 def main():
 
     all_diseases = []
@@ -405,6 +411,8 @@ def main():
 
     for obj in all_locations:
         db.collection(u'locations').document(obj['id']).set(obj)
+    
+    return {}
 ###################
 
     # db.collection(u'articles').document(u'0').delete()
@@ -417,4 +425,5 @@ def main():
 
 # Calling main function
 if __name__ == "__main__":
-    main()
+
+    app.run(host='127.0.0.1', port=8080, debug=True)
