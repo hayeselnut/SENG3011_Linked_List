@@ -138,10 +138,6 @@ def get_maintext(page_soup):
 # r1 = requests.get(url1)
 # json_data = r1.json()
 
-def generate_unique_article_id(counter):
-    unique = hashlib.md5(str(counter).encode('utf-8'))
-
-    return unique.hexdigest()
 
 def get_disease(title, all_diseases):
     disease_list = []
@@ -222,7 +218,7 @@ def get_location(title, main_text, url):
         # set up as default locatoin - US, unknown city
         location = {}
         location['country'] = 'United States'
-        location['city'] = 'unknown'
+        location['location'] = 'unknown'
 
         locations_list.append(location)
 
@@ -233,7 +229,7 @@ def get_location_objects_from_countries(countries, locations_list):
     for country in countries:
         location = {}
         location['country'] = country
-        location['city'] = 'unknown'
+        location['location'] = 'unknown'
     
         if not any(obj['country'] == country for obj in locations_list):
             locations_list.append(location)
@@ -252,21 +248,22 @@ def get_location_objects_from_cities(cities, locations_list):
         country = country.strip()
         location = {}
         location['country'] = country
-        location['city'] = city
+        location['location'] = city
         if location not in locations_list:
             
             locations_list.append(location)
 
     return locations_list
 
-def Union(lst1, lst2):
-    final_list = list(set(lst1) | set(lst2))
-    return final_list
+
+def create_unique_id(type, url):
+    uniqueString = str(type) + " " + str(url)
+    return hashlib.sha3_256(str(uniqueString).encode()).hexdigest()
 
 def main():
 
     all_diseases = []
-    with open('./files/disease_list.json') as json_file:
+    with open('disease_list.json') as json_file:
         disease_dict = json.load(json_file)
     for each in disease_dict:
         all_diseases.append(each['name'])
@@ -293,10 +290,10 @@ def main():
             continue
     
         try:
-            #print(get_publish_date(page))
+            
             title = get_headline(page)
 
-            article['id'] = generate_unique_article_id(counter)
+            article['id'] = create_unique_id("article", url)
             #print(url)
             #print(title)
             article['headline'] = title
@@ -306,10 +303,10 @@ def main():
             article['url'] = url
             main_text = get_maintext(page)
             article['main_text'] = main_text
-            article['reports'] = single_report
-            all_articles.append(article)
+
             
             report_obj = {}
+            report_obj['id'] = create_unique_id("report", url)
             report_obj['syndromes'] = ['dummy - fever']
             diseases = get_disease(title, all_diseases)
             report_obj['diseases'] = diseases
@@ -322,36 +319,50 @@ def main():
 
             report_obj['locations'] = locations
             report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication, title)))
-
+            
             single_report.append(report_obj)
+            
+            article['reports'] = single_report
+
+            all_articles.append(article)
             all_reports.append(report_obj)
 
-            # print("all locations", all_locations)
+
             print(article)
             counter += 1
 
         except Exception:
             continue
-    # with open('./files/articles.json', 'w') as f:
-    #     json.dump(all_articles, f)
+    
+    
+    # with open('myfile.txt', 'w', encoding="utf-8") as f:
+    #     #f.write(all_articles)
+    #     print(all_articles, file=f)
 
-
+    # with open('myfile2.txt', 'w', encoding="utf-8") as f:
+    #     print(all_reports, file=f)
+    
+    # with open('myfile3.txt','w', encoding="utf-8") as f:
+    #     print(all_locations, file=f)
 
 #################
-    # cred = credentials.Certificate('./still-resource-306306-5177b823cb38.json')
-    # firebase_admin.initialize_app(cred)
-    # db = firestore.client()
+    cred = credentials.Certificate('./still-resource-306306-524a6554abdb.json')
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
 
-    # count = 0
 
-    # for obj in all_articles:
-    #     db.collection(u'articles').document(obj['id']).set(obj)
-    #     count += 1
 
-    # count = 0
-    # for obj in all_reports:
-    #     db.collection(u'reports').document(str(count)).set(obj)
-    #     count += 1
+    for obj in all_articles:
+        db.collection(u'articles').document(obj['id']).set(obj)
+
+
+    for obj in all_reports:
+        db.collection(u'reports').document(obj['id']).set(obj)
+
+    for obj in all_locations:
+        location_id = create_unique_id(obj['country'], obj['location'])
+        obj['id'] = location_id
+        db.collection(u'locations').document(obj['id']).set(obj)
 ###################
 
     # db.collection(u'articles').document(u'0').delete()
@@ -359,8 +370,6 @@ def main():
 
 
 #https://www2c.cdc.gov/podcasts/feed.asp?feedid=513&format=json
-
-
 
 
 
