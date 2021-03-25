@@ -308,7 +308,7 @@ def create_unique_id(type, url):
 
 app = Flask(__name__)
 
-@app.route('/main')
+@app.route('/')
 def main():
     
     cred = credentials.Certificate('linked-list2-cc132d7e5883.json')
