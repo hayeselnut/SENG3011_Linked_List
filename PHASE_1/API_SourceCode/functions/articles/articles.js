@@ -126,8 +126,24 @@ const getReports = async (db, request) => {
 };
 
 const isLocationInArticle = (article, request) => {
-    // LOCATION : TODO stub
-    return true;
+    for (const report of article.reports) {
+        if (isLocationInReport(report, request)) {
+            return true;
+        }
+    }
+    return false;
+};
+
+const isLocationInReport = (report, request) => {
+    for (const location of report.locations) {
+        if (location.location.toLowerCase().includes(request.location)) {
+            return true;
+        }
+        if (location.country.toLowerCase().includes(request.location)) {
+            return true;
+        }
+    }
+    return false;
 };
 
 // const getLocations = async (db, request) => {
