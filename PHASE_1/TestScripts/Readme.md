@@ -24,4 +24,16 @@ for load test
 ###
 newman run Load-Seng3011.postman_collection.json -r -n 60
 ###
-
+for postman client
+--------------------
+###
+To use postman to see the tests, you need to import the collection into your client. To do that you:
+###
+Click file -> then import.
+###
+Click choose file
+###
+Navigate to and select the collection json file.
+###
+The collection will now be imported into your client, and can be run through the client.
+###
