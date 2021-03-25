@@ -64,20 +64,42 @@ const isKeyTermInArticle = (article, request) => {
     if (request.keyTerms.length === 0) return true;
 
     for (const keyTerm of request.keyTerms) {
-        if (article.headline.toLowerCase().includes(keyTerm)) {
-            functions.logger.debug(`key term '${keyTerm}' found in headline`);
+        const excludeKeyTerm = keyTerm.includes("!");
+
+        if (excludeKeyTerm) {
+            const unbangedKeyTerm = keyTerm.replace("!", "");
+            if (article.headline.toLowerCase().includes(unbangedKeyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in headline of article ${article.id}`);
+                return false;
+            }
+            if (article.main_text.toLowerCase().includes(unbangedKeyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in main_text of article ${article.id}`);
+                return false;
+            }
+            if (isKeyTermInReports(article.reports, unbangedKeyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in reports of article ${article.id}`);
+                return false;
+            }
+            functions.logger.debug(`key term '${keyTerm}' not found in this article of article ${article.id}`);
             continue;
+        } else {
+            if (article.headline.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in headline of article ${article.id}`);
+                continue;
+            }
+            if (article.main_text.toLowerCase().includes(keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in main_text of article ${article.id}`);
+                continue;
+            }
+            if (isKeyTermInReports(article.reports, keyTerm)) {
+                functions.logger.debug(`key term '${keyTerm}' found in reports of article ${article.id}`);
+                continue;
+            }
+            functions.logger.debug(`key term '${keyTerm}' not found in article ${article.id}`);
+            return false;
         }
-        if (article.main_text.toLowerCase().includes(keyTerm)) {
-            functions.logger.debug(`key term '${keyTerm}' found in main_text`);
-            continue;
-        }
-        if (isKeyTermInReports(article.reports, keyTerm)) {
-            continue;
-        }
-        functions.logger.debug(`key term '${keyTerm}' not found in this article`);
-        return false;
     }
+    functions.logger.debug(`keyTerms matched in article ${article.id}`);
     return true;
 };
 

@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "still-resource-306306"
+    "default": "linked-list2",
+    "australia-east": "linked-list2"
   }
 }

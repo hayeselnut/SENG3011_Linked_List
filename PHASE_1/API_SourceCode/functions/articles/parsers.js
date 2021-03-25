@@ -8,7 +8,7 @@ const parseQuery = (queryParams) => {
 
     let keyTerms;
     if ("key_terms" in queryParams && queryParams.key_terms.trim() !== "") {
-        keyTerms = parseKeyTerms(queryParams.key_terms.trim());
+        keyTerms = parseKeyTerms(queryParams.key_terms);
     } else {
         functions.logger.debug("no key terms specified");
         keyTerms = [];
