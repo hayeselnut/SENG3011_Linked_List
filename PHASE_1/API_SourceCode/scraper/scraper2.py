@@ -310,6 +310,10 @@ app = Flask(__name__)
 
 @app.route('/main')
 def main():
+    
+    cred = credentials.Certificate('linked-list2-cc132d7e5883.json')
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
 
     all_diseases = []
     with open('disease_list.json') as json_file:
@@ -398,9 +402,7 @@ def main():
     #     print(all_locations, file=f)
 
 #################
-    cred = credentials.Certificate('./linked-list2-firebase-adminsdk-2z1uo-bf78a7be2c.json')
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
+    
 
     for obj in all_articles:
         db.collection(u'articles').document(obj['id']).set(obj)
