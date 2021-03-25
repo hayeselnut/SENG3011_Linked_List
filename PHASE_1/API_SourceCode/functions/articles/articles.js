@@ -8,32 +8,24 @@ const getArticles = async (db, request) => {
         .where("date_of_publication", "<=", request.endDate)
         .get();
 
-    const articles = await extractArticlesFromSnapshot(db, snapshot, request);
+    const articles = await extractArticlesFromSnapshot(snapshot);
     const filteredArticles = filterArticles(articles, request);
     return filteredArticles;
 };
 
-const extractArticlesFromSnapshot = async (db, snapshot, request) => {
-    const reports = await getReports(db, request);
+const extractArticlesFromSnapshot = async (snapshot) => {
     const articles = [];
-
     snapshot.forEach((doc) => {
         const id = doc.id;
         const data = doc.data();
         const article = {id, ...data};
-        article.reports = [...reports];
         article.date_of_publication = article.date_of_publication.toDate();
+        for (const report of article.reports) {
+            report.event_date = report.event_date.toDate();
+            delete report.id;
+        }
         articles.push(article);
     });
-    // const toWait = [];
-    // dataSnapshot.forEach(childSnapshot => {
-    //     toWait.push(childFunction((childSnapshot)));
-    // });
-    // await Promise.all(toWait);
-
-    // snap.forEach(function wrapper(){async val => {
-    //     await console.log(val.key)
-    //   }})
 
     return articles;
 };
@@ -93,6 +85,7 @@ const isKeyTermInReports = (reports, keyTerm) => {
     // returns TRUE if any report contains key term
     for (const report of reports) {
         for (const disease of report.diseases) {
+            if (disease === "") continue;
             if (disease.toLowerCase().includes(keyTerm)) {
                 functions.logger.debug(`key term '${keyTerm}' found in diseases`);
                 return true;
@@ -100,6 +93,7 @@ const isKeyTermInReports = (reports, keyTerm) => {
         }
 
         for (const syndrome of report.syndromes) {
+            if (syndrome === "") continue;
             if (syndrome.toLowerCase().includes(keyTerm)) {
                 functions.logger.debug(`key term '${keyTerm}' found in syndrome`);
                 return true;
@@ -107,22 +101,6 @@ const isKeyTermInReports = (reports, keyTerm) => {
         }
     }
     return false;
-};
-
-const getReports = async (db, request) => {
-    functions.logger.debug("retrieving reports");
-    const snapshot = await db.collection("reports").get();
-
-    const reports = [];
-    snapshot.forEach((doc) => {
-        const id = doc.id;
-        const data = doc.data();
-        const report = {id, ...data};
-        // report.event_date = report.event_date.toDate();
-        reports.push(report);
-    });
-
-    return reports;
 };
 
 const isLocationInArticle = (article, request) => {
@@ -135,6 +113,8 @@ const isLocationInArticle = (article, request) => {
 };
 
 const isLocationInReport = (report, request) => {
+    if (request.location === "") return true;
+
     for (const location of report.locations) {
         if (location.location.toLowerCase().includes(request.location)) {
             return true;
@@ -145,9 +125,5 @@ const isLocationInReport = (report, request) => {
     }
     return false;
 };
-
-// const getLocations = async (db, request) => {
-//     functions.logger.debug("retrieving locations");
-// };
 
 exports.getArticles = getArticles;

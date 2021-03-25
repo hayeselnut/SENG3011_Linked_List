@@ -32,7 +32,17 @@ app.get("/articles", async (req, res) => {
         return;
     }
     functions.logger.info(`/articles received request object: ${JSON.stringify(request)}`);
-    const articles = await articlesProcessor.getArticles(db, request);
+
+    let articles;
+    try {
+        articles = await articlesProcessor.getArticles(db, request);
+    } catch (e) {
+        functions.logger.error(`500 ${e.message}`);
+        const errorResponse = response.error(500, e.message);
+        res.status(500).send(errorResponse);
+        await logWriter.writeLog(db, req, errorResponse);
+        return;
+    }
 
     functions.logger.info("200 OK processed request and returning matching articles");
     res.status(200).send(response.success(articles, "articles"));

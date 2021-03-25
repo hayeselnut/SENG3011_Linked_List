@@ -7,16 +7,16 @@ const parseQuery = (queryParams) => {
     const [startDate, endDate, wildcardedDate] = parsePeriodOfInterest(queryParams.period_of_interest);
 
     let keyTerms;
-    if ("key_terms" in queryParams) {
-        keyTerms = parseKeyTerms(queryParams.key_terms);
+    if ("key_terms" in queryParams && queryParams.key_terms.trim() !== "") {
+        keyTerms = parseKeyTerms(queryParams.key_terms.trim());
     } else {
         functions.logger.debug("no key terms specified");
         keyTerms = [];
     }
 
     let location;
-    if ("location" in queryParams) {
-        location = parseLocation(queryParams.location);
+    if ("location" in queryParams && queryParams.location.trim() !== "") {
+        location = parseLocation(queryParams.location.trim());
     } else {
         functions.logger.debug("no location specified");
         location = "";
