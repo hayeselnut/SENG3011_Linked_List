@@ -1,0 +1,13 @@
+requests==2.25.1
+geocoder==1.38.1
+firebase_admin==4.5.3
+fuzzywuzzy==0.18.0
+datefinder==0.7.1
+geopy==2.1.0
+langdetect==1.0.8
+geotext==0.4.0
+geograpy3==0.1.24
+nltk==3.5
+beautifulsoup4==4.9.3
+geograpy==0.3.7
+python_dateutil==2.8.1
