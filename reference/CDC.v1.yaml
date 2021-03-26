@@ -12,7 +12,7 @@ paths:
   /api/articles:
     parameters: []
     get:
-      summary: Report
+      summary: GET all of the articles
       operationId: get-articles-poi-key_terms-location
       responses:
         '200':
@@ -259,16 +259,15 @@ paths:
             example: '2019-01-02 13:00:00 to 2020-01-03 13:00:00'
           in: query
           description: Period of interest
-          name: poi
+          name: period_of_interest
           required: true
         - schema:
             type: string
-            pattern: '^[a-zA-Z\-\ \'']*[,[a-zA-Z\-\ \'']*]*$'
-            example: 'Corona, Ebola, Influenza'
+            pattern: '^[\!]?[a-zA-Z\-\ \'']*[,(\!)?[a-zA-Z\-\ \'']*]*$'
+            example: 'Corona,Ebola,!Influenza'
           in: query
           name: key_terms
           description: Diseases comma separated
-          required: true
           allowEmptyValue: true
         - schema:
             type: string
@@ -277,11 +276,10 @@ paths:
           in: query
           description: Location of interest
           name: location
-          required: true
           allowEmptyValue: true
-  '/api/articles/{id}':
+  /api/article:
     get:
-      summary: Your GET endpoint
+      summary: GET articles by ID
       tags: []
       responses:
         '200':
@@ -511,21 +509,13 @@ paths:
                 example-1:
                   value:
                     errorMessage: Server did not respond in time
-      operationId: get-article-id
+      operationId: get-article-by-id
       description: Gets the article that corresponds to the input id
       parameters: []
-    parameters:
-      - schema:
-          type: string
-          example: '1'
-          pattern: '^[a-zA-Z0-9]$'
-        name: id
-        in: path
-        required: true
-        description: id corresponding to an article id
+    parameters: []
   /api/logs:
     get:
-      summary: Your GET endpoint
+      summary: GET the past logs
       tags: []
       responses:
         '200':
@@ -704,46 +694,5 @@ paths:
       operationId: get-api-logs
       description: 'Gets the last 10 20 API calls '
 components:
-  schemas:
-    User:
-      title: User
-      type: object
-      description: ''
-      x-examples:
-        Alice Smith:
-          id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
-      properties:
-        id:
-          type: integer
-          description: Unique identifier for the given user.
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        dateOfBirth:
-          type: string
-          format: date
-          example: '1997-10-31'
-        emailVerified:
-          type: boolean
-          description: Set to true if the user's email has been verified.
-        createDate:
-          type: string
-          format: date
-          description: The date that the user was created.
-      required:
-        - id
-        - firstName
-        - lastName
-        - email
-        - emailVerified
+  schemas: {}
   securitySchemes: {}
