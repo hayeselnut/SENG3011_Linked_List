@@ -277,9 +277,9 @@ paths:
           description: Location of interest
           name: location
           allowEmptyValue: true
-  '/api/articles/{id}':
+  '/api/articles/:id':
     get:
-      summary: Your GET endpoint
+      summary: GET Articles by ID
       tags: []
       responses:
         '200':
@@ -512,15 +512,7 @@ paths:
       operationId: get-article-id
       description: Gets the article that corresponds to the input id
       parameters: []
-    parameters:
-      - schema:
-          type: string
-          example: '1'
-          pattern: '^[a-zA-Z0-9]$'
-        name: id
-        in: path
-        required: true
-        description: id corresponding to an article id
+    parameters: []
   /api/logs:
     get:
       summary: Your GET endpoint
