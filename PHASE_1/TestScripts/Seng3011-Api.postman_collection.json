@@ -15,11 +15,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,1,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,0,31,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -154,11 +171,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
-									"pm.test(\"Status code is 200\", function () {\r",
-									"        pm.response.to.have.status(200);\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"        pm.response.to.have.status(400);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -283,11 +297,8 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
-									"pm.test(\"Status code is 200\", function () {\r",
-									"        pm.response.to.have.status(200);\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"        pm.response.to.have.status(400);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -412,12 +423,32 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
-									"});"
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
+									"});\r",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -541,11 +572,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -670,9 +719,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 400\", function () {\r",
 									"        pm.response.to.have.status(400);\r",
 									"});"
@@ -799,9 +846,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 400\", function () {\r",
 									"        pm.response.to.have.status(400);\r",
 									"});"
@@ -928,9 +973,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 400\", function () {\r",
 									"        pm.response.to.have.status(400);\r",
 									"});"
@@ -1057,9 +1100,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 400\", function () {\r",
 									"        pm.response.to.have.status(400);\r",
 									"});"
@@ -1186,11 +1227,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,30,0,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,15,23,59,59,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1315,11 +1374,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2021,0,16,12,59,59,0); \r",
+									"        var EndDate =  new Date(2021,0,16,13,0,1,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1330,7 +1407,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 12:59:59  to 2021-01-16 13:00:01",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-16 12:59:59  to 2021-01-16 13:00:01",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -1344,7 +1421,7 @@
 							"query": [
 								{
 									"key": "period_of_interest",
-									"value": "2020-01-16 12:59:59  to 2021-01-16 13:00:01"
+									"value": "2021-01-16 12:59:59  to 2021-01-16 13:00:01"
 								}
 							]
 						}
@@ -1444,11 +1521,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2021,0,16,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,0,16,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1459,7 +1554,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-16 13:00:00  to 2021-01-16 13:00:00",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -1473,7 +1568,7 @@
 							"query": [
 								{
 									"key": "period_of_interest",
-									"value": "2020-01-16 13:00:00  to 2021-01-16 13:00:00"
+									"value": "2021-01-16 13:00:00  to 2021-01-16 13:00:00"
 								}
 							]
 						}
@@ -1573,11 +1668,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2020,0,16,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,0,16,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1710,11 +1823,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1847,11 +1977,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1984,11 +2131,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2121,11 +2285,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2258,12 +2439,11 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"        pm.response.to.have.status(200);\r",
 									"});\r",
-									"pm.test(\"Status code is 400\", function () {\r",
-									"        pm.response.to.have.status(400);\r",
-									"});"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -2395,11 +2575,29 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
+									"\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2532,11 +2730,28 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Response time is less than 200ms\", function () {\r",
-									"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
-									"});\r",
 									"pm.test(\"Status code is 200\", function () {\r",
 									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2661,6 +2876,75 @@
 							"body": "{\n    \"log\": {\n        \"team\": \"SENG3011_LINKED_LIST\",\n        \"time_accessed\": \"2021-03-24T11:05:26.555Z\"\n    },\n    \"articles\": [\n        {\n            \"id\": \"g67edVI2X90bWQ4yUSJ7\",\n            \"reports\": [\n                {\n                    \"id\": \"0\",\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"salmonellosis\"\n                    ],\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614038400,\n                        \"_nanoseconds\": 0\n                    }\n                },\n                {\n                    \"id\": \"1\",\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"listeriosis\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614384000,\n                        \"_nanoseconds\": 0\n                    },\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ]\n                },\n                {\n                    \"id\": \"10\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    }\n                },\n                {\n                    \"id\": \"11\",\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ],\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    }\n                },\n                {\n                    \"id\": \"12\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ]\n                },\n                {\n                    \"id\": \"13\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ]\n                },\n                {\n                    \"id\": \"14\",\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"event_date\": \"\",\n                    \"diseases\": [\n                        \"dummy - corona\"\n                    ],\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ]\n                },\n                {\n                    \"id\": \"2\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1616112000,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ]\n                },\n                {\n                    \"id\": \"3\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"diseases\": [\n                        \"cryptococcosis\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1546732800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ]\n                },\n                {\n                    \"id\": \"4\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"other\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1582635600,\n                        \"_nanoseconds\": 0\n                    }\n                },\n                {\n                    \"id\": \"5\",\n                    \"event_date\": {\n                        \"_seconds\": 1609372800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"measles\"\n                    ]\n                },\n                {\n                    \"id\": \"6\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1616378405,\n                        \"_nanoseconds\": 0\n                    },\n                    \"diseases\": [\n                        \"hepatitis a\"\n                    ]\n                },\n                {\n                    \"id\": \"7\",\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ],\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ]\n                },\n                {\n                    \"id\": \"8\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    }\n                },\n                {\n                    \"id\": \"9\",\n                    \"syndromes\": [\n                        \"dummy - fever\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1614556800,\n                        \"_nanoseconds\": 0\n                    },\n                    \"locations\": [\n                        \"dummy - VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"diseases\": [\n                        \"COVID-19\"\n                    ]\n                },\n                {\n                    \"id\": \"eWNmTwDbDmE396xk7sV6\",\n                    \"syndromes\": [\n                        \"Fever of unknown Origin\"\n                    ],\n                    \"diseases\": [\n                        \"2019-nCoV\"\n                    ],\n                    \"locations\": [\n                        \" VTabSvJyA8rx6pGNb17h\"\n                    ],\n                    \"event_date\": {\n                        \"_seconds\": 1577970000,\n                        \"_nanoseconds\": 0\n                    }\n                }\n            ],\n            \"url\": \"https://www.who.int/csr/don/17-january-2020-novel-coronavirus-japan-ex-chila/en/\",\n            \"headline\": \"Novel Coronavirus - Japan (ex-China)\",\n            \"main_text\": \"On 15 January 2020, the Ministry of Health, Labour and Welfare, Japan (MHLW) reported an imported case of laboratory-confirmed 2019-novel coronavirus (2019-nCoV) from Wuhan, Hubei Province, China. The case-patient is male, between the age of 30-39 years, living in Japan. The case-patient travelled to Wuhan, China in late December and developed fever on 3 January 2020 while staying in Wuhan. He did not visit the Huanan Seafood Wholesale Market or any other live animal markets in Wuhan. He has indicated that he was in close contact with a person with pneumonia. On 6 January, he traveled back to Japan and tested negative for influenza when he visited a local clinic on the same day.\",\n            \"date_of_publication\": \"2021-01-16T13:00:00.000Z\"\n        }\n    ]\n}"
 						}
 					]
+				},
+				{
+					"name": "Test 21",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"        pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"test time\", function () {\r",
+									"    var flagt = 1;\r",
+									"    var jsonData = pm.response.json();\r",
+									"    if (jsonData != null){\r",
+									"        var StartDate = new Date(2019,0,2,13,0,0,0); \r",
+									"        var EndDate =  new Date(2021,2,17,13,0,0,0);\r",
+									"        var arts = jsonData.articles;\r",
+									"        for(var i=0,len = arts.length; i<len;i++){\r",
+									"            var temp = arts[i].date_of_publication;\r",
+									"            var timestamp = new Date(temp);\r",
+									"            //console.log(EndDate);\r",
+									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                flagt = 0;\r",
+									"                break;\r",
+									"            }\r",
+									"        }\r",
+									"    }\r",
+									"    pm.expect(flagt).to.eql(1)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&location=China",
+							"protocol": "https",
+							"host": [
+								"us-central1-still-resource-306306",
+								"cloudfunctions",
+								"net"
+							],
+							"path": [
+								"api",
+								"articles"
+							],
+							"query": [
+								{
+									"key": "period_of_interest",
+									"value": "2020-01-16 13:00:00  to 2021-01-16 13:00:00"
+								},
+								{
+									"key": "key_terms",
+									"value": "China,fever",
+									"disabled": true
+								},
+								{
+									"key": "location",
+									"value": "China"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
