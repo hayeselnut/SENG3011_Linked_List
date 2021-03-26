@@ -55,6 +55,7 @@ def get_valuable_nested_links(url, link_list):
                 '/2008/' in each,
                 '/2007/' in each,
                 '/2006/' in each,
+                'symptoms' in each
                 ]) and '2019-ncov/' not in each:
             each = fix_url(each)
             link_list.append(each)
@@ -77,17 +78,7 @@ def get_USAndTravel(url, link_list):
         url = container['href']
         # add prefix for broken url
         url = fix_url(url)
-        #print(url)
-        # html = get_page_html(url)
-        # nested_links = get_nested_url(html)
 
-        # for each in nested_links:
-        #     if any ([each.endswith('/index.html'), 
-        #              each.endswith('/index.htm'),
-        #              each.isdigit(),
-        #              ]) and '2019-ncov/' not in each:
-        #         each = fix_url(each)
-        #         link_list.append(each)
         link_list = get_valuable_nested_links(url, link_list)
 
     #add E coli urls
@@ -145,6 +136,7 @@ def get_publish_date(page_soup):
 
 def get_maintext(page_soup):
     container = page_soup.findAll('p') 
+    #print("la2")
     if container != None:
         container = re.sub('<[^>]+>', '', str(container))
         container = re.sub(r'\s+\-.*|\s+\|.*|\n*|\r*',"", container)
@@ -152,6 +144,17 @@ def get_maintext(page_soup):
         container.strip()
         if container.startswith('[') and container.endswith(']'):
             container = container[1:-1]
+        #if 'signs-symptoms' in url:
+        try:
+            div = page_soup.find_all('div', {'class' : 'syndicate'})
+            container2 = ''
+            for each in div:
+                for li in each.find_all('li'):
+                    if li.string is not None:
+                        container2 = container2 + li.string + ' '
+            container = container + ' ' + str(container2)
+        except Exception:
+            pass
     else:
         container = "unknown"
     return str(container)
@@ -162,13 +165,13 @@ def get_maintext(page_soup):
 # json_data = r1.json()
 
 
-def get_disease(title, all_diseases):
+def get_disease(title, all_diseases, url):
     disease_list = []
 
     if 'E. coli' in title:
         disease_list.append('ehec (e.coli)')
         return disease_list
-    elif 'tobacco' in title.lower():
+    elif 'tobacco' in url:
         disease_list.append('other')
         return disease_list
 
@@ -179,7 +182,7 @@ def get_disease(title, all_diseases):
     highest_percent = 80
     target_disease = 'unknown'
     for each in splited_title:
-        if each == '-':
+        if each == '-' or each == '/':
             continue
 
         if each.endswith('a'):
@@ -193,7 +196,10 @@ def get_disease(title, all_diseases):
             highest_percent = matching_percent[1]
             target_disease = matching_percent[0]
 
-    disease_list.append(target_disease)
+    if target_disease != '':
+        disease_list.append(target_disease)
+    else:
+        disease_list.append('unknown')
 
     return disease_list
     
@@ -299,9 +305,49 @@ def get_location_objects_from_cities(cities, locations_list):
     return locations_list
 
 
+
 def create_unique_id(type, url):
     uniqueString = str(type) + " " + str(url)
     return hashlib.sha3_256(str(uniqueString).encode()).hexdigest()
+
+
+def get_syndroms(main_text):
+    syndrome_list = []
+    haemorrhagic_list = ['hemorrhagic', 'bleed', 'blood', 'haemorrhoids']
+    paralysis_list = ['paralysis', 'paralyze', 'paralyse', 'muscle', 'body aches', 'limb', 'weak', 'loose', 'joint']
+    gastroenteritis_list = ['abdominal', 'diarrhea', 'stool', 'cramp', 'stomach', 'vomit', 'gastroenteritis']
+    respiratory_list = ['breath', 'respirat', 'difficulty breathing', 'sore throat']
+    flu_list = ['cough', 'flu', 'sore throat', 'runny nose', 'congestion', 'headache']
+    fever_rash = ['rash', 'itch', 'red spots']
+    fever_unknown = ['fever']
+    encephalitis_list = ['encephalitis']
+    meningitis_list = ['meningitis']
+
+    lower_case_maintext = main_text.lower()
+
+    if any(word in lower_case_maintext for word in haemorrhagic_list):
+        syndrome_list.append('Haemorrhagic Fever')
+    if any(word in lower_case_maintext for word in paralysis_list):
+        syndrome_list.append('Acute Flacid Paralysis')
+    if any(word in lower_case_maintext for word in gastroenteritis_list):
+        syndrome_list.append('Acute gastroenteritis')
+    if any(word in lower_case_maintext for word in respiratory_list):
+        syndrome_list.append('Acute respiratory syndrome')
+    if any(word in lower_case_maintext for word in flu_list):
+        syndrome_list.append('Influenza-like illness')
+    if any(word in lower_case_maintext for word in fever_rash):
+        syndrome_list.append('Acute fever and rash')
+    if any(word in lower_case_maintext for word in fever_unknown):
+        syndrome_list.append('Fever of unknown Origin')
+    if any(word in lower_case_maintext for word in encephalitis_list):
+        syndrome_list.append('Encephalitis')
+    if any(word in lower_case_maintext for word in meningitis_list):
+        syndrome_list.append('Meningitis')
+    
+    if not syndrome_list:
+        syndrome_list.append('unknown')
+
+    return syndrome_list
 
 def main():
 
@@ -310,6 +356,13 @@ def main():
         disease_dict = json.load(json_file)
     for each in disease_dict:
         all_diseases.append(each['name'])
+
+    all_syndromes = []
+    with open('syndrome_list.json') as json_file2:
+        syndromes_dict = json.load(json_file2)
+    for each in syndromes_dict:
+        all_syndromes.append(each['name'])
+
 
     link_list = []
     link_list = get_USAndTravel("https://www.cdc.gov/outbreaks/", link_list)
@@ -320,7 +373,7 @@ def main():
     all_reports = []
     all_locations = []
 
-    #link_list.append('https://www.cdc.gov/listeria/outbreaks/cantaloupes-jensen-farms/index.html')
+    #link_list.append('https://www.cdc.gov/salmonella/braenderup-04-18/signs-symptoms.html')
 
     for url in link_list:
         article = {}
@@ -344,14 +397,15 @@ def main():
             date_of_publication = parser.isoparse(get_publish_date(page))
             article['date_of_publication'] = date_of_publication
             article['url'] = url
+            #print("la")
             main_text = get_maintext(page)
             article['main_text'] = main_text
 
             
             report_obj = {}
             report_obj['id'] = create_unique_id("report", url)
-            report_obj['syndromes'] = ['dummy - fever']
-            diseases = get_disease(title, all_diseases)
+            report_obj['syndromes'] = get_syndroms(main_text)
+            diseases = get_disease(title, all_diseases, url)
             report_obj['diseases'] = diseases
             report_obj['locations'] = []
             locations = get_location(title, main_text, url)
@@ -359,15 +413,16 @@ def main():
             # set of two lists
             for loc in locations:
                 loc_id = create_unique_id(loc['country'], loc['location'])
-                report_obj['locations'].append(loc_id)
+                #report_obj['locations'].append(loc_id)
                 loc['id'] = loc_id
+                report_obj['locations'].append(loc)
                 if loc not in all_locations:
                     all_locations.append(loc)
 
             #report_obj['locations'] = locations
             report_obj['event_date'] = parser.isoparse(str(get_eventDate(main_text, date_of_publication, title)))
             
-            single_report.append(report_obj['id'])
+            single_report.append(report_obj)
             
             article['reports'] = single_report
 
@@ -375,10 +430,13 @@ def main():
             all_reports.append(report_obj)
 
 
-            print(article)
+            #print(article)
+            #print(report_obj)
+            print("document written")
 
         except Exception:
             continue
+            #print(e)
     
     
     # with open('myfile.txt', 'w', encoding="utf-8") as f:
@@ -392,7 +450,7 @@ def main():
     #     print(all_locations, file=f)
 
 #################
-    cred = credentials.Certificate('./linked-list2-firebase-adminsdk-2z1uo-bf78a7be2c.json')
+    cred = credentials.Certificate('./still-resource-306306-524a6554abdb.json')
     firebase_admin.initialize_app(cred)
     db = firestore.client()
 
