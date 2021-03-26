@@ -279,7 +279,7 @@ paths:
           allowEmptyValue: true
   /api/article:
     get:
-      summary: GET Articles by ID
+      summary: GET articles by ID
       tags: []
       responses:
         '200':
