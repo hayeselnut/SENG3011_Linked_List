@@ -12,7 +12,7 @@ paths:
   /api/articles:
     parameters: []
     get:
-      summary: Report
+      summary: GET all of the articles
       operationId: get-articles-poi-key_terms-location
       responses:
         '200':
