@@ -19,10 +19,8 @@ app.get("/articles", async (req, res) => {
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.header("Access-Control-Allow-Credentials", true);
 
-    functions.logger.info(req);
     let request;
     try {
-        functions.logger.info(req.query);
         request = parser.parseQuery(req.query);
     } catch (e) {
         functions.logger.error(`400 BAD REQUEST could not parse request: ${e.message}`);
@@ -89,4 +87,6 @@ app.get("/logs", async (req, res) => {
     await logWriter.writeLog(db, req, {"status": 200});
 });
 
-exports.api = functions.https.onRequest(app);
+exports.api = functions
+    .region("australia-southeast1")
+    .https.onRequest(app);

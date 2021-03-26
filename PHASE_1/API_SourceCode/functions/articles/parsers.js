@@ -8,7 +8,7 @@ const parseQuery = (queryParams) => {
 
     let keyTerms;
     if ("key_terms" in queryParams && queryParams.key_terms.trim() !== "") {
-        keyTerms = parseKeyTerms(queryParams.key_terms.trim());
+        keyTerms = parseKeyTerms(queryParams.key_terms);
     } else {
         functions.logger.debug("no key terms specified");
         keyTerms = [];
@@ -59,8 +59,6 @@ const parsePeriodOfInterest = (periodOfInterestString) => {
         if (startDate.getTime() > endDate.getTime()) {
             throw new Error(`'end_date' ${endDate} must not be before 'start_date' ${startDate}`);
         }
-
-        // TODO: date isnt 31st Feb
     } else {
         throw new Error(`'${periodOfInterestString}' must match date regex ${dateRegex} or must be "<start_date> to <end_date>"`);
     }
@@ -73,7 +71,14 @@ const parseDate = (field, dateString) => {
 
     if (isNaN(timestamp)) throw new Error(`'${field}' is an invalid date format`);
 
-    return new Date(timestamp);
+    const dateObject = new Date(timestamp);
+
+    // Check date is valid (e.g. 31st Feb)
+    if (dateObject.toISOString().split("T")[0] !== dateString) {
+        throw new Error(`'${field}' is an invalid date format`);
+    }
+
+    return dateObject;
 };
 
 const parseKeyTerms = (keyTermsString) => {
