@@ -509,13 +509,13 @@ paths:
                 example-1:
                   value:
                     errorMessage: Server did not respond in time
-      operationId: get-article-id
+      operationId: get-article-by-id
       description: Gets the article that corresponds to the input id
       parameters: []
     parameters: []
   /api/logs:
     get:
-      summary: Your GET endpoint
+      summary: GET the past logs
       tags: []
       responses:
         '200':
