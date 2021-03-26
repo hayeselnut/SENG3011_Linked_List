@@ -347,6 +347,7 @@ def main():
             title = get_headline(page)
 
             article['id'] = create_unique_id("article", url)
+            article['last_web_scrapped'] = datetime.now()
             #print(url)
             #print(title)
             article['headline'] = title
@@ -381,7 +382,9 @@ def main():
             
             article['reports'] = single_report
 
-            all_articles.append(article)
+            #all_articles.append(article)
+
+            db.collection(u'articles').document(article['id']).set(article)
             all_reports.append(report_obj)
 
 
@@ -389,7 +392,7 @@ def main():
 
         except Exception:
             continue
-    
+    return {}
     
     # with open('myfile.txt', 'w', encoding="utf-8") as f:
     #     #f.write(all_articles)
@@ -404,8 +407,8 @@ def main():
 #################
     
 
-    for obj in all_articles:
-        db.collection(u'articles').document(obj['id']).set(obj)
+    #for obj in all_articles:
+        
 
 
     for obj in all_reports:
