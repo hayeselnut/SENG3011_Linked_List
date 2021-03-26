@@ -510,7 +510,7 @@ paths:
                   value:
                     errorMessage: Server did not respond in time
       operationId: get-article-by-id
-      description: Gets the article that corresponds to the input id
+      description: 'Gets the article that corresponds to the input id, Currently does not work'
       parameters: []
     parameters: []
   /api/logs:
