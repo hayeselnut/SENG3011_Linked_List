@@ -23,8 +23,8 @@
 									"    var flagt = 1;\r",
 									"    var jsonData = pm.response.json();\r",
 									"    if (jsonData != null){\r",
-									"        var StartDate = new Date(2019,0,1,13,0,0,0); \r",
-									"        var EndDate =  new Date(2021,0,31,13,0,0,0);\r",
+									"        var StartDate = new Date(2019,0,1,0,0,0,0); \r",
+									"        var EndDate =  new Date(2021,0,31,23,59,59,0);\r",
 									"        var arts = jsonData.articles;\r",
 									"        for(var i=0,len = arts.length; i<len;i++){\r",
 									"            var temp = arts[i].date_of_publication;\r",
@@ -47,7 +47,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-xx 13:00:00",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-xx xx:xx:xx",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -61,11 +61,11 @@
 							"query": [
 								{
 									"key": "period_of_interest",
-									"value": "2021-01-xx 13:00:00"
+									"value": "2021-01-xx xx:xx:xx"
 								},
 								{
 									"key": "key_terms",
-									"value": null,
+									"value": "",
 									"disabled": true
 								}
 							]
@@ -1383,14 +1383,14 @@
 									"    var flagt = 1;\r",
 									"    var jsonData = pm.response.json();\r",
 									"    if (jsonData != null){\r",
-									"        var StartDate = new Date(2021,0,16,12,59,59,0); \r",
-									"        var EndDate =  new Date(2021,0,16,13,0,1,0);\r",
+									"        var StartDate = new Date(\"2019-01-11T01:32:15.000Z\"); \r",
+									"        var EndDate =  new Date(\"2019-01-11T01:32:17.000Z\");\r",
 									"        var arts = jsonData.articles;\r",
 									"        for(var i=0,len = arts.length; i<len;i++){\r",
 									"            var temp = arts[i].date_of_publication;\r",
 									"            var timestamp = new Date(temp);\r",
-									"            //console.log(EndDate);\r",
 									"            if (timestamp < StartDate || timestamp > EndDate ){\r",
+									"                console.log(timestamp);\r",
 									"                flagt = 0;\r",
 									"                break;\r",
 									"            }\r",
@@ -1407,7 +1407,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-16 12:59:59  to 2021-01-16 13:00:01",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2019-01-11 01:32:15  to 2019-01-11 01:32:17",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -1421,7 +1421,12 @@
 							"query": [
 								{
 									"key": "period_of_interest",
-									"value": "2021-01-16 12:59:59  to 2021-01-16 13:00:01"
+									"value": "2019-01-11 01:32:15  to 2019-01-11 01:32:17"
+								},
+								{
+									"key": null,
+									"value": "",
+									"disabled": true
 								}
 							]
 						}
@@ -1530,8 +1535,8 @@
 									"    var flagt = 1;\r",
 									"    var jsonData = pm.response.json();\r",
 									"    if (jsonData != null){\r",
-									"        var StartDate = new Date(2021,0,16,13,0,0,0); \r",
-									"        var EndDate =  new Date(2021,0,16,13,0,0,0);\r",
+									"        var StartDate = new Date(\"2019-01-11T01:32:16.000Z\"); \r",
+									"        var EndDate =  new Date(\"2019-01-11T01:32:16.000Z\");\r",
 									"        var arts = jsonData.articles;\r",
 									"        for(var i=0,len = arts.length; i<len;i++){\r",
 									"            var temp = arts[i].date_of_publication;\r",
@@ -1554,7 +1559,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2021-01-16 13:00:00  to 2021-01-16 13:00:00",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2019-01-11 01:32:16  to 2019-01-11 01:32:16",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -1568,7 +1573,7 @@
 							"query": [
 								{
 									"key": "period_of_interest",
-									"value": "2021-01-16 13:00:00  to 2021-01-16 13:00:00"
+									"value": "2019-01-11 01:32:16  to 2019-01-11 01:32:16"
 								}
 							]
 						}
@@ -1855,7 +1860,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&key_terms=2019-ncov",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&key_terms=Haemorrhagic Fever",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -1873,7 +1878,7 @@
 								},
 								{
 									"key": "key_terms",
-									"value": "2019-ncov"
+									"value": "Haemorrhagic Fever"
 								}
 							]
 						}
@@ -2009,7 +2014,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&key_terms=wuhan",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&location=China",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -2026,8 +2031,8 @@
 									"value": "2020-01-16 13:00:00  to 2021-01-16 13:00:00"
 								},
 								{
-									"key": "key_terms",
-									"value": "wuhan"
+									"key": "location",
+									"value": "China"
 								}
 							]
 						}
@@ -2916,7 +2921,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&location=China",
+							"raw": "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2020-01-16 13:00:00  to 2021-01-16 13:00:00&location=US",
 							"protocol": "https",
 							"host": [
 								"us-central1-still-resource-306306",
@@ -2939,7 +2944,7 @@
 								},
 								{
 									"key": "location",
-									"value": "China"
+									"value": "US"
 								}
 							]
 						}
