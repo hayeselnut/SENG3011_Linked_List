@@ -263,8 +263,8 @@ paths:
           required: true
         - schema:
             type: string
-            pattern: '^[a-zA-Z\-\ \'']*[,[a-zA-Z\-\ \'']*]*$'
-            example: 'Corona, Ebola, Influenza'
+            pattern: '^[\!]?[a-zA-Z\-\ \'']*[,(\!)?[a-zA-Z\-\ \'']*]*$'
+            example: 'Corona,Ebola,!Influenza'
           in: query
           name: key_terms
           description: Diseases comma separated
@@ -277,7 +277,7 @@ paths:
           description: Location of interest
           name: location
           allowEmptyValue: true
-  '/api/articles/:id':
+  /api/article:
     get:
       summary: GET Articles by ID
       tags: []
