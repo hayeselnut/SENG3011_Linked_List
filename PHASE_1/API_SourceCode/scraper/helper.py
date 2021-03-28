@@ -1,22 +1,21 @@
-import requests
-from bs4 import BeautifulSoup as soup
-import re
-import json
-from datetime import datetime
-from dateutil import parser, tz
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
 import hashlib
+import json
+import re
+from datetime import datetime
+
 import datefinder
-from fuzzywuzzy import process
-from geotext import GeoText
+import firebase_admin
 import geocoder
-from geopy.geocoders import Nominatim
 import geograpy
 import nltk
-
+import requests
+from bs4 import BeautifulSoup as soup
+from dateutil import parser, tz
+from firebase_admin import credentials, firestore
 from flask import Flask
+from fuzzywuzzy import process
+from geopy.geocoders import Nominatim
+from geotext import GeoText
 
 CDC_PREFIX = "https://www.cdc.gov"
 
@@ -78,31 +77,13 @@ def get_USAndTravel(url, link_list):
         url = container['href']
         # add prefix for broken url
         url = fix_url(url)
-        #print(url)
-        # html = get_page_html(url)
-        # nested_links = get_nested_url(html)
-
-        # for each in nested_links:
-        #     if any ([each.endswith('/index.html'), 
-        #              each.endswith('/index.htm'),
-        #              each.isdigit(),
-        #              ]) and '2019-ncov/' not in each:
-        #         each = fix_url(each)
-        #         link_list.append(each)
+       
         link_list = get_valuable_nested_links(url, link_list)
 
     #add E coli urls
-    # E_coli_url = 'https://www2c.cdc.gov/podcasts/feed.asp?feedid=280&format=json'
-    # r1 = requests.get(E_coli_url)
-    # json_data = r1.json()
-    # for each in json_data['entries']:
-    #     url = fix_url(each['link'])
-    #     link_list.append(url)
     E_coli_url = 'https://www.cdc.gov/ecoli/2021/o157h7-02-21/index.html'
     link_list = get_valuable_nested_links(E_coli_url, link_list)
 
-    #print(link_list)
-    #print(link_list)
     return link_list
 
 # replacement for us and travel 
@@ -116,81 +97,31 @@ def getUrlToHtmlMap(url, link_list):
     if page_soup == None:
         page_soup = get_page_html(url)
 
+    # the links in the cdc page are in containers 
     containers = page_soup.find_all("a", {"class": "feed-item-title"}, href=True)
+    counter = 0
 
+    # opening each container and getting the links embedded in them 
     for container in containers:
+        print('container: ' + str(counter))
         # extract urls from html containers
         url = container['href']
         # add prefix for broken url
         url = fix_url(url)
-
-
-        #TODO get the ammended html pages
-        link_list = get_valuable_nested_links(url, link_list)
         
-        # THIS WILL REPLACE THE ABOVE LINE 
-        #get_valuable_nested_html(url, listOfPages)
+ 
+        get_valuable_nested_html(url, listOfPages)
+        counter += 1
         
+    # Adding the E coli links 
+    E_coli_url = 'https://www.cdc.gov/ecoli/2021/o157h7-02-21/index.#html'
+    
+    get_valuable_nested_html(E_coli_url, listOfPages)
 
-    print("the size of this list is : " + str(len(link_list)))
+    print("the size of this list is : " + str(len(listOfPages)))
 
-
-#    for url in link_list:
-#        page_soup = get_page_html(url)
-#        if page_soup == None:
-#
-#            # getting the page soup of the url 
-#            page_soup = get_page_html(url)
-#
-#            # add to the url map 
-#            appendToPageMap(url, page_soup,listOfPages)
-
-
-
-
-    # tag: a, attribute: feed-item-title -> getting US based & Travel Notices Affecting International Travelers
-    # food safety: elements with attribute name "data_ng_href" -> doesnt work need to either use feedid or js
-#    containers = page_soup.find_all("a", {"class": "feed-item-title"}, href=True)
-#
-#    for container in containers:
-#        # extract urls from html containers
-#        url = container['href']
-#
-#        # add prefix for broken url
-#        url = fix_url(url)
-#        link_list = get_valuable_nested_html(url, link_list, listOfPages)
-#
-#    #add E coli urls
-#    E_coli_url = 'https://www.cdc.gov/ecoli/2021/o157h7-02-21/index.html'
-#    link_list = get_valuable_nested_html(E_coli_url, link_list, listOfPages)
-
-
-    # just double checking if this works out. 
-    print (listOfPages)
     return listOfPages
 
-# THIS IS JUST A COPY OF THE GIVEN FUNCTION I AM TRYING TO COPY 
-#def get_valuable_nested_links(url, link_list):
-#    
-#    link_list.append(url)
-#    html = get_page_html(url)
-#    nested_links = get_nested_url(html)
-#
-#    for each in nested_links:
-#        if any ([each.endswith('/index.html'), 
-#                each.endswith('/index.htm'),
-#                each.isdigit(),
-#                '/2011/' in each,
-#                '/2010/' in each,
-#                '/2009/' in each,
-#                '/2008/' in each,
-#                '/2007/' in each,
-#                '/2006/' in each,
-#                ]) and '2019-ncov/' not in each:
-#            each = fix_url(each)
-#            link_list.append(each)
-#
-#    return link_list
 
 def get_valuable_nested_html(url, listOfPages):
     
@@ -202,8 +133,9 @@ def get_valuable_nested_html(url, listOfPages):
 
     # this returns a list with the nested links inside of the given html 
     nested_links = get_nested_url(html)
-
     
+
+    # this gets all the nested links 
     for each in nested_links:
         if any ([each.endswith('/index.html'), 
                 each.endswith('/index.htm'),
@@ -217,12 +149,8 @@ def get_valuable_nested_html(url, listOfPages):
                 ]) and '2019-ncov/' not in each:
             each = fix_url(each)
 
-            # replace this line with the line below
-            #link_list.append(each)
-
             # add the url and page to the list of pages
             appendToPageMap(url, get_page_html(url), listOfPages)
-
 
     return None
 
@@ -238,7 +166,6 @@ def appendToPageMap(url, page_soup, listOfPages):
 def get_nested_url(page_soup):
     
     return [el.find('a').get('href') for el in page_soup.find_all('li', {'class': 'list-group-item'})]
-
 
 
 def get_headline(page_soup):
