@@ -32,6 +32,12 @@ import "@reach/combobox/styles.css";
 import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
+import covid19Api from "../apis/covid19Api.js"
+import epiwatchApi from "../apis/epiwatchApi.js"
+
+import getDataAndPredictions from "./cases.js"
+import { CasesChart } from "./casesChart";
+
 let clicked;
 
 const changeSidebar = (state) => {
@@ -55,22 +61,6 @@ const markers = () => {
     console.log(listt)
     return listt
 }
-
-
-// import { ohioDelim } from './ohiocoords.js'
-// import { nyDelim } from './nycoords.js'
-// import { ny2Delim } from './ny2coords.js'
-// import { ny3Delim } from './ny3coords.js'
-// import { ny4Delim } from './ny4coords.js'
-// import { connectDelim } from './connectcoords.js'
-// import { massDelim } from './masscoords.js'
-
-
-import covid19Api from "../apis/covid19Api.js"
-import epiwatchApi from "../apis/epiwatchApi.js"
-
-import getDataAndPredictions from "./cases.js"
-import { CasesChart } from "./casesChart";
 
 const useStyles = makeStyles((theme) => ({
     root: {
