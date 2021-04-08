@@ -4,6 +4,9 @@ import {
     useLoadScript, 
     Marker,
     InfoWindow,
+    Polygon,
+    DirectionsService,
+    DirectionsRenderer,
 } from "@react-google-maps/api";
 import {
     Container,
@@ -14,7 +17,7 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
 import usePlacesAutoComplete, {
-    getGeoCode,
+    getGeocode,
     getLatLng,
 } from "use-places-autocomplete";
 import {
@@ -26,6 +29,41 @@ import {
 } from "@reach/combobox";
 import "@reach/combobox/styles.css";
 import { Report } from "./report.js";
+import { centerCoords } from "./centerCoords.js";
+
+let clicked;
+
+const changeSidebar = (state) => {
+    console.log("clicked", state);
+    clicked = true;
+}
+
+const markers = () => {
+    let listt = []
+    Object.keys(centerCoords).forEach(element => {
+        console.log(element, centerCoords[element])
+        listt.push(
+            <Marker 
+                position={centerCoords[element]}
+                clickable={true}
+                onClick={() => changeSidebar(element)}
+                id={element}
+            />
+        )
+    })
+    console.log(listt)
+    return listt
+}
+
+
+// import { ohioDelim } from './ohiocoords.js'
+// import { nyDelim } from './nycoords.js'
+// import { ny2Delim } from './ny2coords.js'
+// import { ny3Delim } from './ny3coords.js'
+// import { ny4Delim } from './ny4coords.js'
+// import { connectDelim } from './connectcoords.js'
+// import { massDelim } from './masscoords.js'
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -80,9 +118,8 @@ function useAsyncHook(location) {
 
         // Get all of the cases 
         const getCases = async (date) => {
-            https://api.covid19api.com/live/country/united-states/status/confirmed/date/
             date = "2021-03-20T00:00:00Z"
-            
+
             let casesJson;
             try {
                 const caseURL = "https://api.covid19api.com/live/country/united-states/status/confirmed/date/";
@@ -108,7 +145,7 @@ function useAsyncHook(location) {
 
 
 const Search = () => {
-    const { ready, value, suggestions: {status, data}, setValue, clearSuggestion,} = usePlacesAutoComplete({
+    const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
         requestOptions: {
             location: {
                 lat: () => 40.7128,
@@ -123,10 +160,34 @@ const Search = () => {
         
     }
     const classes = useStyles();
+
+    const mapRef = React.useRef();
+    // const onMapLoad = React.useCallback((map) => {
+    //   mapRef.current = map;
+    // }, []);
+  
+    const panTo = React.useCallback(({ lat, lng }) => {
+      mapRef.current.panTo({ lat, lng });
+      mapRef.current.setZoom(14);
+    }, []);
+
+
+
     return (
         <div className={classes.search}>
-            <Combobox onSelect={(address) => {
+            <Combobox onSelect={ async (address) => {
+                setValue(address, false); 
+                clearSuggestions();
                 console.log(address);
+
+                try {
+                    const results = await getGeocode({address});
+                    const { lat, lng } = await getLatLng(results[0]);
+                    panTo({ lat, lng });
+                    // Display the side bar for this place
+                } catch (error) {
+                    console.log('error trying to pan')
+                }
             }}>
                 <ComboboxInput
                     value={value}
@@ -150,6 +211,8 @@ const Search = () => {
 const Map = () => {
     // TODO: Make this dynamic to the state they click on
     const [result, loading] = useAsyncHook("ohio");
+    const [direct, setDirect] = React.useState({});
+    const [response, setResponse] = React.useState({});
     console.log(result,loading);
     let eventDate, headline, url; 
     let results = false;
@@ -187,6 +250,58 @@ const Map = () => {
         height: "100%"
     }
 
+    const ohioOptions = {
+        strokeColor: '#FF000',
+        strokeOpacity: 0.8,
+        strokeWeight: 3,
+        fillcolor: '#FF0000',
+        fillOpacity: 0.35,
+        zIndex: 1
+    };
+
+    const ohioOnLoad = (polygon) => {
+        console.log("yessir", polygon)
+    }
+
+    // const latlngs = {
+    //     "state": {lat: lng:}
+    // }
+
+    const directionsService = new window.google.maps.DirectionsService();
+
+    const origin = centerCoords['New York, USA'];
+    const destination = centerCoords['Ohio, USA'];
+
+    const directionsCallback = (response) => {
+        console.log("THE RESPONSE IS ", response)
+        if (response !== null) {
+            if (response.status === 'OK') {
+                console.log("alsjdf;alksdjf")
+              setResponse(
+                response
+              )
+            } else {
+              console.log('response: ', response)
+            }
+          }
+    }
+
+    // directionsService.route(
+    // {
+    //     origin: origin,
+    //     destination: destination,
+    //     travelMode: window.google.maps.TravelMode.DRIVING
+    // },
+    // (result, status) => {
+    //     if (status === window.google.maps.DirectionsStatus.OK) {
+    //     setDirect({
+    //         directions: result
+    //     });
+    //     } else {
+    //     console.error(`error fetching directions ${result}`);
+    //     }
+    // }
+    // );
 
     return (
         <div style={mapPageStyle}>
@@ -198,6 +313,9 @@ const Map = () => {
                         </Typography>
                         <Search />
                         {results ? <Report headline={headline} url={url} eventDate={eventDate}/> : <></>}
+                        {
+
+                        }
                     </div>
                 </Grid>
                 <Grid item xs={12} sm={9} md={9}>
@@ -206,7 +324,56 @@ const Map = () => {
                         zoom={8}
                         center={center}
                         options={options}
-                    />
+                    >    
+                        
+                        <DirectionsService
+                            options={{origin: origin, destination: destination, travelMode: "DRIVING"}}
+                            callback={directionsCallback}
+                        />
+                        {response !== null && <DirectionsRenderer
+                            options={{
+                                directions: response
+                            }}
+                        />}
+                        
+                        
+                        {markers()}      
+                        {/* <Polygon
+                            paths={ohioDelim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={nyDelim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={ny2Delim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={ny3Delim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={ny4Delim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={connectDelim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        />
+                        <Polygon
+                            paths={massDelim}
+                            options={ohioOptions}
+                            onLoad={ohioOnLoad}
+                        /> */}
+                    </GoogleMap>
                 </Grid>
             </Grid>
         </div>
