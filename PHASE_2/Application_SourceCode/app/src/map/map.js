@@ -192,12 +192,12 @@ const Map = () => {
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sm={9} md={9}>
-                    {/* <GoogleMap
+                    <GoogleMap
                         mapContainerStyle={mapContainerStyle}
                         zoom={8}
                         center={center}
                         options={options}
-                    /> */}
+                    />
                 </Grid>
             </Grid>
         </div>
