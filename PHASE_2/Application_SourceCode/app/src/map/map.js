@@ -27,6 +27,9 @@ import {
 import "@reach/combobox/styles.css";
 import { Report } from "./report.js";
 
+import covid19Api from "../apis/covid19Api.js"
+import epiwatchApi from "../apis/epiwatchApi.js"
+
 const useStyles = makeStyles((theme) => ({
     root: {
       height: '100vh',
@@ -52,63 +55,37 @@ const useStyles = makeStyles((theme) => ({
 const libraries = ["places"];
 
 function useAsyncHook(location) {
-    // Result is a list of event_date, url and headline 
+    // Result is a list of event_date, url and headline
     const [result, setResult] = React.useState([])
     const [loading, setLoading] = React.useState("false");
     const [cases, setCases] = React.useState();
     const [caseLoading, setCaseLoading] = React.useState("false");
 
     React.useEffect(() => {
-        
-        const getReports = async (location) => {
+        const getReports = async (poi, keyTerms, location) => {
             let myData;
             try {
-                const url = "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2010-01-01 11:11:11 to 2021-05-05 11:11:11&key_terms=&location=";
-                const data = await fetch (`${url}${location}`);
-                myData = await data.json();
-                
+                myData = await epiwatchApi.articles(poi, keyTerms, location);
+
                 setResult(
                     [myData.articles[0].headline, myData.articles[0].url, myData.articles[0].reports[0].event_date]
                 )
-                console.log(myData);
 
             } catch {
                 setLoading("null");
             }
-            // we want, event_date, url, headline 
+            // we want, event_date, url, headline
         }
 
-        // Get all of the cases 
-        const getCases = async (date) => {
-            https://api.covid19api.com/live/country/united-states/status/confirmed/date/
-            date = "2021-03-20T00:00:00Z"
-            
-            let casesJson;
-            try {
-                const caseURL = "https://api.covid19api.com/live/country/united-states/status/confirmed/date/";
-                const caseData = await fetch (`${caseURL}${date}`);
-                casesJson = await caseData.json();
+        covid19Api.liveCountryStatusDate("united-states", "confirmed", "2021-03-20T00:00:00Z")
+        getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
-                console.log(casesJson);
-
-
-            } catch {
-                setCaseLoading("null")
-            }
-
-
-        }
-        getCases('')
-        getReports(location);
-        
-    
     }, [location])
     return [result, loading];
 }
 
-
 const Search = () => {
-    const { ready, value, suggestions: {status, data}, setValue, clearSuggestion,} = usePlacesAutoComplete({
+    const { ready, value, suggestions: {status, data}, setValue, clearSuggestion} = usePlacesAutoComplete({
         requestOptions: {
             location: {
                 lat: () => 40.7128,
@@ -120,7 +97,6 @@ const Search = () => {
     const handleInput = (e) => {
         setValue(e.target.value);
         console.log("intput is", value, ready, status);
-        
     }
     const classes = useStyles();
     return (
@@ -151,7 +127,7 @@ const Map = () => {
     // TODO: Make this dynamic to the state they click on
     const [result, loading] = useAsyncHook("ohio");
     console.log(result,loading);
-    let eventDate, headline, url; 
+    let eventDate, headline, url;
     let results = false;
     if (result.length !== 0) {
         eventDate = result[2].split('T')[0];
