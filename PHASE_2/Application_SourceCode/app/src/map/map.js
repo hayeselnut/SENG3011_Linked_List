@@ -30,6 +30,8 @@ import { Report } from "./report.js";
 import covid19Api from "../apis/covid19Api.js"
 import epiwatchApi from "../apis/epiwatchApi.js"
 
+import getDataAndPredictions from "./cases.js"
+
 const useStyles = makeStyles((theme) => ({
     root: {
       height: '100vh',
@@ -49,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         alignItems: 'center',
         height: '10%'
-    }, 
+    },
 }));
 
 const libraries = ["places"];
@@ -77,7 +79,9 @@ function useAsyncHook(location) {
             // we want, event_date, url, headline
         }
 
-        covid19Api.liveCountryStatusDate("united-states", "confirmed", "2021-03-20T00:00:00Z")
+        // covid19Api.liveCountryStatusDate("united-states", "confirmed", "2021-03-20T00:00:00Z")
+        getDataAndPredictions("united-states");
+
         getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
     }, [location])
@@ -169,11 +173,16 @@ const Map = () => {
             <Grid container className={classes.root}>
                 <Grid item xs={12} sm={3} md={3} component={Paper} elevation={6}>
                     <div className={classes.paper}>
-                        <Typography component="h1" variant="h5">
+                        <Typography component="h1" variant="h4">
                             Route Planner
                         </Typography>
                         <Search />
+                    </div>
+                    <div>
                         {results ? <Report headline={headline} url={url} eventDate={eventDate}/> : <></>}
+                    </div>
+                    <div>
+                        Charts
                     </div>
                 </Grid>
                 <Grid item xs={12} sm={9} md={9}>
