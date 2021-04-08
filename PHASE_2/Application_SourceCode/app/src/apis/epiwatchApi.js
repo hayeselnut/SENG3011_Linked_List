@@ -7,7 +7,7 @@ class API {
     constructor(url) {
         this.url = url;
         this.article = (articleId) => getFetch(`${this.url}/article/${articleId}`);
-        this.articles = (poi, keyTerms, location) => getFetch(`${this.url}/articles?periodOfInterest=${poi}&keyTerms=${keyTerms}&location=${location}`);
+        this.articles = (poi, keyTerms, location) => getFetch(`${this.url}/articles?period_of_interest=${poi}&key_termns=${keyTerms}&location=${location}`);
     }
 }
 

@@ -10,6 +10,7 @@ import {
     Grid,
     Paper,
     Typography,
+    Link,
 } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
@@ -31,6 +32,7 @@ import covid19Api from "../apis/covid19Api.js"
 import epiwatchApi from "../apis/epiwatchApi.js"
 
 import getDataAndPredictions from "./cases.js"
+import { CasesChart } from "./casesChart";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -79,9 +81,7 @@ function useAsyncHook(location) {
             // we want, event_date, url, headline
         }
 
-        // covid19Api.liveCountryStatusDate("united-states", "confirmed", "2021-03-20T00:00:00Z")
-        getDataAndPredictions("united-states");
-
+        // getDataAndPredictions("united-states");
         getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
     }, [location])
@@ -160,38 +160,44 @@ const Map = () => {
     })
 
     if (loadError) return "Error Loading Maps";
-    if (!isLoaded) return "Loading Maps"; 
+    if (!isLoaded) return "Loading Maps";
 
     const mapPageStyle = {
         width: "100%",
         height: "100%"
     }
 
-
     return (
         <div style={mapPageStyle}>
             <Grid container className={classes.root}>
-                <Grid item xs={12} sm={3} md={3} component={Paper} elevation={6}>
-                    <div className={classes.paper}>
-                        <Typography component="h1" variant="h4">
-                            Route Planner
+                <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
+                    <Grid item xs>
+                        <div className={classes.paper}>
+                            <Typography component="h1" variant="h4">
+                                Route Planner
+                            </Typography>
+                            <Search />
+                        </div>
+                    </Grid>
+                    <Grid item align="center">
+                        <CasesChart />
+                    </Grid>
+                    <Grid item align="center">
+                        <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
+                    </Grid>
+                    <Grid item component={Paper} align="center">
+                        <Typography variant="body2" gutterTop gutterBottom>
+                            By <Link href="https://github.com/hayeselnut/SENG3011_Linked_List" target="_blank">SENG3011 Linked List</Link>
                         </Typography>
-                        <Search />
-                    </div>
-                    <div>
-                        {results ? <Report headline={headline} url={url} eventDate={eventDate}/> : <></>}
-                    </div>
-                    <div>
-                        Charts
-                    </div>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12} sm={9} md={9}>
-                    <GoogleMap
+                    {/* <GoogleMap
                         mapContainerStyle={mapContainerStyle}
                         zoom={8}
                         center={center}
                         options={options}
-                    />
+                    /> */}
                 </Grid>
             </Grid>
         </div>

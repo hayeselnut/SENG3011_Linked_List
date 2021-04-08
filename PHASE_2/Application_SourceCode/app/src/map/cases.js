@@ -2,29 +2,21 @@ import covid19Api from "../apis/covid19Api.js"
 import PolynomialRegression from "js-polynomial-regression";
 
 const getDataAndPredictions = async (country) => {
-    const [yesterday, lastWeek] = getLatestDates();
-    const covid19Data = await getCovid19DataGroupedByState(country, "confirmed", lastWeek);
+    const lastMonth = getLastMonth();
+    const covid19Data = await getCovid19DataGroupedByState(country, "confirmed", lastMonth);
     const recordedActiveCasesByProvince = getActiveCasesOnly(covid19Data);
     const predictionsByProvince = getPredictionsByProvinces(recordedActiveCasesByProvince);
-    console.log("RECORDED", recordedActiveCasesByProvince);
-    console.log("PREDICTIONS", predictionsByProvince);
-
-    for (const Province in predictionsByProvince) {
-        let temp = [];
-        temp = temp.concat(recordedActiveCasesByProvince[Province]);
-        temp = temp.concat(predictionsByProvince[Province]);
-        console.log(Province, temp);
-    }
+    return [recordedActiveCasesByProvince, predictionsByProvince];
 }
 
-const getLatestDates = () => {
+const getLastMonth = () => {
     const ONE_DAY = 86400000;
     const ONE_MONTH = ONE_DAY * 31;
 
     const now = new Date();
     const yesterday = new Date(now - ONE_DAY);
-    const lastWeek = new Date(yesterday - ONE_MONTH);
-    return [asDate(yesterday), asDate(lastWeek)];
+    const lastMonth = new Date(yesterday - ONE_MONTH);
+    return asDate(lastMonth)
 }
 
 const asDate = (date) => date.toISOString().slice(0, 10)
