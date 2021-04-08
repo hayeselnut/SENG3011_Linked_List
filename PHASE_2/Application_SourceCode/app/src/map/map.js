@@ -13,6 +13,7 @@ import {
     Grid,
     Paper,
     Typography,
+    Link,
 } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
@@ -65,6 +66,12 @@ const markers = () => {
 // import { massDelim } from './masscoords.js'
 
 
+import covid19Api from "../apis/covid19Api.js"
+import epiwatchApi from "../apis/epiwatchApi.js"
+
+import getDataAndPredictions from "./cases.js"
+import { CasesChart } from "./casesChart";
+
 const useStyles = makeStyles((theme) => ({
     root: {
       height: '100vh',
@@ -84,65 +91,40 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         alignItems: 'center',
         height: '10%'
-    }, 
+    },
 }));
 
 const libraries = ["places"];
 
 function useAsyncHook(location) {
-    // Result is a list of event_date, url and headline 
+    // Result is a list of event_date, url and headline
     const [result, setResult] = React.useState([])
     const [loading, setLoading] = React.useState("false");
     const [cases, setCases] = React.useState();
     const [caseLoading, setCaseLoading] = React.useState("false");
 
     React.useEffect(() => {
-        
-        const getReports = async (location) => {
+        const getReports = async (poi, keyTerms, location) => {
             let myData;
             try {
-                const url = "https://us-central1-still-resource-306306.cloudfunctions.net/api/articles?period_of_interest=2010-01-01 11:11:11 to 2021-05-05 11:11:11&key_terms=&location=";
-                const data = await fetch (`${url}${location}`);
-                myData = await data.json();
-                
+                myData = await epiwatchApi.articles(poi, keyTerms, location);
+
                 setResult(
                     [myData.articles[0].headline, myData.articles[0].url, myData.articles[0].reports[0].event_date]
                 )
-                console.log(myData);
 
             } catch {
                 setLoading("null");
             }
-            // we want, event_date, url, headline 
+            // we want, event_date, url, headline
         }
 
-        // Get all of the cases 
-        const getCases = async (date) => {
-            date = "2021-03-20T00:00:00Z"
+        // getDataAndPredictions("united-states");
+        getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
-            let casesJson;
-            try {
-                const caseURL = "https://api.covid19api.com/live/country/united-states/status/confirmed/date/";
-                const caseData = await fetch (`${caseURL}${date}`);
-                casesJson = await caseData.json();
-
-                console.log(casesJson);
-
-
-            } catch {
-                setCaseLoading("null")
-            }
-
-
-        }
-        getCases('')
-        getReports(location);
-        
-    
     }, [location])
     return [result, loading];
 }
-
 
 const Search = () => {
     const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
@@ -157,7 +139,6 @@ const Search = () => {
     const handleInput = (e) => {
         setValue(e.target.value);
         console.log("intput is", value, ready, status);
-        
     }
     const classes = useStyles();
 
@@ -214,7 +195,7 @@ const Map = () => {
     const [direct, setDirect] = React.useState({});
     const [response, setResponse] = React.useState({});
     console.log(result,loading);
-    let eventDate, headline, url; 
+    let eventDate, headline, url;
     let results = false;
     if (result.length !== 0) {
         eventDate = result[2].split('T')[0];
@@ -243,7 +224,7 @@ const Map = () => {
     })
 
     if (loadError) return "Error Loading Maps";
-    if (!isLoaded) return "Loading Maps"; 
+    if (!isLoaded) return "Loading Maps";
 
     const mapPageStyle = {
         width: "100%",
@@ -306,17 +287,26 @@ const Map = () => {
     return (
         <div style={mapPageStyle}>
             <Grid container className={classes.root}>
-                <Grid item xs={12} sm={3} md={3} component={Paper} elevation={6}>
-                    <div className={classes.paper}>
-                        <Typography component="h1" variant="h5">
-                            Route Planner
+                <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
+                    <Grid item xs>
+                        <div className={classes.paper}>
+                            <Typography component="h1" variant="h4">
+                                Route Planner
+                            </Typography>
+                            <Search />
+                        </div>
+                    </Grid>
+                    <Grid item align="center">
+                        <CasesChart />
+                    </Grid>
+                    <Grid item align="center">
+                        <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
+                    </Grid>
+                    <Grid item component={Paper} align="center">
+                        <Typography variant="body2" gutterTop gutterBottom>
+                            By <Link href="https://github.com/hayeselnut/SENG3011_Linked_List" target="_blank">SENG3011 Linked List</Link>
                         </Typography>
-                        <Search />
-                        {results ? <Report headline={headline} url={url} eventDate={eventDate}/> : <></>}
-                        {
-
-                        }
-                    </div>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12} sm={9} md={9}>
                     <GoogleMap
