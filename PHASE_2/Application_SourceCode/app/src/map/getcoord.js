@@ -1,10 +1,10 @@
 import{Coords} from './mapdata.js'
 
-function getcoord(state,city ='') {
+export function getcoord(state,city) {
     // Result is a list of event_date, url and headline
-    export const value = {};
+    const value = [];
 
-    if(city = ''){
+    if(city == ''){
 
         for (var i  in Coords){
             if (i.properties.state == state){
@@ -15,14 +15,23 @@ function getcoord(state,city ='') {
         }
     }else{
 
+       // console.log(Coords);
         for (var i  in Coords){
-            if (i.properties.city == city && i.properties.state == state){
-                for(var x in i.coordinates){
-                    value.append({lng:x[0],lat:x[1]});
+            //console.log(Coords[i]);
+            var ii = Coords[i];
+          //  console.log(ii.properties.city,city,ii.properties.state , state);
+            if (ii.properties.city == city && ii.properties.state == state){
+                
+                for(var x in ii.coordinates){
+                    var xx = ii.coordinates[x];
+                   // console.log(xx);
+                    var temp = {lng:xx[0],lat : xx[1]}
+                  //  console.log(temp);
+                    value.push(temp);
                 }
             }
         }
 
     }
-    return value;
+    return null;
 }
