@@ -1,4 +1,4 @@
-import{Coords} from './mapdata.js'
+import{Coords} from './mapdata'
 
 export function getcoord(state,city) {
     // Result is a list of event_date, url and headline
@@ -20,7 +20,7 @@ export function getcoord(state,city) {
             //console.log(Coords[i]);
             var ii = Coords[i];
           //  console.log(ii.properties.city,city,ii.properties.state , state);
-            if (ii.properties.city == city && ii.properties.state == state){
+            if (ii.properties.state == state && ii.properties.city == city){
                 
                 for(var x in ii.coordinates){
                     var xx = ii.coordinates[x];
@@ -33,5 +33,7 @@ export function getcoord(state,city) {
         }
 
     }
-    return null;
+
+    console.log(value);
+    return value;
 }

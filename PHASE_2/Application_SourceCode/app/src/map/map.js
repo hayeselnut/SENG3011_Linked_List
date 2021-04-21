@@ -39,6 +39,7 @@ import epiwatchApi from "../apis/epiwatchApi.js"
 import getDataAndPredictions from "./cases.js"
 import { CasesChart } from "./casesChart";
 import { CasesChartModal } from "./casesChartModal";
+import { getcoord } from "./getcoord";
 
 let clicked;
 
@@ -56,7 +57,8 @@ const markers = () => {
         key={index}
         position={centerCoords[element]}
         clickable={true}
-        onClick={() => changeSidebar(element)}
+        //onClick={() => changeSidebar(element)}
+        onClick={() => function() {console.log(element)}}
         id={element}
       />
     )
@@ -114,6 +116,8 @@ function useAsyncHook(location) {
   }, [location])
   return [result, loading];
 }
+
+
 
 const Search = () => {
   const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
@@ -327,11 +331,11 @@ const Map = () => {
             />}
 
             {markers()}
-            {/* <Polygon
-              paths={ohioDelim}
+            { <Polygon id = "poly"
+              paths={getcoord("Alabama","Autauga")}
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            />
+            />/*
             <Polygon
               paths={nyDelim}
               options={ohioOptions}
