@@ -14,6 +14,7 @@ import {
   Paper,
   Typography,
   Link,
+  Button,
 } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
@@ -37,20 +38,22 @@ import epiwatchApi from "../apis/epiwatchApi.js"
 
 import getDataAndPredictions from "./cases.js"
 import { CasesChart } from "./casesChart";
+import { CasesChartModal } from "./casesChartModal";
 
 let clicked;
 
 const changeSidebar = (state) => {
-  console.log("clicked", state);
+  // console.log("clicked", state);
   clicked = true;
 }
 
 const markers = () => {
   let listt = []
-  Object.keys(centerCoords).forEach(element => {
-    console.log(element, centerCoords[element])
+  Object.keys(centerCoords).forEach((element, index) => {
+    // console.log(element, centerCoords[element])
     listt.push(
       <Marker
+        key={index}
         position={centerCoords[element]}
         clickable={true}
         onClick={() => changeSidebar(element)}
@@ -58,7 +61,6 @@ const markers = () => {
       />
     )
   })
-  console.log(listt)
   return listt
 }
 
@@ -90,7 +92,6 @@ function useAsyncHook(location) {
   // Result is a list of event_date, url and headline
   const [result, setResult] = React.useState([])
   const [loading, setLoading] = React.useState("false");
-  const [cases, setCases] = React.useState();
   const [caseLoading, setCaseLoading] = React.useState("false");
 
   React.useEffect(() => {
@@ -106,10 +107,8 @@ function useAsyncHook(location) {
       } catch {
         setLoading("null");
       }
-      // we want, event_date, url, headline
     }
 
-    getDataAndPredictions("united-states");
     getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
   }, [location])
@@ -128,7 +127,7 @@ const Search = () => {
   })
   const handleInput = (e) => {
     setValue(e.target.value);
-    console.log("intput is", value, ready, status);
+    // console.log("intput is", value, ready, status);
   }
   const classes = useStyles();
 
@@ -169,7 +168,7 @@ const Search = () => {
         <ComboboxPopover className={classes.popover}>
           <ComboboxList className={classes.list}>
             {status === "OK" && data.map(({id, description}) => {
-              console.log(id, description)
+              // console.log(id, description)
               return <ComboboxOption key={id} value={description}/>
             })}
           </ComboboxList>
@@ -181,9 +180,21 @@ const Search = () => {
 
 const Map = () => {
   // TODO: Make this dynamic to the state they click on
-  const [result, loading] = useAsyncHook("ohio");
+  const usState = "Ohio";
+  const [result, loading] = useAsyncHook(usState);
+  const [recordedCases, setRecordedCases] = React.useState({});
+  const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
   const [response, setResponse] = React.useState({});
+
+  React.useEffect(() => {
+    getDataAndPredictions("united-states").then(([recorded, predicted]) => {
+      console.log('recorded and predicted', recorded, predicted)
+      setRecordedCases(recorded);
+      setPredictedCases(predicted);
+    });
+  }, [])
+
   console.log(result,loading);
   let eventDate, headline, url;
   let results = false;
@@ -287,13 +298,13 @@ const Map = () => {
             </div>
           </Grid>
           <Grid item align="center">
-            <CasesChart />
+            <CasesChartModal state={usState} recorded={recordedCases[usState]} predicted={predictedCases[usState]} />
           </Grid>
           <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
           </Grid>
           <Grid item component={Paper} align="center">
-            <Typography variant="body2" gutterTop gutterBottom>
+            <Typography variant="body2" gutterBottom>
               By <Link href="https://github.com/hayeselnut/SENG3011_Linked_List" target="_blank">SENG3011 Linked List</Link>
             </Typography>
           </Grid>
@@ -305,7 +316,6 @@ const Map = () => {
             center={center}
             options={options}
           >
-
             <DirectionsService
               options={{origin: origin, destination: destination, travelMode: "DRIVING"}}
               callback={directionsCallback}
