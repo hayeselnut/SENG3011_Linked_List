@@ -119,7 +119,7 @@ function useAsyncHook(location) {
 
 
 
-const Search = () => {
+const Search = (props) => {
   const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
     requestOptions: {
       location: {
@@ -129,9 +129,12 @@ const Search = () => {
       radius: 200 * 1000,
     }
   })
+  const { setFunc } = props;
   const handleInput = (e) => {
     setValue(e.target.value);
     // console.log("intput is", value, ready, status);
+    console.log(e.target.value); 
+    setFunc(e.target.value);
   }
   const classes = useStyles();
 
@@ -144,8 +147,6 @@ const Search = () => {
     mapRef.current.panTo({ lat, lng });
     mapRef.current.setZoom(14);
   }, []);
-
-
 
   return (
     <div className={classes.search}>
@@ -190,6 +191,9 @@ const Map = () => {
   const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
   const [response, setResponse] = React.useState({});
+  const [origin, setOrigin] = React.useState('');
+  const [dest, setDest] = React.useState('');
+
 
   React.useEffect(() => {
     getDataAndPredictions("united-states").then(([recorded, predicted]) => {
@@ -198,6 +202,30 @@ const Map = () => {
       setPredictedCases(predicted);
     });
   }, [])
+
+  React.useEffect(async () => {
+    // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
+    const results = await getGeocode({address});
+    const { lat, lng } = await getLatLng(results[0]);
+    const destPara = {
+      address: dest,
+    };
+    const originPara = {
+      address: origin,
+    };
+    
+    getGeocode(parameter)
+      .then((results) => getLatLng(results[0]))
+      .then((latLng) => {
+        const { lat, lng } = latLng;
+    
+        console.log("Coordinates: ", { lat, lng });
+      })
+      .catch((error) => {
+        console.log("Error: ", error);
+      });
+
+  },[dest, origin])
 
   console.log(result,loading);
   let eventDate, headline, url;
@@ -269,7 +297,7 @@ const Map = () => {
       } else {
         console.log('response: ', response)
       }
-      }
+    }
   }
 
   // directionsService.route(
@@ -298,7 +326,8 @@ const Map = () => {
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
-              <Search />
+              <Search setFunc={setOrigin}/>
+              <Search setFunc={setDest}/>
             </div>
           </Grid>
           <Grid item align="center">
