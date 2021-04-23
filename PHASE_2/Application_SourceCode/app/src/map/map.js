@@ -184,6 +184,7 @@ const Search = () => {
 
 const Map = () => {
   // TODO: Make this dynamic to the state they click on
+  const [country, setCountry] = React.useState("united-states");
   const usState = "Ohio";
   const [result, loading] = useAsyncHook(usState);
   const [recordedCases, setRecordedCases] = React.useState({});
@@ -192,7 +193,7 @@ const Map = () => {
   const [response, setResponse] = React.useState({});
 
   React.useEffect(() => {
-    getDataAndPredictions("united-states").then(([recorded, predicted]) => {
+    getDataAndPredictions(country).then(([recorded, predicted]) => {
       console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
@@ -295,6 +296,8 @@ const Map = () => {
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
+              <Button onClick={() => setCountry("united-states")}>United States</Button>
+              <Button onClick={() => setCountry("india")}>India</Button>
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
