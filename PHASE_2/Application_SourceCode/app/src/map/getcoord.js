@@ -1,11 +1,15 @@
 import{Coords} from './mapdata'
 import{USCoords} from './USA'
 import{INCoords} from './INcoord'
+/*
+Why should I be so troublesome, because I can't save it. 100m files cannot be saved on github, and the stack will burst.
+My idea is to write an API that can query coords, but it seems we are running out of time.
+*/
 
 export function getcoord(country,state) {
     // Result is a list of event_date, url and headline
     const value = [];
-    console.log(state);
+  //  console.log(state);
     if(country == 'india'){
 
        // console.log(Coords);
@@ -45,6 +49,6 @@ export function getcoord(country,state) {
 
     }
 
-    console.log(value);
+  //  console.log(value);
     return value;
 }

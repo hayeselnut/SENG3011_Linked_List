@@ -385,10 +385,15 @@ const Map = () => {
 
             {markers()}
             { <Polygon id = "poly"
-              paths={getcoord(country,province)}
+              paths={getcoord(country,province)} 
+
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            /> /*
+            /> 
+            /*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
+              because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
+              I can do it, but the system can't save it. Unless we have a database.*/
+            /*
             <Polygon
               paths={nyDelim}
               options={ohioOptions}
