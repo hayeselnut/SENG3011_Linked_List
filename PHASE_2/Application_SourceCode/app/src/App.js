@@ -6,6 +6,7 @@ import {
   Route,
 } from "react-router-dom";
 import Map from './map/map.js';
+import Home from './home/home';
 
 function App() {
   return (
@@ -17,9 +18,4 @@ function App() {
     </Router>
   );
 }
-
-function Home() {
-  return <h2>Home</h2>;
-}
-
 export default App;
