@@ -195,19 +195,18 @@ const supportedCountries = {
     "Country": "USA",
     "Slug": "united-states",
     "ISO2": "US",
-    "Provinces": ["Connecticut", "Hawaii", "Alabama", "Maine", "Pennsylvania", "Ohio", "Virgin Islands", "Louisiana", "New York", "West Virginia", "Colorado", "South Dakota", "North Carolina", "Montana", "District of Columbia", "Oregon", "Virginia", "Nebraska", "Kansas", "Guam", "Idaho", "Minnesota", "North Dakota", "Massachusetts", "Arkansas", "Georgia", "Missouri", "Texas", "Alaska", "Washington", "Arizona", "Maryland", "Rhode Island", "Mississippi", "Nevada", "Indiana", "Wyoming", "Delaware", "Puerto Rico", "New Jersey", "Iowa", "New Mexico", "South Carolina", "Michigan", "New Hampshire", "California", "Illinois", "Wisconsin", "Kentucky", "Florida", "Oklahoma", "Utah", "Tennessee", "Vermont", "Northern Mariana Islands"],
+    "Provinces": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virgin Islands", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
   },
   "india": {
     "Country": "India",
     "Slug": "india",
     "ISO2": "IN",
-    "Provinces": ["Maharashtra", "West Bengal", "Haryana", "Gujarat", "Nagaland", "Tamil Nadu", "Delhi", "Andaman and Nicobar Islands", "Sikkim", "Meghalaya", "Rajasthan", "Karnataka", "Puducherry", "Arunachal Pradesh", "Odisha", "Uttar Pradesh", "Telangana", "Jharkhand", "Uttarakhand", "Jammu and Kashmir", "Dadra and Nagar Haveli and Daman and Diu", "Assam", "Kerala", "Chandigarh", "Tripura", "Madhya Pradesh", "Goa", "Mizoram", "Manipur", "Bihar", "Punjab", "Ladakh", "Lakshadweep", "Himachal Pradesh", "Chhattisgarh", "Andhra Pradesh"],
+    "Provinces": ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
   },
 }
 
 const Map = () => {
-  // TODO: Make this dynamic to the state they click on
-  const [province, setProvince] = React.useState("Ohio")
+  const [province, setProvince] = React.useState("Ohio") // a province is a state
   const [country, setCountry] = React.useState("united-states");
   const [result, loading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
@@ -326,7 +325,7 @@ const Map = () => {
                     labelId="country-label"
                     id="country-select"
                     value={country}
-                    onChange={(e) => setCountry(e.target.value)}
+                    onChange={(e) => {setCountry(e.target.value); setProvince(supportedCountries[e.target.value].Provinces[0])}}
                   >
                     {Object.keys(supportedCountries).map((key, index) => (
                       <MenuItem key={index} value={supportedCountries[key].Slug}>{supportedCountries[key].Country}</MenuItem>
@@ -368,7 +367,7 @@ const Map = () => {
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9}>
-          <GoogleMap
+          {/* <GoogleMap
             mapContainerStyle={mapContainerStyle}
             zoom={8}
             center={center}
@@ -389,7 +388,7 @@ const Map = () => {
               paths={getcoord("Alabama","Autauga")}
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            />/*
+            />
             <Polygon
               paths={nyDelim}
               options={ohioOptions}
@@ -419,8 +418,8 @@ const Map = () => {
               paths={massDelim}
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            /> */}
-          </GoogleMap>
+            />
+          </GoogleMap> */}
         </Grid>
       </Grid>
     </div>
