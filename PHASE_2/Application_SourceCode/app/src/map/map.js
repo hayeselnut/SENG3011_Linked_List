@@ -39,6 +39,7 @@ import epiwatchApi from "../apis/epiwatchApi.js"
 import getDataAndPredictions from "./cases.js"
 import { CasesChart } from "./casesChart";
 import { CasesChartModal } from "./casesChartModal";
+import { getcoord } from "./getcoord";
 
 let clicked;
 
@@ -56,7 +57,8 @@ const markers = () => {
         key={index}
         position={centerCoords[element]}
         clickable={true}
-        onClick={() => changeSidebar(element)}
+        //onClick={() => changeSidebar(element)}
+        onClick={() => function() {console.log(element)}}
         id={element}
       />
     )
@@ -114,6 +116,8 @@ function useAsyncHook(location) {
   }, [location])
   return [result, loading];
 }
+
+
 
 const Search = () => {
   const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
@@ -180,6 +184,7 @@ const Search = () => {
 
 const Map = () => {
   // TODO: Make this dynamic to the state they click on
+  const [country, setCountry] = React.useState("united-states");
   const usState = "Ohio";
   const [result, loading] = useAsyncHook(usState);
   const [recordedCases, setRecordedCases] = React.useState({});
@@ -188,7 +193,7 @@ const Map = () => {
   const [response, setResponse] = React.useState({});
 
   React.useEffect(() => {
-    getDataAndPredictions("united-states").then(([recorded, predicted]) => {
+    getDataAndPredictions(country).then(([recorded, predicted]) => {
       console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
@@ -291,6 +296,8 @@ const Map = () => {
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
+              <Button onClick={() => setCountry("united-states")}>United States</Button>
+              <Button onClick={() => setCountry("india")}>India</Button>
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
@@ -327,11 +334,11 @@ const Map = () => {
             />}
 
             {markers()}
-            {/* <Polygon
-              paths={ohioDelim}
+            { <Polygon id = "poly"
+              paths={getcoord("Alabama","Autauga")}
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            />
+            />/*
             <Polygon
               paths={nyDelim}
               options={ohioOptions}
