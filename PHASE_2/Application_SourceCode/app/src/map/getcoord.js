@@ -1,11 +1,11 @@
 import{Coords} from './mapdata'
 import{USCoords} from './USA'
 
-export function getcoord(state,city) {
+export function getcoord(country,state) {
     // Result is a list of event_date, url and headline
     const value = [];
-
-    if(city == 'NONE'){
+    console.log(state);
+    if(country == 'india'){
 
        // console.log(Coords);
         for (var i  in USCoords){
@@ -26,11 +26,11 @@ export function getcoord(state,city) {
     }else{
 
        // console.log(Coords);
-        for (var i  in Coords){
+        for (var i  in USCoords){
             //console.log(Coords[i]);
-            var ii = Coords[i];
-          //  console.log(ii.properties.city,city,ii.properties.state , state);
-            if (ii.properties.state == state && ii.properties.city == city){
+            var ii = USCoords[i];
+            console.log(ii.properties.state , state);
+            if (ii.properties.state == state){
                 
                 for(var x in ii.coordinates){
                     var xx = ii.coordinates[x];

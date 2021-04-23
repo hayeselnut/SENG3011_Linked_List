@@ -367,7 +367,7 @@ const Map = () => {
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9}>
-          {/* <GoogleMap
+          { <GoogleMap
             mapContainerStyle={mapContainerStyle}
             zoom={8}
             center={center}
@@ -385,10 +385,10 @@ const Map = () => {
 
             {markers()}
             { <Polygon id = "poly"
-              paths={getcoord("Alabama","Autauga")}
+              paths={getcoord(country,province)}
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            />
+            /> /*
             <Polygon
               paths={nyDelim}
               options={ohioOptions}
@@ -420,6 +420,8 @@ const Map = () => {
               onLoad={ohioOnLoad}
             />
           </GoogleMap> */}
+          
+          </GoogleMap>}
         </Grid>
       </Grid>
     </div>
