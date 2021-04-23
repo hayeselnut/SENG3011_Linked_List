@@ -192,7 +192,7 @@ const Search = () => {
 
 const supportedCountries = {
   "united-states": {
-    "Country": "United States of America",
+    "Country": "USA",
     "Slug": "united-states",
     "ISO2": "US",
     "Provinces": ["Connecticut", "Hawaii", "Alabama", "Maine", "Pennsylvania", "Ohio", "Virgin Islands", "Louisiana", "New York", "West Virginia", "Colorado", "South Dakota", "North Carolina", "Montana", "District of Columbia", "Oregon", "Virginia", "Nebraska", "Kansas", "Guam", "Idaho", "Minnesota", "North Dakota", "Massachusetts", "Arkansas", "Georgia", "Missouri", "Texas", "Alaska", "Washington", "Arizona", "Maryland", "Rhode Island", "Mississippi", "Nevada", "Indiana", "Wyoming", "Delaware", "Puerto Rico", "New Jersey", "Iowa", "New Mexico", "South Carolina", "Michigan", "New Hampshire", "California", "Illinois", "Wisconsin", "Kentucky", "Florida", "Oklahoma", "Utah", "Tennessee", "Vermont", "Northern Mariana Islands"],
