@@ -265,7 +265,7 @@ const Map = () => {
       } else {
         console.log('response: ', response)
       }
-      }
+    }
   }
 
   // directionsService.route(
