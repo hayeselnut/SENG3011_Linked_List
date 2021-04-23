@@ -11,10 +11,14 @@ import {
 import {
   Container,
   Grid,
+  Select,
   Paper,
   Typography,
   Link,
   Button,
+  MenuItem,
+  InputLabel,
+  FormControl,
 } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
@@ -85,6 +89,10 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: '10%'
+  },
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
   },
 }));
 
@@ -182,11 +190,26 @@ const Search = () => {
   )
 }
 
+const supportedCountries = {
+  "united-states": {
+    "Country": "United States of America",
+    "Slug": "united-states",
+    "ISO2": "US",
+    "Provinces": ["Connecticut", "Hawaii", "Alabama", "Maine", "Pennsylvania", "Ohio", "Virgin Islands", "Louisiana", "New York", "West Virginia", "Colorado", "South Dakota", "North Carolina", "Montana", "District of Columbia", "Oregon", "Virginia", "Nebraska", "Kansas", "Guam", "Idaho", "Minnesota", "North Dakota", "Massachusetts", "Arkansas", "Georgia", "Missouri", "Texas", "Alaska", "Washington", "Arizona", "Maryland", "Rhode Island", "Mississippi", "Nevada", "Indiana", "Wyoming", "Delaware", "Puerto Rico", "New Jersey", "Iowa", "New Mexico", "South Carolina", "Michigan", "New Hampshire", "California", "Illinois", "Wisconsin", "Kentucky", "Florida", "Oklahoma", "Utah", "Tennessee", "Vermont", "Northern Mariana Islands"],
+  },
+  "india": {
+    "Country": "India",
+    "Slug": "india",
+    "ISO2": "IN",
+    "Provinces": ["Maharashtra", "West Bengal", "Haryana", "Gujarat", "Nagaland", "Tamil Nadu", "Delhi", "Andaman and Nicobar Islands", "Sikkim", "Meghalaya", "Rajasthan", "Karnataka", "Puducherry", "Arunachal Pradesh", "Odisha", "Uttar Pradesh", "Telangana", "Jharkhand", "Uttarakhand", "Jammu and Kashmir", "Dadra and Nagar Haveli and Daman and Diu", "Assam", "Kerala", "Chandigarh", "Tripura", "Madhya Pradesh", "Goa", "Mizoram", "Manipur", "Bihar", "Punjab", "Ladakh", "Lakshadweep", "Himachal Pradesh", "Chhattisgarh", "Andhra Pradesh"],
+  },
+}
+
 const Map = () => {
   // TODO: Make this dynamic to the state they click on
+  const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
-  const usState = "Ohio";
-  const [result, loading] = useAsyncHook(usState);
+  const [result, loading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
   const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
@@ -296,8 +319,36 @@ const Map = () => {
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
-              <Button onClick={() => setCountry("united-states")}>United States</Button>
-              <Button onClick={() => setCountry("india")}>India</Button>
+              <div>
+                <FormControl className={classes.formControl}>
+                  <InputLabel id="country-label">Country</InputLabel>
+                  <Select
+                    labelId="country-label"
+                    id="country-select"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  >
+                    {Object.keys(supportedCountries).map((key, index) => (
+                      <MenuItem key={index} value={supportedCountries[key].Slug}>{supportedCountries[key].Country}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl className={classes.formControl}>
+                  <InputLabel id="state-label">State</InputLabel>
+                  <Select
+                    labelId="state-label"
+                    id="state-select"
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
+                  >
+                    {console.log(country)}
+                    {supportedCountries[country].Provinces.map((province, index) => (
+                      <MenuItem key={index} value={province}>{province}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </div>
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
@@ -305,7 +356,7 @@ const Map = () => {
             </div>
           </Grid>
           <Grid item align="center">
-            <CasesChartModal state={usState} recorded={recordedCases[usState]} predicted={predictedCases[usState]} />
+            <CasesChartModal state={province} recorded={recordedCases[province]} predicted={predictedCases[province]} />
           </Grid>
           <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
