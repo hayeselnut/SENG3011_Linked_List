@@ -1,5 +1,6 @@
 import{Coords} from './mapdata'
 import{USCoords} from './USA'
+import{INCoords} from './INcoord'
 
 export function getcoord(country,state) {
     // Result is a list of event_date, url and headline
@@ -8,9 +9,9 @@ export function getcoord(country,state) {
     if(country == 'india'){
 
        // console.log(Coords);
-        for (var i  in USCoords){
+        for (var i  in INCoords){
             //console.log(Coords[i]);
-            var ii = USCoords[i];
+            var ii = INCoords[i];
           //  console.log(ii.properties.city,city,ii.properties.state , state);
             if (ii.properties.state == state){
                 
