@@ -141,7 +141,7 @@ const Search = (props) => {
   const handleInput = (e) => {
     setValue(e.target.value);
     // console.log("intput is", value, ready, status);
-    console.log(e.target.value); 
+    // console.log(e.target.value); 
     setFunc(e.target.value);
   }
   const classes = useStyles();
@@ -151,22 +151,22 @@ const Search = (props) => {
   //   mapRef.current = map;
   // }, []);
 
-  const panTo = React.useCallback(({ lat, lng }) => {
-    mapRef.current.panTo({ lat, lng });
-    mapRef.current.setZoom(14);
-  }, []);
+  // const panTo = React.useCallback(({ lat, lng }) => {
+  //   mapRef.current.panTo({ lat, lng });
+  //   mapRef.current.setZoom(14);
+  // }, []);
 
   return (
     <div className={classes.search}>
       <Combobox onSelect={ async (address) => {
         setValue(address, false); 
         clearSuggestions();
-        console.log(address);
+        // console.log(address);
 
         try {
           const results = await getGeocode({address});
           const { lat, lng } = await getLatLng(results[0]);
-          panTo({ lat, lng });
+          // panTo({ lat, lng });
           // Display the side bar for this place
         } catch (error) {
           console.log('error trying to pan')
@@ -216,46 +216,86 @@ const Map = () => {
   const [response, setResponse] = React.useState({});
   const [origin, setOrigin] = React.useState('');
   const [dest, setDest] = React.useState('');
+  const [destLatLng, setDestLatLng] = React.useState({});
+  const [originLatLng, setOriginLatLng] = React.useState({});
+  const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
+  const [gotDirections, setGotDirections] = React.useState(false); 
 
 
   React.useEffect(() => {
+<<<<<<< HEAD
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       console.log('recorded and predicted', recorded, predicted)
+=======
+    getDataAndPredictions("united-states").then(([recorded, predicted]) => {
+      // console.log('recorded and predicted', recorded, predicted)
+>>>>>>> routes from search
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
   }, [])
 
-  React.useEffect(async () => {
-    // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
-    const results = await getGeocode({address});
-    const { lat, lng } = await getLatLng(results[0]);
-    const destPara = {
-      address: dest,
-    };
+  // React.useEffect(async () => {
+  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
+  //   const destPara = {
+  //     address: dest,
+  //   };
+  //   console.log('dest', dest);
+  //   try {
+
+  //     const results = await getGeocode(destPara);
+  //     const coords = await getLatLng(results[0]);
+  //     console.log('coords', coords);
+  //     setDestLatLng(coords);
+  //   } catch (error) {
+  //     console.log("Error: ", error);
+  //   }
+
+  // },[dest])
+
+  // React.useEffect(async () => {
+  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
+
+
+  // },[origin])
+
+  const getDirectionCoords = async () => {
+    // console.log('og', origin)
     const originPara = {
       address: origin,
     };
-    
-    getGeocode(parameter)
-      .then((results) => getLatLng(results[0]))
-      .then((latLng) => {
-        const { lat, lng } = latLng;
-    
-        console.log("Coordinates: ", { lat, lng });
-      })
-      .catch((error) => {
-        console.log("Error: ", error);
-      });
+    try {
+      const results = await getGeocode(originPara);
+      const coords = await getLatLng(results[0]);
+      // console.log('origin coords', coords);
+      setOriginLatLng(coords);
+    } catch (error) {
+      console.log("Error: ", error);
+    }    
+    const destPara = {
+      address: dest,
+    };
+    // console.log('dest', dest);
+    try {
 
-  },[dest, origin])
+      const results = await getGeocode(destPara);
+      const coords = await getLatLng(results[0]);
+      // console.log('coords', coords);
+      setDestLatLng(coords);
+      setCenter(coords);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
 
-  console.log(result,loading);
+
+  }
+
+  // console.log(result,loading);
   let eventDate, headline, url;
   let results = false;
   if (result.length !== 0) {
     eventDate = result[2].split('T')[0];
-    console.log(eventDate);
+    // console.log(eventDate);
     headline = result[0];
     url = result[1];
     results = true;
@@ -264,10 +304,6 @@ const Map = () => {
   const mapContainerStyle = {
     width: "100%",
     height: "100%"
-  }
-  const center = {
-    lat: 40.7128,
-    lng: -74.0060,
   }
   const options = {
     styles: mapStyles,
@@ -297,28 +333,28 @@ const Map = () => {
   };
 
   const ohioOnLoad = (polygon) => {
-    console.log("yessir", polygon)
   }
 
   // const latlngs = {
   //     "state": {lat: lng:}
   // }
 
-  const directionsService = new window.google.maps.DirectionsService();
+  // const directionsService = new window.google.maps.DirectionsService();
 
-  const origin = centerCoords['New York, USA'];
-  const destination = centerCoords['Ohio, USA'];
+  // const origin = centerCoords['New York, USA'];
+  // const destination = centerCoords['Ohio, USA'];
 
   const directionsCallback = (response) => {
-    console.log("THE RESPONSE IS ", response)
     if (response !== null) {
       if (response.status === 'OK') {
-        console.log("alsjdf;alksdjf")
+        console.log("Positive response", response);
+        // if (response.)
         setResponse(
         response
         )
+        setGotDirections(true);
       } else {
-        console.log('response: ', response)
+        console.log('Neg response: ', response)
       }
     }
   }
@@ -381,6 +417,9 @@ const Map = () => {
               </Typography>
               <Search setFunc={setOrigin}/>
               <Search setFunc={setDest}/>
+              <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
+                Find the safest route!
+              </Button>
             </div>
           </Grid>
           <Grid item align="center">
@@ -398,14 +437,14 @@ const Map = () => {
         <Grid item xs={12} sm={9} md={9}>
           { <GoogleMap
             mapContainerStyle={mapContainerStyle}
-            zoom={8}
+            zoom={5}
             center={center}
             options={options}
           >
-            <DirectionsService
-              options={{origin: origin, destination: destination, travelMode: "DRIVING"}}
+            {!gotDirections && <DirectionsService
+              options={{origin: originLatLng, destination: destLatLng, travelMode: "DRIVING", provideRouteAlternatives:true }}
               callback={directionsCallback}
-            />
+            />}
             {response !== null && <DirectionsRenderer
               options={{
                 directions: response
