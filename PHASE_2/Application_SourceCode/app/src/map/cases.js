@@ -6,7 +6,7 @@ const getDataAndPredictions = async (country) => {
   const covid19Data = await getCovid19DataGroupedByState(country, "confirmed", lastMonth);
   const recordedActiveCasesByProvince = getActiveCasesOnly(covid19Data);
   const predictionsByProvince = getPredictionsByProvinces(recordedActiveCasesByProvince);
-  console.log(recordedActiveCasesByProvince, predictionsByProvince)
+  // console.log(recordedActiveCasesByProvince, predictionsByProvince)
   return [recordedActiveCasesByProvince, predictionsByProvince];
 }
 

@@ -44,6 +44,6 @@ export function getcoord(state,city) {
 
     }
 
-    console.log(value);
+    // console.log(value);
     return value;
 }
