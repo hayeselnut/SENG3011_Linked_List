@@ -1,49 +1,21 @@
 import React from "react";
-import {
-  GoogleMap, 
-  useLoadScript, 
-  Marker,
-  InfoWindow,
-  Polygon,
-  DirectionsService,
-  DirectionsRenderer,
-} from "@react-google-maps/api";
-import {
-  Container,
-  Grid,
-  Select,
-  Paper,
-  Typography,
-  Link,
-  Button,
-  MenuItem,
-  InputLabel,
-  FormControl,
-} from "@material-ui/core";
+import { GoogleMap, useLoadScript, Marker, Polygon, DirectionsService, DirectionsRenderer } from "@react-google-maps/api";
+import { Grid, Select, Paper, MenuItem, InputLabel, FormControl } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
-import usePlacesAutoComplete, {
-  getGeocode,
-  getLatLng,
-} from "use-places-autocomplete";
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopover,
-  ComboboxList,
-  ComboboxOption,
-} from "@reach/combobox";
-import "@reach/combobox/styles.css";
+
 import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
-import covid19Api from "../apis/covid19Api.js"
 import epiwatchApi from "../apis/epiwatchApi.js"
 
 import getDataAndPredictions from "./cases.js"
-import { CasesChart } from "./casesChart";
 import { CasesChartModal } from "./casesChartModal";
 import { getcoord } from "./getcoord";
+import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
+import Search from "../components/search/searchBar";
+
+import SupportedCountries from "../assets/SupportedCountries.json";
 
 let clicked;
 
@@ -123,86 +95,6 @@ function useAsyncHook(location) {
 
   }, [location])
   return [result, loading];
-}
-
-
-
-const Search = () => {
-  const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
-    requestOptions: {
-      location: {
-        lat: () => 40.7128,
-        lng: () => -74.0060,
-      },
-      radius: 200 * 1000,
-    }
-  })
-  const handleInput = (e) => {
-    setValue(e.target.value);
-    // console.log("intput is", value, ready, status);
-  }
-  const classes = useStyles();
-
-  const mapRef = React.useRef();
-  // const onMapLoad = React.useCallback((map) => {
-  //   mapRef.current = map;
-  // }, []);
-
-  const panTo = React.useCallback(({ lat, lng }) => {
-    mapRef.current.panTo({ lat, lng });
-    mapRef.current.setZoom(14);
-  }, []);
-
-
-
-  return (
-    <div className={classes.search}>
-      <Combobox onSelect={ async (address) => {
-        setValue(address, false); 
-        clearSuggestions();
-        console.log(address);
-
-        try {
-          const results = await getGeocode({address});
-          const { lat, lng } = await getLatLng(results[0]);
-          panTo({ lat, lng });
-          // Display the side bar for this place
-        } catch (error) {
-          console.log('error trying to pan')
-        }
-      }}>
-        <ComboboxInput
-          value={value}
-          onChange={handleInput}
-          disabled={!ready}
-          placeholder="Enter a state"
-        />
-        <ComboboxPopover className={classes.popover}>
-          <ComboboxList className={classes.list}>
-            {status === "OK" && data.map(({id, description}) => {
-              // console.log(id, description)
-              return <ComboboxOption key={id} value={description}/>
-            })}
-          </ComboboxList>
-        </ComboboxPopover>
-      </Combobox>
-    </div>
-  )
-}
-
-const supportedCountries = {
-  "united-states": {
-    "Country": "United States of America",
-    "Slug": "united-states",
-    "ISO2": "US",
-    "Provinces": ["Connecticut", "Hawaii", "Alabama", "Maine", "Pennsylvania", "Ohio", "Virgin Islands", "Louisiana", "New York", "West Virginia", "Colorado", "South Dakota", "North Carolina", "Montana", "District of Columbia", "Oregon", "Virginia", "Nebraska", "Kansas", "Guam", "Idaho", "Minnesota", "North Dakota", "Massachusetts", "Arkansas", "Georgia", "Missouri", "Texas", "Alaska", "Washington", "Arizona", "Maryland", "Rhode Island", "Mississippi", "Nevada", "Indiana", "Wyoming", "Delaware", "Puerto Rico", "New Jersey", "Iowa", "New Mexico", "South Carolina", "Michigan", "New Hampshire", "California", "Illinois", "Wisconsin", "Kentucky", "Florida", "Oklahoma", "Utah", "Tennessee", "Vermont", "Northern Mariana Islands"],
-  },
-  "india": {
-    "Country": "India",
-    "Slug": "india",
-    "ISO2": "IN",
-    "Provinces": ["Maharashtra", "West Bengal", "Haryana", "Gujarat", "Nagaland", "Tamil Nadu", "Delhi", "Andaman and Nicobar Islands", "Sikkim", "Meghalaya", "Rajasthan", "Karnataka", "Puducherry", "Arunachal Pradesh", "Odisha", "Uttar Pradesh", "Telangana", "Jharkhand", "Uttarakhand", "Jammu and Kashmir", "Dadra and Nagar Haveli and Daman and Diu", "Assam", "Kerala", "Chandigarh", "Tripura", "Madhya Pradesh", "Goa", "Mizoram", "Manipur", "Bihar", "Punjab", "Ladakh", "Lakshadweep", "Himachal Pradesh", "Chhattisgarh", "Andhra Pradesh"],
-  },
 }
 
 const Map = () => {
@@ -315,25 +207,12 @@ const Map = () => {
 
   return (
     <div style={mapPageStyle}>
+      <EpiWatchToolBar pageName={"Route Planner"} country={country} setCountry={setCountry} />
       <Grid container className={classes.root}>
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
               <div>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="country-label">Country</InputLabel>
-                  <Select
-                    labelId="country-label"
-                    id="country-select"
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                  >
-                    {Object.keys(supportedCountries).map((key, index) => (
-                      <MenuItem key={index} value={supportedCountries[key].Slug}>{supportedCountries[key].Country}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
                 <FormControl className={classes.formControl}>
                   <InputLabel id="state-label">State</InputLabel>
                   <Select
@@ -343,15 +222,12 @@ const Map = () => {
                     onChange={(e) => setProvince(e.target.value)}
                   >
                     {console.log(country)}
-                    {supportedCountries[country].Provinces.map((province, index) => (
+                    {SupportedCountries[country].Provinces.map((province, index) => (
                       <MenuItem key={index} value={province}>{province}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </div>
-              <Typography component="h1" variant="h4">
-                Route Planner
-              </Typography>
               <Search />
             </div>
           </Grid>
@@ -360,11 +236,6 @@ const Map = () => {
           </Grid>
           <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
-          </Grid>
-          <Grid item component={Paper} align="center">
-            <Typography variant="body2" gutterBottom>
-              By <Link href="https://github.com/hayeselnut/SENG3011_Linked_List" target="_blank">SENG3011 Linked List</Link>
-            </Typography>
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9}>
