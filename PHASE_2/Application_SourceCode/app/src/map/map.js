@@ -62,10 +62,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: '10%'
   },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
 }));
 
 const libraries = ["places"];
@@ -98,7 +94,6 @@ function useAsyncHook(location) {
 }
 
 const Map = () => {
-  // TODO: Make this dynamic to the state they click on
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
   const [result, loading] = useAsyncHook(province);
@@ -113,7 +108,15 @@ const Map = () => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
-  }, [])
+  }, []);
+
+  React.useEffect(() => {
+    getDataAndPredictions(country).then(([recorded, predicted]) => {
+      console.log('recorded and predicted', recorded, predicted)
+      setRecordedCases(recorded);
+      setPredictedCases(predicted);
+    });
+  }, [country, province])
 
   console.log(result,loading);
   let eventDate, headline, url;
@@ -207,32 +210,21 @@ const Map = () => {
 
   return (
     <div style={mapPageStyle}>
-      <EpiWatchToolBar pageName={"Route Planner"} country={country} setCountry={setCountry} />
+      <EpiWatchToolBar
+        pageName={"Route Planner"}
+        country={country}
+        setCountry={setCountry}
+        province={province}
+        setProvince={setProvince}
+        recordedCases={recordedCases}
+        predictedCases={predictedCases}
+      />
       <Grid container className={classes.root}>
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
-              <div>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="state-label">State</InputLabel>
-                  <Select
-                    labelId="state-label"
-                    id="state-select"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                  >
-                    {console.log(country)}
-                    {SupportedCountries[country].Provinces.map((province, index) => (
-                      <MenuItem key={index} value={province}>{province}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
               <Search />
             </div>
-          </Grid>
-          <Grid item align="center">
-            <CasesChartModal state={province} recorded={recordedCases[province]} predicted={predictedCases[province]} />
           </Grid>
           <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
