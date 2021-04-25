@@ -1,18 +1,23 @@
 import covid19Api from "../../apis/covid19Api.js"
-import PolynomialRegression from "js-polynomial-regression";
+import brain from "brain.js/src";
+import SupportedCountries from "../../assets/SupportedCountries.json";
+import trainedBrainJsonConfig from "../../assets/brain.json";
 
 const getDataAndPredictions = async (country) => {
   const lastMonth = getLastMonth();
-  const covid19Data = await getCovid19DataGroupedByState(country, "confirmed", lastMonth);
+  const covid19ApiData = await getCovid19ApiData(country, "confirmed", lastMonth);
+  const covid19Data = getCovid19DataGroupedByState(country, covid19ApiData);
   const recordedActiveCasesByProvince = getActiveCasesOnly(covid19Data);
-  const predictionsByProvince = getPredictionsByProvinces(recordedActiveCasesByProvince);
-  console.log(recordedActiveCasesByProvince, predictionsByProvince)
+
+  const trainingData = convertToTrainingData(recordedActiveCasesByProvince);
+  const predictionsByDays = getPredictionsByDays(trainingData);
+  const predictionsByProvince = convertToPredictionsByProvinces(recordedActiveCasesByProvince, predictionsByDays);
   return [recordedActiveCasesByProvince, predictionsByProvince];
 }
 
 const getLastMonth = () => {
   const ONE_DAY = 86400000;
-  const ONE_MONTH = ONE_DAY * 31;
+  const ONE_MONTH = ONE_DAY * 31 * 12;
 
   const now = new Date();
   const yesterday = new Date(now - ONE_DAY);
@@ -22,12 +27,17 @@ const getLastMonth = () => {
 
 const asDate = (date) => date.toISOString().slice(0, 10)
 
-const getCovid19DataGroupedByState = async (country, status, date) => {
-  const rawData = await covid19Api.liveCountryStatusDate(country, status, date);
+const getCovid19ApiData = async (country, status, date) => {
+  return await covid19Api.liveCountryStatusDate(country, status, date);
+}
+
+const getCovid19DataGroupedByState = (country, rawData) => {
   const covid19Data = {};
 
   for (const provinceData of rawData) {
     const {Active, City, CityCode, Confirmed, Country, CountryCode, Date, Deaths, Lat, Lon, Province, Recovered} = provinceData
+
+    if (!SupportedCountries[country].Provinces.includes(Province)) continue;
 
     if (!(Province in covid19Data)) {
       covid19Data[Province] = {Country, CountryCode, City, CityCode, Province, Lat, Lon, dataByDates: {}}
@@ -47,33 +57,72 @@ const getActiveCasesOnly = (covid19Data) => {
   return activeCasesOnly;
 }
 
-const getPredictionsByProvinces = (recordedCasesByProvince) => {
-  const predictionsByProvince = {};
+const convertToTrainingData = (recordedCasesByProvince) => {
+  // Object of arrays { Ohio: [...], Florida: [...] }
+  const listOfKeys = Object.keys(recordedCasesByProvince);
+  const numberOfDays = recordedCasesByProvince[listOfKeys[0]].length;
 
-  const polynomialRegressionsByProvince = transformToPolynomialRegressions(recordedCasesByProvince);
-  for (const Province in polynomialRegressionsByProvince) {
-    const model = polynomialRegressionsByProvince[Province]
-    const terms = model.getTerms();
-    predictionsByProvince[Province] = [];
+  // Training data is an array of arrays
+  const trainingData = [];
+  for (let i = 0 ; i < numberOfDays; i++) {
+    const day = []
+    for (const key of listOfKeys) {
+      const cases = recordedCasesByProvince[key][i]
 
-    for (let day = 0; day < 31; day++) {
-      predictionsByProvince[Province].push(Math.round(model.predictY(terms, day)));
+      if (cases !== undefined) {
+        day.push(recordedCasesByProvince[key][i])
+      }
+    }
+    trainingData.push(day);
+  }
+  return trainingData;
+}
+
+const getPredictionsByDays = (trainingData) => {
+  const net = trainBrain(trainingData)
+  const lastDay = trainingData.length - 1
+  const daysToPredict = 30
+  return net.forecast([trainingData[lastDay]], daysToPredict).map(denormaliseCases);
+}
+
+const trainBrain = (trainingData) => {
+  const net = new brain.recurrent.LSTMTimeStep({
+    inputSize: trainingData[0].length,
+    hiddenLayers: [10],
+    outputSize: trainingData[0].length,
+  });
+
+  // FOR TRAINING ONLY:
+  // const iterations = 100_000;
+  // net.train(trainingData.map(normaliseCases), { log: true, iterations: iterations });
+
+  net.fromJSON(trainedBrainJsonConfig);
+
+  return net;
+}
+
+const convertToPredictionsByProvinces = (recordedCasesByProvince, predictionsByDays) => {
+  // Object of arrays { 0: [...], 1: [...] }
+  const listOfProvinces = Object.keys(recordedCasesByProvince);
+  const numberOfDays = Object.keys(predictionsByDays).length;
+
+  const predictionsCasesByProvince = {};
+  for (const Province in recordedCasesByProvince) {
+    predictionsCasesByProvince[Province] = [];
+  }
+
+  for (const Province in recordedCasesByProvince) {
+    for (let i = 0; i < numberOfDays; i++) {
+
+      const indexOfProvince = listOfProvinces.indexOf(Province);
+
+      predictionsCasesByProvince[Province].push(predictionsByDays[i][indexOfProvince]);
     }
   }
-  return predictionsByProvince;
+  return predictionsCasesByProvince;
 }
 
-const transformToPolynomialRegressions = (recordsByProvince) => {
-  const polynomialRegressionsByProvince = {}
-  for (const Province in recordsByProvince) {
-    const plotPoints = recordsByProvince[Province]
-      .map((cases, index) => ({x: index - recordsByProvince[Province].length, y: cases}));
-    const degreeOfPolynomialRegression = 3;
-
-    polynomialRegressionsByProvince[Province] = PolynomialRegression.read(plotPoints, degreeOfPolynomialRegression);
-  }
-  return polynomialRegressionsByProvince;
-
-}
+const normaliseCases = (provinceCases) => provinceCases.map(cases => Math.log(cases));
+const denormaliseCases = (provinceCases) => provinceCases.map(cases => Math.exp(cases));
 
 export default getDataAndPredictions
