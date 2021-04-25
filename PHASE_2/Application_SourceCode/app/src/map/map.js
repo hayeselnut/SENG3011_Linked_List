@@ -350,7 +350,7 @@ const Map = () => {
         console.log("Positive response", response);
         // if (response.)
         setResponse(
-        response
+          response
         )
         setGotDirections(true);
       } else {
@@ -375,6 +375,23 @@ const Map = () => {
   //     }
   // }
   // );
+  const AllRouteRenderer = () => {
+    if (response !== null && response.routes) {
+      console.log('routes', response.routes)
+      const routes = response.routes.map((_, i) => {
+        return (
+          <DirectionsRenderer
+            options={{
+              directions: response,
+              routeIndex: i,
+            }}
+          />
+        )
+      })
+      return routes;
+    } 
+    return null;
+  }
 
   return (
     <div style={mapPageStyle}>
@@ -445,12 +462,12 @@ const Map = () => {
               options={{origin: originLatLng, destination: destLatLng, travelMode: "DRIVING", provideRouteAlternatives:true }}
               callback={directionsCallback}
             />}
-            {response !== null && <DirectionsRenderer
+            {/* {response !== null && <DirectionsRenderer
               options={{
                 directions: response
               }}
-            />}
-
+            />} */}
+            <AllRouteRenderer/>
             {markers()}
             { <Polygon id = "poly"
               paths={getcoord(country,province)} 
