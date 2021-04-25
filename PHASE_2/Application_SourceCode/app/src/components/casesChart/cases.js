@@ -1,4 +1,4 @@
-import covid19Api from "../apis/covid19Api.js"
+import covid19Api from "../../apis/covid19Api.js"
 import PolynomialRegression from "js-polynomial-regression";
 
 const getDataAndPredictions = async (country) => {

@@ -9,13 +9,10 @@ import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import getDataAndPredictions from "./cases.js"
-import { CasesChartModal } from "./casesChartModal";
+import getDataAndPredictions from "../components/casesChart/cases.js"
 import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
-
-import SupportedCountries from "../assets/SupportedCountries.json";
 
 let clicked;
 

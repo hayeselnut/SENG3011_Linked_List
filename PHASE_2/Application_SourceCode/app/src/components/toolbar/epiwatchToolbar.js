@@ -4,7 +4,7 @@ import HomeIcon from '@material-ui/icons/HomeRounded';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { makeStyles } from '@material-ui/core/styles';
 import SupportedCountries from "../../assets/SupportedCountries.json"
-import { CasesChartModal } from "../../map/casesChartModal";
+import { CasesChartModal } from "../casesChart/casesChartModal.js";
 
 import GraphIcon from '@material-ui/icons/Assessment';
 
