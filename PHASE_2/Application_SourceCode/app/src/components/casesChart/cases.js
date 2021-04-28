@@ -4,6 +4,21 @@ import SupportedCountries from "../../assets/SupportedCountries.json";
 import USBrain from "../../assets/USBrain.json";
 import INBrain from "../../assets/INBrain.json";
 
+const getCasesByCity = async (country) => {
+  const rawData = await covid19Api.cities(country);
+  const formattedCityData = {};
+  rawData.forEach(cityData => {
+    const { Active, City, CityCode, Confirmed, Country, CountryCode, Date, Deaths, Lat, Lon, Province, Recovered } = cityData;
+    if (!(CityCode in formattedCityData)) {
+      formattedCityData[CityCode] = { City, CityCode, Date, Lat, Lon, Province, dataByDates: {} };
+    }
+
+    formattedCityData[CityCode].dataByDates[Date] = { Confirmed, Deaths, Recovered, Active };
+  })
+
+  return formattedCityData;
+}
+
 const getDataAndPredictions = async (country) => {
   const lastMonth = getLastMonth();
   const covid19ApiData = await getCovid19ApiData(country, "confirmed", lastMonth);
@@ -14,7 +29,6 @@ const getDataAndPredictions = async (country) => {
   const predictionsByDays = getPredictionsByDays(country, trainingData);
   const predictionsByProvince = convertToPredictionsByProvinces(recordedActiveCasesByProvince, predictionsByDays);
 
-  console.log(predictionsByProvince);
   return [recordedActiveCasesByProvince, predictionsByProvince];
 }
 
@@ -131,4 +145,4 @@ const INDenormaliseCases = (provinceCases) => provinceCases.map(cases => Math.ex
 const USNormaliseCases = (provinceCases) => provinceCases.map(cases => cases / 1_000_000);
 const USDenormaliseCases = (provinceCases) => provinceCases.map(cases => cases * 1_000_000);
 
-export default getDataAndPredictions
+export { getDataAndPredictions, getCasesByCity };
