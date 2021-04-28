@@ -9,7 +9,7 @@ import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import getDataAndPredictions from "../components/casesChart/cases.js"
+import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/cases.js"
 import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
@@ -197,6 +197,8 @@ const Map = () => {
   //     }
   // }
   // );
+
+  getCasesByCity(country).then(x => console.log(x));
 
   return (
     <div style={mapPageStyle}>
