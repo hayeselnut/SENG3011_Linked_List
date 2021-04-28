@@ -10,7 +10,7 @@ const getCasesByCity = async (country) => {
   rawData.forEach(cityData => {
     const { Active, City, CityCode, Confirmed, Country, CountryCode, Date, Deaths, Lat, Lon, Province, Recovered } = cityData;
     if (!(CityCode in formattedCityData)) {
-      formattedCityData[CityCode] = { City, CityCode, Date, Lat, Lon, Province, dataByDates: {} };
+      formattedCityData[CityCode] = { City, CityCode, Lat, Lon, Province, dataByDates: {} };
     }
 
     formattedCityData[CityCode].dataByDates[Date] = { Confirmed, Deaths, Recovered, Active };
