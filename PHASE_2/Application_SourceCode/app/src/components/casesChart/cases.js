@@ -85,22 +85,22 @@ const getPredictionsByDays = (country, trainingData) => {
   const net = trainBrain(country, trainingData)
   const lastDay = trainingData.length - 1
   const daysToPredict = 30
-  return net.forecast([trainingData[lastDay]], daysToPredict).map(denormaliseCases);
+  return net.forecast([trainingData[lastDay]], daysToPredict).map(country === "united-states" ? USDenormaliseCases : INDenormaliseCases);
 }
 
 const trainBrain = (country, trainingData) => {
-  const net = new brain.recurrent.LSTMTimeStep({
-    inputSize: trainingData[0].length,
-    hiddenLayers: [10],
-    outputSize: trainingData[0].length,
-  });
-
   // FOR TRAINING ONLY:
-  // const iterations = 10000;
-  // net.train(trainingData.map(normaliseCases), { log: true, iterations: iterations });
+  // const net = new brain.recurrent.LSTMTimeStep({
+  //   inputSize: trainingData[0].length,
+  //   hiddenLayers: [50],
+  //   outputSize: trainingData[0].length,
+  // });
+
+  // net.train(trainingData.map(INNormaliseCases), { log: true, logPeriod: 1000, iterations: 1_000 });
   // console.log(JSON.stringify(net.toJSON()))
   // alert();
 
+  const net = new brain.recurrent.LSTMTimeStep();
   net.fromJSON(country === "united-states" ? USBrain : INBrain);
 
   return net;
@@ -125,7 +125,10 @@ const convertToPredictionsByProvinces = (recordedCasesByProvince, predictionsByD
   return predictionsCasesByProvince;
 }
 
-const normaliseCases = (provinceCases) => provinceCases.map(cases => Math.log(cases));
-const denormaliseCases = (provinceCases) => provinceCases.map(cases => Math.exp(cases));
+const INNormaliseCases = (provinceCases) => provinceCases.map(cases => Math.log(cases)/10);
+const INDenormaliseCases = (provinceCases) => provinceCases.map(cases => Math.exp(cases*10));
+
+const USNormaliseCases = (provinceCases) => provinceCases.map(cases => cases / 1_000_000);
+const USDenormaliseCases = (provinceCases) => provinceCases.map(cases => cases * 1_000_000);
 
 export default getDataAndPredictions

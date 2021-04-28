@@ -27,6 +27,10 @@ export const CasesChart = (props) => {
 
   const { state, recorded, predicted } = props;
 
+  const data = recorded.slice(-7).concat(predicted.slice(7, 14))
+  console.log("MIN", Math.min(...data))
+
+
   const options = {
     chart: {
       type: 'line',
@@ -78,15 +82,16 @@ export const CasesChart = (props) => {
       categories: sevenDaysBeforeAndAfter(),
     },
     yaxis: {
-      min: 0,
+      min: Math.min(...data) > 100_000 ? 100_000 : 0,
       decimalsInFloat: 0,
+      forceNiceScale: true,
     }
   }
 
   const series = [
     {
       name: "Cases",
-      data: recorded.slice(-7).concat(predicted.slice(2, 9))
+      data: data
     }
   ];
 
