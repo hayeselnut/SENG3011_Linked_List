@@ -10,15 +10,14 @@ export function getcoord(country,state) {
     // Result is a list of event_date, url and headline
     const value = [];
   //  console.log(state);
-    if(country == 'india'){
+    if(country === 'india'){
 
        // console.log(Coords);
         for (var i  in INCoords){
             //console.log(Coords[i]);
             var ii = INCoords[i];
           //  console.log(ii.properties.city,city,ii.properties.state , state);
-            if (ii.properties.state == state){
-                
+            if (ii.properties.state === state){
                 for(var x in ii.coordinates){
                     var xx = ii.coordinates[x];
                    // console.log(xx);
@@ -34,9 +33,8 @@ export function getcoord(country,state) {
         for (var i  in USCoords){
             //console.log(Coords[i]);
             var ii = USCoords[i];
-            console.log(ii.properties.state , state);
+            // console.log(ii.properties.state , state);
             if (ii.properties.state == state){
-                
                 for(var x in ii.coordinates){
                     var xx = ii.coordinates[x];
                    // console.log(xx);

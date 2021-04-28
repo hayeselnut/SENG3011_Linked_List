@@ -27,6 +27,10 @@ export const CasesChart = (props) => {
 
   const { state, recorded, predicted } = props;
 
+  const data = recorded.slice(-7).concat(predicted.slice(7, 14))
+  console.log("MIN", Math.min(...data))
+
+
   const options = {
     chart: {
       type: 'line',
@@ -48,7 +52,7 @@ export const CasesChart = (props) => {
       colors: ['#f44336'],
     },
     title: {
-      text: `Covid-19 Cases in ${state}`,
+      text: `Active COVID-19 Cases in ${state}`,
       align: 'middle'
     },
     grid: {
@@ -76,13 +80,18 @@ export const CasesChart = (props) => {
     },
     xaxis: {
       categories: sevenDaysBeforeAndAfter(),
+    },
+    yaxis: {
+      min: Math.min(...data) > 100_000 ? 100_000 : 0,
+      decimalsInFloat: 0,
+      forceNiceScale: true,
     }
   }
 
   const series = [
     {
       name: "Cases",
-      data: recorded.slice(-7).concat(predicted.slice(0, 7)),
+      data: data
     }
   ];
 
