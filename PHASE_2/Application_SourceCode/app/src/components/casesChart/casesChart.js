@@ -86,7 +86,7 @@ export const CasesChart = (props) => {
   const series = [
     {
       name: "Cases",
-      data: recorded.slice(-7).concat(predicted.slice(1, 7)),
+      data: recorded.slice(-7).concat(predicted.slice(2, 9))
     }
   ];
 
