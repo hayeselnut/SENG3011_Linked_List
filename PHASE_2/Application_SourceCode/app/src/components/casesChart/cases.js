@@ -1,7 +1,8 @@
 import covid19Api from "../../apis/covid19Api.js"
 import brain from "brain.js/src";
 import SupportedCountries from "../../assets/SupportedCountries.json";
-import trainedBrainJsonConfig from "../../assets/brain.json";
+import USBrain from "../../assets/USBrain.json";
+import INBrain from "../../assets/INBrain.json";
 
 const getDataAndPredictions = async (country) => {
   const lastMonth = getLastMonth();
@@ -10,14 +11,16 @@ const getDataAndPredictions = async (country) => {
   const recordedActiveCasesByProvince = getActiveCasesOnly(covid19Data);
 
   const trainingData = convertToTrainingData(recordedActiveCasesByProvince);
-  const predictionsByDays = getPredictionsByDays(trainingData);
+  const predictionsByDays = getPredictionsByDays(country, trainingData);
   const predictionsByProvince = convertToPredictionsByProvinces(recordedActiveCasesByProvince, predictionsByDays);
+
+  console.log(predictionsByProvince);
   return [recordedActiveCasesByProvince, predictionsByProvince];
 }
 
 const getLastMonth = () => {
   const ONE_DAY = 86400000;
-  const ONE_MONTH = ONE_DAY * 31 * 12;
+  const ONE_MONTH = ONE_DAY * 31;
 
   const now = new Date();
   const yesterday = new Date(now - ONE_DAY);
@@ -78,14 +81,14 @@ const convertToTrainingData = (recordedCasesByProvince) => {
   return trainingData;
 }
 
-const getPredictionsByDays = (trainingData) => {
-  const net = trainBrain(trainingData)
+const getPredictionsByDays = (country, trainingData) => {
+  const net = trainBrain(country, trainingData)
   const lastDay = trainingData.length - 1
   const daysToPredict = 30
   return net.forecast([trainingData[lastDay]], daysToPredict).map(denormaliseCases);
 }
 
-const trainBrain = (trainingData) => {
+const trainBrain = (country, trainingData) => {
   const net = new brain.recurrent.LSTMTimeStep({
     inputSize: trainingData[0].length,
     hiddenLayers: [10],
@@ -93,10 +96,12 @@ const trainBrain = (trainingData) => {
   });
 
   // FOR TRAINING ONLY:
-  // const iterations = 100_000;
+  // const iterations = 10000;
   // net.train(trainingData.map(normaliseCases), { log: true, iterations: iterations });
+  // console.log(JSON.stringify(net.toJSON()))
+  // alert();
 
-  net.fromJSON(trainedBrainJsonConfig);
+  net.fromJSON(country === "united-states" ? USBrain : INBrain);
 
   return net;
 }
@@ -113,9 +118,7 @@ const convertToPredictionsByProvinces = (recordedCasesByProvince, predictionsByD
 
   for (const Province in recordedCasesByProvince) {
     for (let i = 0; i < numberOfDays; i++) {
-
       const indexOfProvince = listOfProvinces.indexOf(Province);
-
       predictionsCasesByProvince[Province].push(predictionsByDays[i][indexOfProvince]);
     }
   }

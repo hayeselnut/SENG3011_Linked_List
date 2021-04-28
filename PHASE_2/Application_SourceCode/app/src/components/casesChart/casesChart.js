@@ -80,14 +80,13 @@ export const CasesChart = (props) => {
     yaxis: {
       min: 0,
       decimalsInFloat: 0,
-      logarithmic: true,
     }
   }
 
   const series = [
     {
       name: "Cases",
-      data: recorded.slice(-7).concat(predicted.slice(1, 7)),
+      data: recorded.slice(-7).concat(predicted.slice(2, 9))
     }
   ];
 
