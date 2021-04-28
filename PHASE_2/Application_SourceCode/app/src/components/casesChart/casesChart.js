@@ -80,7 +80,6 @@ export const CasesChart = (props) => {
     yaxis: {
       min: 0,
       decimalsInFloat: 0,
-      logarithmic: true,
     }
   }
 
