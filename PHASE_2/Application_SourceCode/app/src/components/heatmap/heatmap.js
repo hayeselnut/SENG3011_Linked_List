@@ -53,13 +53,6 @@ const Heatmap = (props) => {
 
   console.log(dangerIndexes);
 
-  // {SupportedCountries[country].Provinces.map(Province => (
-  //   <Polygon
-  //   paths={getcoord(country, Province)} 
-  //   options={stateOutlineOptions}
-  // />
-  // ))}
-
   return (
     <>
       {Object.keys(dangerIndexes).map((Province, index) => (
@@ -69,9 +62,6 @@ const Heatmap = (props) => {
           options={getOptions(dangerIndexes[Province], Province === province)}
         />
       ))}
-      {/* {Object.entries(dangerIndexes).map((Province, index) => (
-        "Polygon " +"
-      ))} */}
     </>
   );
 };
