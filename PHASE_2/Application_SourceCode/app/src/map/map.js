@@ -258,7 +258,7 @@ const Map = () => {
               callback={directionsCallback}
             />}
             <AllRouteRenderer/>
-            {markers()}
+            {/* {markers()} */}
             <Polygon id = "poly"
               paths={getcoord(country,province)} 
 
