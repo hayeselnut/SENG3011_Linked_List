@@ -156,15 +156,6 @@ const Map = () => {
     height: "100%"
   }
 
-  const ohioOptions = {
-    strokeColor: '#000000',
-    strokeOpacity: 0.8,
-    strokeWeight: 3,
-    fillcolor: '#000000',
-    fillOpacity: 0,
-    zIndex: 1
-  };
-
   const directionsCallback = (response) => {
     if (response !== null) {
       if (response.status === 'OK') {
