@@ -49,10 +49,6 @@ export function getcoord(country,state) {
 
     }
 
-<<<<<<< HEAD
   //  console.log(value);
-=======
-    // console.log(value);
->>>>>>> routes from search
     return value;
 }
