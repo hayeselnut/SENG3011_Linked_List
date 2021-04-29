@@ -16,7 +16,7 @@ const getIndexesByArticles = async (listOfProvinces) => {
         return epiwatchApi.articles("2015-01-01 00:00:00 to 3000-01-01 00:00:00", "", Province);
     }))
 
-    const maxArticles = Math.max(...resolved.map(r => r.articles.length));
+    const maxArticles = Math.max(...resolved.map(r => r.articles.length), 1);
     listOfProvinces.forEach((Province, index) => {
         articlesByProvinces[Province] = resolved[index].articles.length / maxArticles;
     })
