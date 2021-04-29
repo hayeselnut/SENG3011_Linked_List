@@ -79,15 +79,12 @@ const Search = (props) => {
           value={value}
           onChange={handleInput}
           disabled={!ready}
-          placeholder="Enter a state"
-          style={{width: "100%"}}
+          placeholder={props.placeholder}
+          style={{ width: "100%", height: "2em" }}
         />
-        <ComboboxPopover className={classes.popover}>
-        <ComboboxList className={classes.list}>
-          {status === "OK" && data.map(({id, description}) => {
-          // console.log(id, description)
-          return <ComboboxOption key={id} value={description}/>
-          })}
+        <ComboboxPopover>
+        <ComboboxList>
+          {status === "OK" && data.map(({id, description}) => <ComboboxOption key={id} value={description}/>)}
         </ComboboxList>
         </ComboboxPopover>
       </Combobox>

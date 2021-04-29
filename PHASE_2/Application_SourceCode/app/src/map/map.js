@@ -4,19 +4,20 @@ import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
 
-import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/cases.js"
-import { getcoord } from "./getcoord";
+import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/cases.js"
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import { overallCalculatorOfRouteCases } from "../components/routes/routeColouring.js";
+import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
+import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
 import Geocode from "react-geocode";
+import Heatmap from "../components/heatmap/heatmap.js";
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
 
 Geocode.setRegion("es");
@@ -46,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   paper: {
-    marginTop: '2rem',
+    marginTop: '2em',
     width: '100%',
   }
 }));
@@ -54,51 +55,33 @@ const useStyles = makeStyles((theme) => ({
 const libraries = ["places"];
 
 function useAsyncHook(location) {
-  // Result is a list of event_date, url and headline
-  const [result, setResult] = React.useState([])
-  const [loading, setLoading] = React.useState("false");
-  const [caseLoading, setCaseLoading] = React.useState("false");
+  const [articles, setArticles] = React.useState([])
+  const [articlesLoading, setArticlesLoading] = React.useState(true);
 
   React.useEffect(() => {
     const getReports = async (poi, keyTerms, location) => {
       let myData;
+      setArticlesLoading(true);
       try {
         myData = await epiwatchApi.articles(poi, keyTerms, location);
-
-        setResult(
-          [myData.articles[0].headline, myData.articles[0].url, myData.articles[0].reports[0].event_date]
-        )
-
+        console.log(myData);
+        setArticles(myData.articles);
+        setArticlesLoading(false);
       } catch {
-        setLoading("null");
+        setArticlesLoading(true);
       }
     }
 
     getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
   }, [location])
-  return [result, loading];
-}
-
-const supportedCountries = {
-  "united-states": {
-    "Country": "USA",
-    "Slug": "united-states",
-    "ISO2": "US",
-    "Provinces": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virgin Islands", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
-  },
-  "india": {
-    "Country": "India",
-    "Slug": "india",
-    "ISO2": "IN",
-    "Provinces": ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
-  },
+  return [articles, articlesLoading];
 }
 
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
-  const [result, loading] = useAsyncHook(province);
+  const [articles, articlesLoading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
   const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
@@ -112,10 +95,10 @@ const Map = () => {
   const [routecitys, setRoutecitys] = React.useState([]);
   const [routecitySearch, setRoutecitysSearch] = React.useState(true);
   const [casesByCity, setCasesByCity] = React.useState(true);
+  const [cases, setcases] = React.useState({});
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
-      console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
@@ -188,16 +171,6 @@ const Map = () => {
 
   }
 
-  // console.log(result,loading);
-  let eventDate, headline, url;
-  let results = false;
-  if (result.length !== 0) {
-    eventDate = result[2].split('T')[0];
-    // console.log(eventDate);
-    headline = result[0];
-    url = result[1];
-    results = true;
-  }
   const classes = useStyles();
   const mapContainerStyle = {
     width: "100%",
@@ -273,6 +246,7 @@ const Map = () => {
           />
         )
       })
+      console.log('rr',routes);
       return routes;
     } 
     return null;
@@ -311,6 +285,8 @@ const Map = () => {
                         case "country":
                           country = response.results[0].address_components[i].long_name;
                           break;
+                        default:
+                          break;
                       }
                     }
                   }
@@ -320,18 +296,12 @@ const Map = () => {
                   console.error('error');
                 }
               );
-
               qq = 0;
-
             }
-           // console.log(se1);
           }
-
         }
         se.push(se1);
-
       }
-
       setRoutecitys(se);
       console.log("se",se);
       console.log("rctiys:",routecitys);
@@ -354,26 +324,31 @@ const Map = () => {
         recordedCases={recordedCases}
         predictedCases={predictedCases}
       />
-      <Grid container className={classes.root}>
-        <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
-          <Grid item xs>
+      <Grid container className={classes.root} spacing={2}>
+        <Grid container item direction="column" xs={12} sm={3} md={3} >
+          <Grid item>
             <div className={classes.paper}>
-              <Typography component="h1" variant="h4">
-                Route Planner
-              </Typography>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Typography style={{marginLeft: '1em', marginRight: '1em'}} component="h1" variant="h4">
+                  Route Planner
+                </Typography>
+              </div>
 
-              <Search setFunc={setOrigin}/>
-              <Search setFunc={setDest}/>
-
-              <div style={{width: "100%", display: "flex", justifyContent: "center"}} >
-                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false);}}>
+              <div style={{ display: "flex", justifyContent: "center" }} >
+                <div style={{ width: "90%" }}>
+                  <Search placeholder={"Starting location"} setFunc={setOrigin}/>
+                  <Search placeholder={"Destination"} setFunc={setDest}/>
+                </div>
+              </div>
+              <div style={{ width: "100%", display: "flex", justifyContent: "center" }} >
+                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false)}}>
                   Find safe route
                 </Button>
               </div>
             </div>
           </Grid>
           <Grid item align="center">
-            <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
+            <ArticlesShowcase articles={articles} articlesLoading={articlesLoading} province={province} />
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9} style={{position: "static"}}>
@@ -389,64 +364,10 @@ const Map = () => {
             />}
             <AllRouteRenderer/>
             <AllCityfinder/>
-            {markers()}
-            <Polygon id = "poly"
-              paths={getcoord(country,province)} 
 
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
-              because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
-              I can do it, but the system can't save it. Unless we have a database.
-              
-              
-              I don't know what the variables of our destination country and state are, so I wrote an example. 
-              You only need to change the variables in getcoord to display the corresponding continent. 
-              The continent that cannot be displayed does not match the characters, and the name may be different.
-              */
+            {/* {markers()} */}
+            <Heatmap country={country} province={province} recorded={recordedCases}/>
 
-              // for future
-            /*  <Polygon id = "poly"
-              paths={getcoord(destination_country,destination_province)} //
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            /> */
-  
-
-            /*
-            <Polygon
-              paths={nyDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny2Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny3Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny4Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={connectDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={massDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-          </GoogleMap> */}
-          
           </GoogleMap>
         </Grid>
       </Grid>

@@ -66,6 +66,7 @@ const routeCases = (routecitys, setOfCitys) => {
 
 export const overallCalculatorOfRouteCases = (routecitys, casesByCity) => {
     // combines all the functions 
+    console.log(JSON.stringify(casesByCity, routecitys))
     const covidCountSet = routeCovidCalculator(routecitys, casesByCity);
     const listOfRouteSums = routeCases(routecitys, covidCountSet);
     return listOfRouteSums;
