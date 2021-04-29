@@ -178,7 +178,7 @@ const Map = () => {
   }
 
   const ohioOptions = {
-    strokeColor: '#FFFFFF',
+    strokeColor: '#000000',
     strokeOpacity: 0.8,
     strokeWeight: 3,
     fillcolor: '#000000',
@@ -351,6 +351,7 @@ const Map = () => {
         );
         heats.push(qq) 
       }
+      console.log(heats);
       return heats;
     } 
   
