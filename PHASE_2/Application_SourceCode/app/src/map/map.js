@@ -240,12 +240,16 @@ const Map = () => {
 
   }
 
-  const getChooseCoords = async () => {
+  const getChooseCoords = async (p) => {
+    
+    if(p == undefined ){
+      p = province;
+    }
+    const destPara = {
+      address: p+','+country,
+    };
 
-  const destPara = {
-    address: province+','+country,
-  };
-  console.log('put', dest);
+  console.log('put', destPara);
   try {
 
     const results = await getGeocode(destPara);
