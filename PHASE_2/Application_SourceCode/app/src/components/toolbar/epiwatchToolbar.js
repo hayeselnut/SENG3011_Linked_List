@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 const EpiWatchToolBar = (props) => {
   const classes = useStyles();
-  const { pageName, country, setCountry, province, setProvince, recordedCases, predictedCases } = props;
+  const { pageName, country, setCountry, province, setProvince, recordedCases, predictedCases,getChooseCoords } = props;
 
   return (
     <AppBar position="static">
@@ -42,7 +42,7 @@ const EpiWatchToolBar = (props) => {
             id="country-select"
             value={country}
             style={{ backgroundColor: "white" }}
-            onChange={(e) => {setCountry(e.target.value); setProvince(SupportedCountries[e.target.value].Provinces[0])}}
+            onChange={(e) => {setCountry(e.target.value); setProvince(SupportedCountries[e.target.value].Provinces[0]); }}
           >
             {Object.keys(SupportedCountries).map((key, index) => (
               <MenuItem key={index} value={SupportedCountries[key].Slug}>{SupportedCountries[key].Country}</MenuItem>
@@ -55,7 +55,7 @@ const EpiWatchToolBar = (props) => {
             id="state-select"
             value={province}
             style={{ backgroundColor: "white" }}
-            onChange={(e) => setProvince(e.target.value)}
+            onChange={(e) => {setProvince(e.target.value);getChooseCoords();}}
           >
             {SupportedCountries[country].Provinces.map((province, index) => (
               <MenuItem key={index} value={province}>{province}</MenuItem>
