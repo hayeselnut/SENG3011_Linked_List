@@ -19,8 +19,8 @@ const routeCovidCalculator = (routecitys, casesByCity) => {
         // if the "City" key
         // console.log('looping', value);
         if (value.City in setOfCitys) {
-            console.log('value.City', value.City, value);
-            setOfCitys[value.City] = value.dataByDates[newDate].active;
+            console.log('value.City', value.City, value, value.dataByDates[newDate].Active);
+            setOfCitys[value.City] = Number(value.dataByDates[newDate].Active);
         } 
         // console.log(key, value);
             
@@ -31,21 +31,21 @@ const routeCovidCalculator = (routecitys, casesByCity) => {
 
 const calcSetOfCitys = (routecitys) => {
     let setOfCitys = {};
-    console.log('calc', JSON.stringify(routecitys));
+    // console.log('calc', JSON.stringify(routecitys));
     routecitys.forEach((route) => {
-        console.log('route', JSON.stringify(route));
+        // console.log('route', JSON.stringify(route));
         route.forEach((city) => {
-            console.log('city', JSON.stringify(city));
-            console.log(city[0]);
+            // console.log('city', JSON.stringify(city));
+            // console.log(city[0]);
             if (!setOfCitys.hasOwnProperty(city[0])) {
                 setOfCitys[city[0]] = 0;
             }
             // city.forEach((item) => {
             // })
         })
-        for (const item in route) {
-            console.log('item', item);
-        }
+        // for (const item in route) {
+        //     console.log('item', item);
+        // }
     })
     console.log('set', setOfCitys)
     return setOfCitys;
@@ -56,7 +56,8 @@ const routeCases = (routecitys, setOfCitys) => {
     const listOfRouteSums = routecitys.map((route) => {
         let sum = 0;
         route.forEach((city) => {
-            sum += setOfCitys[city];
+            console.log('setofcitys', setOfCitys[city[0]])
+            sum += setOfCitys[city[0]];
         })
         return sum; 
     })
@@ -64,10 +65,35 @@ const routeCases = (routecitys, setOfCitys) => {
     return listOfRouteSums;
 }
 
+const rank = (listOfRouteSums) => {
+    const dictOfSums = {}
+    let highest = 0;
+    let highestId = 0
+    let lowest = listOfRouteSums[0];
+    let lowestId = 0;
+    listOfRouteSums.forEach((sum, id) => {
+        dictOfSums[id] = sum;
+        if (lowest > sum) {
+            lowest = sum;
+            lowestId = id;
+        } 
+        if (highest < sum) {
+            highest = sum;
+            highestId = id;
+        }
+    })
+    dictOfSums["highestId"] = highestId;
+    dictOfSums["lowestId"] = lowestId;
+    return dictOfSums
+}
+
+
 export const overallCalculatorOfRouteCases = (routecitys, casesByCity) => {
     // combines all the functions 
     console.log(JSON.stringify(casesByCity, routecitys))
     const covidCountSet = routeCovidCalculator(routecitys, casesByCity);
+    console.log('covid', covidCountSet);
     const listOfRouteSums = routeCases(routecitys, covidCountSet);
-    return listOfRouteSums;
+    const ranks = rank(listOfRouteSums);
+    return ranks;
 }

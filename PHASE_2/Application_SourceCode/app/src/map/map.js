@@ -78,6 +78,67 @@ function useAsyncHook(location) {
   return [articles, articlesLoading];
 }
 
+const allCityfinder = (response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity) => {
+  if (response !== null && response.routes && !routecitySearch ) {
+    setRoutecitysSearch(true);
+
+   // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
+   const se = [];
+
+    for (let i1 = 0; i1 < response.routes.length ; i1++){
+      const se1 = [];
+      let qq = 0;//reduce call api number
+      for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
+        for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
+          qq = qq + 1;
+          var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
+          var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
+          if( qq == 3){
+
+            Geocode.fromLatLng(q1(), q2()).then(
+              (response) => {
+                const address = response.results[0].formatted_address;
+                let city, state, country;
+                for (let i = 0; i < response.results[0].address_components.length; i++) {
+                  for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
+                    switch (response.results[0].address_components[i].types[j]) {
+                      case "locality":
+                        city = response.results[0].address_components[i].long_name;
+                        break;
+                      case "administrative_area_level_1":
+                        state = response.results[0].address_components[i].long_name;
+                        break;
+                      case "country":
+                        country = response.results[0].address_components[i].long_name;
+                        break;
+                      default:
+                        break;
+                    }
+                  }
+                }
+                se1.push([city,state,country]);
+              },
+              (error) => {
+                console.error('error');
+              }
+            );
+            qq = 0;
+          }
+        }
+      }
+      se.push(se1);
+    }
+    setRoutecitys(se);
+    console.log("se",se);
+    console.log("rctiys:",routecitys);
+    // const a = await sleep(1000);
+    const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
+    console.log('answer', ans);
+
+  } 
+  return null;
+}
+
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
@@ -96,6 +157,7 @@ const Map = () => {
   const [routecitySearch, setRoutecitysSearch] = React.useState(true);
   const [casesByCity, setCasesByCity] = React.useState(true);
   const [cases, setcases] = React.useState({});
+  const [routeRank, setRouteRank] = React.useState({});
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
@@ -114,8 +176,15 @@ const Map = () => {
     // if (routecitys.length > 0 && routecitySearch && routecitys) {
       const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
       console.log('answer', ans);
+      setRouteRank(ans); 
     // }
   }, [routecitys, casesByCity, routecitySearch]);
+
+
+  React.useEffect(() => { 
+    allCityfinder(response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity); 
+  },[gotDirections, response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity]);
+
 
   // React.useEffect(async () => {
   //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
@@ -237,14 +306,52 @@ const Map = () => {
     if (response !== null && response.routes) {
       console.log('routes', response.routes)
       const routes = response.routes.map((_, i) => {
+        console.log('id', i);
+      if (i === routeRank.lowestId) {
+        console.log("rank", i)
         return (
           <DirectionsRenderer
             options={{
               directions: response,
               routeIndex: i,
+              polylineOptions: { strokeColor: '#FFFFFF' }
             }}
           />
         )
+      } else if (i === routeRank.highestId) {
+          console.log("rank", i)
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+                polylineOptions: { strokeColor: '#000000' },
+                zIndex: 1
+              }}
+            />
+          )
+
+        } else if (routeRank === {}) {
+          console.log("rank", "{}")
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+              }}
+            />
+          )
+        } else {
+          console.log("asdlkfj rank")
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+              }}
+            />
+          )
+        }
       })
       console.log('rr',routes);
       return routes;
@@ -252,66 +359,6 @@ const Map = () => {
     return null;
   }
 
-  const AllCityfinder = async () => {
-    if (response !== null && response.routes && !routecitySearch ) {
-      setRoutecitysSearch(true);
-
-     // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
-     const se = [];
-
-      for (let i1 = 0; i1 < response.routes.length ; i1++){
-        const se1 = [];
-        let qq = 0;//reduce call api number
-        for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
-          for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
-            qq = qq + 1;
-            var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
-            var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
-            if( qq == 3){
-
-              Geocode.fromLatLng(q1(), q2()).then(
-                (response) => {
-                  const address = response.results[0].formatted_address;
-                  let city, state, country;
-                  for (let i = 0; i < response.results[0].address_components.length; i++) {
-                    for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
-                      switch (response.results[0].address_components[i].types[j]) {
-                        case "locality":
-                          city = response.results[0].address_components[i].long_name;
-                          break;
-                        case "administrative_area_level_1":
-                          state = response.results[0].address_components[i].long_name;
-                          break;
-                        case "country":
-                          country = response.results[0].address_components[i].long_name;
-                          break;
-                        default:
-                          break;
-                      }
-                    }
-                  }
-                  se1.push([city,state,country]);
-                },
-                (error) => {
-                  console.error('error');
-                }
-              );
-              qq = 0;
-            }
-          }
-        }
-        se.push(se1);
-      }
-      setRoutecitys(se);
-      console.log("se",se);
-      console.log("rctiys:",routecitys);
-      // const a = await sleep(1000);
-      const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
-      console.log('answer', ans);
-
-    } 
-    return null;
-  }
 
   return (
     <div style={mapPageStyle}>
@@ -363,7 +410,6 @@ const Map = () => {
               callback={directionsCallback}
             />}
             <AllRouteRenderer/>
-            <AllCityfinder/>
 
             {/* {markers()} */}
             <Heatmap country={country} province={province} recorded={recordedCases}/>
