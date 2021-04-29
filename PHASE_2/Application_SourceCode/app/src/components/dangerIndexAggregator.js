@@ -13,7 +13,7 @@ const aggregateDangerIndexes = async (activeCasesByProvince) => {
 const getIndexesByArticles = async (listOfProvinces) => {
     const articlesByProvinces = {};
     const resolved = await Promise.all(listOfProvinces.map(Province => {
-        return epiwatchApi.articles("2015-01-01 00:00:00 to 3000-01-01 00:00:00", "", Province);
+        return epiwatchApi.articles(`${new Date().getYear() + 1900 - 5}-01-01 00:00:00 to 3000-01-01 00:00:00`, "", Province);
     }))
 
     const maxArticles = Math.max(...resolved.map(r => r.articles.length), 1);
@@ -27,16 +27,14 @@ const getIndexesByArticles = async (listOfProvinces) => {
 const getIndexesByCases = (activeCasesByProvince) => {
     const mostRecentActiveCasesByProvince = {};
     const caseIndexesByProvinces = {};
-    let maxCases = 0;
     for (const Province in activeCasesByProvince) {
         mostRecentActiveCasesByProvince[Province] = activeCasesByProvince[Province][activeCasesByProvince[Province].length - 1];
-        if (maxCases < mostRecentActiveCasesByProvince[Province]) {
-            maxCases = mostRecentActiveCasesByProvince[Province];
-        }
     }
 
     for (const Province in mostRecentActiveCasesByProvince) {
-        caseIndexesByProvinces[Province] = mostRecentActiveCasesByProvince[Province] / maxCases
+        // Any cases above 1_000_000 are indexed at most dangerous (i.e. index = 1)
+        const loggedIndex = Math.log10(mostRecentActiveCasesByProvince[Province]) / 6;
+        caseIndexesByProvinces[Province] = Math.min(Math.max(loggedIndex, 0), 1);
     }
 
     return caseIndexesByProvinces;
@@ -46,7 +44,8 @@ const combineIndexes = (indexesByArticlesOnly, indexesByCasesOnly) => {
     // 10% is articles, 90% is cases
     const summedIndexes = {};
     for (const Province in indexesByArticlesOnly) {
-        summedIndexes[Province] = indexesByArticlesOnly[Province] * 10 + indexesByCasesOnly[Province] * 90;
+        let outOf100 = indexesByArticlesOnly[Province] * 10 + indexesByCasesOnly[Province] * 90;
+        summedIndexes[Province] =  Math.min(Math.max(outOf100, 0), 100);
     }
 
     return summedIndexes;
