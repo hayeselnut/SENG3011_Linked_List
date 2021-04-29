@@ -13,10 +13,10 @@ const aggregateDangerIndexes = async (activeCasesByProvince) => {
 const getIndexesByArticles = async (listOfProvinces) => {
     const articlesByProvinces = {};
     const resolved = await Promise.all(listOfProvinces.map(Province => {
-        return epiwatchApi.articles("2015-01-01 00:00:00 to 3000-01-01 00:00:00", "", Province);
+        return epiwatchApi.articles(`${new Date().getYear() + 1900 - 5}-01-01 00:00:00 to 3000-01-01 00:00:00`, "", Province);
     }))
 
-    const maxArticles = Math.max(...resolved.map(r => r.articles.length));
+    const maxArticles = Math.max(...resolved.map(r => r.articles.length), 1);
     listOfProvinces.forEach((Province, index) => {
         articlesByProvinces[Province] = resolved[index].articles.length / maxArticles;
     })
@@ -46,7 +46,8 @@ const combineIndexes = (indexesByArticlesOnly, indexesByCasesOnly) => {
     // 10% is articles, 90% is cases
     const summedIndexes = {};
     for (const Province in indexesByArticlesOnly) {
-        summedIndexes[Province] = indexesByArticlesOnly[Province] * 10 + indexesByCasesOnly[Province] * 90;
+        let outOf100 = indexesByArticlesOnly[Province] * 10 + indexesByCasesOnly[Province] * 90;
+        summedIndexes[Province] = Math.sqrt(10_000 - (outOf100 - 100) * (outOf100 - 100));
     }
 
     return summedIndexes;
