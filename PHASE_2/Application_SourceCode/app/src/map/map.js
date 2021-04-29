@@ -9,7 +9,7 @@ import { centerCoords } from "./centerCoords.js";
 import epiwatchApi from "../apis/epiwatchApi.js"
 
 import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/cases.js"
-import { getcoord } from "./getcoord";
+import { getcoord} from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
@@ -178,11 +178,11 @@ const Map = () => {
   }
 
   const ohioOptions = {
-    strokeColor: '#FF000',
+    strokeColor: '#FFFFFF',
     strokeOpacity: 0.8,
     strokeWeight: 3,
-    fillcolor: '#FFFF00',
-    fillOpacity: 0.35,
+    fillcolor: '#000000',
+    fillOpacity: 0,
     zIndex: 1
   };
 
@@ -287,9 +287,7 @@ const Map = () => {
 
 
   function percentToRGB(percent) { 
-    if (percent === 100) { 
-     percent = 99 
-    } 
+
     var r, g, b; 
 
     if (percent < 50) { 
@@ -323,7 +321,7 @@ const Map = () => {
 
     var color = percentToRGB(data);
     var modelOptions = {
-      strokeColor: color,
+      strokeColor: '#000000',
       strokeOpacity: 0.8,
       strokeWeight: 3,
       fillColor: color,
@@ -335,31 +333,28 @@ const Map = () => {
   }
 
   const Heatmap = () => {
-  /*  if (response !== null) {
 
-      const heats = response.map((curr, i) => {
-        return (
-          <Polygon 
-            id = {i}
-            paths={getcoord(curr.country,curr.province)} 
-            options={checkcolor(curr.percent)}
-            onLoad={ohioOnLoad}
-         />
-        )
-      })
+    var res = aggregateDangerIndexes(recordedCases);
+  //  var datac = getuscoord();
+    if (res !== null) {
+
+      const heats = [];
+
+      for (var key in res){
+       var qq = (            
+          <Polygon id = "poly"
+              paths={getcoord("us",key)} 
+              options={checkcolor(res[key])}
+              onLoad={ohioOnLoad}
+            />   
+
+        );
+        heats.push(qq) 
+      }
       return heats;
     } 
   
-    return null; */
-
-    return(
-      <Polygon 
-        id = {1}
-        paths={getcoord('us','Alabama')} 
-        options={checkcolor(10)}
-        onLoad={ohioOnLoad}
-      />
-      )
+    return null; 
   }
 
   return (
@@ -415,14 +410,14 @@ const Map = () => {
             <AllCityfinder/>
 
             {markers()}
+
+            <Heatmap/>       
             <Polygon id = "poly"
               paths={getcoord(country,province)} 
 
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            />
-
-            <Heatmap/>          
+            />   
 
 
           </GoogleMap>

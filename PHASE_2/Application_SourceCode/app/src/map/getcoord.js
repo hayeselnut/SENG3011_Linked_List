@@ -50,3 +50,4 @@ export function getcoord(country,state) {
     // console.log(value);
     return value;
 }
+
