@@ -4,7 +4,6 @@ import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
 
-import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
@@ -14,6 +13,8 @@ import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
+import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
+import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
 import Geocode from "react-geocode";
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
@@ -45,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   paper: {
-    marginTop: '2rem',
+    marginTop: '2em',
     width: '100%',
   }
 }));
@@ -53,30 +54,27 @@ const useStyles = makeStyles((theme) => ({
 const libraries = ["places"];
 
 function useAsyncHook(location) {
-  // Result is a list of event_date, url and headline
-  const [result, setResult] = React.useState([])
-  const [loading, setLoading] = React.useState("false");
-  const [caseLoading, setCaseLoading] = React.useState("false");
+  const [articles, setArticles] = React.useState([])
+  const [articlesLoading, setArticlesLoading] = React.useState(true);
 
   React.useEffect(() => {
     const getReports = async (poi, keyTerms, location) => {
       let myData;
+      setArticlesLoading(true);
       try {
         myData = await epiwatchApi.articles(poi, keyTerms, location);
-
-        setResult(
-          [myData.articles[0].headline, myData.articles[0].url, myData.articles[0].reports[0].event_date]
-        )
-
+        console.log(myData);
+        setArticles(myData.articles);
+        setArticlesLoading(false);
       } catch {
-        setLoading("null");
+        setArticlesLoading(true);
       }
     }
 
     getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
   }, [location])
-  return [result, loading];
+  return [articles, articlesLoading];
 }
 
 const supportedCountries = {
@@ -97,7 +95,7 @@ const supportedCountries = {
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
-  const [result, loading] = useAsyncHook(province);
+  const [articles, articlesLoading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
   const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
@@ -114,39 +112,16 @@ const Map = () => {
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
-      console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
 
+      console.log(aggregateDangerIndexes(recorded));
     });
+
     
     getCasesByCity(country).then(x => console.log(x));
 
   }, [country]);
-
-  // React.useEffect(async () => {
-  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
-  //   const destPara = {
-  //     address: dest,
-  //   };
-  //   console.log('dest', dest);
-  //   try {
-
-  //     const results = await getGeocode(destPara);
-  //     const coords = await getLatLng(results[0]);
-  //     console.log('coords', coords);
-  //     setDestLatLng(coords);
-  //   } catch (error) {
-  //     console.log("Error: ", error);
-  //   }
-
-  // },[dest])
-
-  // React.useEffect(async () => {
-  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
-
-
-  // },[origin])
 
 
   const getDirectionCoords = async () => {
@@ -179,16 +154,6 @@ const Map = () => {
 
   }
 
-  // console.log(result,loading);
-  let eventDate, headline, url;
-  let results = false;
-  if (result.length !== 0) {
-    eventDate = result[2].split('T')[0];
-    // console.log(eventDate);
-    headline = result[0];
-    url = result[1];
-    results = true;
-  }
   const classes = useStyles();
   const mapContainerStyle = {
     width: "100%",
@@ -223,15 +188,6 @@ const Map = () => {
 
   const ohioOnLoad = (polygon) => {
   }
-
-  // const latlngs = {
-  //     "state": {lat: lng:}
-  // }
-
-  // const directionsService = new window.google.maps.DirectionsService();
-
-  // const origin = centerCoords['New York, USA'];
-  // const destination = centerCoords['Ohio, USA'];
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -417,26 +373,31 @@ const Map = () => {
         recordedCases={recordedCases}
         predictedCases={predictedCases}
       />
-      <Grid container className={classes.root}>
-        <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
-          <Grid item xs>
+      <Grid container className={classes.root} spacing={2}>
+        <Grid container item direction="column" xs={12} sm={3} md={3} >
+          <Grid item>
             <div className={classes.paper}>
-              <Typography component="h1" variant="h4">
-                Route Planner
-              </Typography>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Typography component="h1" variant="h4">
+                  Route Planner
+                </Typography>
+              </div>
 
-              <Search setFunc={setOrigin}/>
-              <Search setFunc={setDest}/>
-
-              <div style={{width: "100%", display: "flex", justifyContent: "center"}} >
-                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false);}}>
+              <div style={{ display: "flex", justifyContent: "center" }} >
+                <div style={{ width: "90%" }}>
+                  <Search placeholder={"Starting location"} setFunc={setOrigin}/>
+                  <Search placeholder={"Destination"} setFunc={setDest}/>
+                </div>
+              </div>
+              <div style={{ width: "100%", display: "flex", justifyContent: "center" }} >
+                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false)}}>
                   Find safe route
                 </Button>
               </div>
             </div>
           </Grid>
           <Grid item align="center">
-            <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
+            <ArticlesShowcase articles={articles} articlesLoading={articlesLoading} province={province} />
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9} style={{position: "static"}}>
@@ -462,6 +423,7 @@ const Map = () => {
             />
 
             <Heatmap/>          
+
 
           </GoogleMap>
         </Grid>
