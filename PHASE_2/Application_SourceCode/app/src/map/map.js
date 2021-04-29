@@ -266,18 +266,23 @@ const Map = () => {
         recordedCases={recordedCases}
         predictedCases={predictedCases}
       />
-      <Grid container className={classes.root}>
-        <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
+      <Grid container className={classes.root}  spacing={2}>
+        <Grid container item direction="column" xs={12} sm={3} md={3} >
           <Grid item xs>
             <div className={classes.paper}>
-              <Typography component="h1" variant="h4">
-                Route Planner
-              </Typography>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <Typography component="h1" variant="h4">
+                  Route Planner
+                </Typography>
+              </div>
 
-              <Search setFunc={setOrigin}/>
-              <Search setFunc={setDest}/>
-
-              <div style={{width: "100%", display: "flex", justifyContent: "center"}} >
+              <div style={{ display: "flex", justifyContent: "center" }} >
+                <div style={{ width: "90%" }}>
+                  <Search placeholder={"Starting location"} setFunc={setOrigin}/>
+                  <Search placeholder={"Destination"} setFunc={setDest}/>
+                </div>
+              </div>
+              <div style={{ width: "100%", display: "flex", justifyContent: "center" }} >
                 <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
                   Find safe route
                 </Button>

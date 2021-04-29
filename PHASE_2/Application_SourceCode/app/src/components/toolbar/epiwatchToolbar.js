@@ -6,9 +6,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import SupportedCountries from "../../assets/SupportedCountries.json"
 import { CasesChartModal } from "../casesChart/casesChartModal.js";
 
-import GraphIcon from '@material-ui/icons/Assessment';
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -35,12 +32,6 @@ const EpiWatchToolBar = (props) => {
 
   return (
     <Toolbar>
-      <Link href="/" color="inherit">
-        <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-          <HomeIcon />
-        </IconButton>
-      </Link>
-
       <Typography variant="h6" className={classes.title}>{pageName}</Typography>
 
       <FormControl variant="outlined" className={classes.formCountryControl}>
