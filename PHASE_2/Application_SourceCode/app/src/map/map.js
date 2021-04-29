@@ -14,6 +14,7 @@ import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
+import { routeCovidCalculator } from "../components/routes/routeColouring.js";
 
 import Geocode from "react-geocode";
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
@@ -108,8 +109,9 @@ const Map = () => {
   const [originLatLng, setOriginLatLng] = React.useState({});
   const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
   const [gotDirections, setGotDirections] = React.useState(false); 
-  const [routecitys, setRoutecitys] = React.useState({});
+  const [routecitys, setRoutecitys] = React.useState([]);
   const [routecitySearch, setRoutecitysSearch] = React.useState(true);
+  const [casesByCity, setCasesByCity] = React.useState(true);
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
@@ -118,9 +120,19 @@ const Map = () => {
       setPredictedCases(predicted);
     });
 
-    getCasesByCity(country).then(x => console.log(x));
+    getCasesByCity(country).then(x => setCasesByCity(x));
 
   }, [country]);
+
+  React.useEffect(() => {
+
+    // calculate covid along this route everytime the cities is updated 
+    console.log('routecities', routecitys)
+    if (routecitys.length > 0) {
+      const ans = routeCovidCalculator(routecitys, casesByCity);
+      console.log('answer', ans);
+    }
+  }, [routecitys, casesByCity]);
 
   // React.useEffect(async () => {
   //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
