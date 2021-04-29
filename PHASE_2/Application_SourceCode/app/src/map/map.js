@@ -14,7 +14,7 @@ import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
-import { routeCovidCalculator } from "../components/routes/routeColouring.js";
+import { overallCalculatorOfRouteCases } from "../components/routes/routeColouring.js";
 
 import Geocode from "react-geocode";
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
@@ -128,11 +128,11 @@ const Map = () => {
 
     // calculate covid along this route everytime the cities is updated 
     console.log('routecities', routecitys)
-    if (routecitys.length > 0) {
-      const ans = routeCovidCalculator(routecitys, casesByCity);
+    // if (routecitys.length > 0 && routecitySearch && routecitys) {
+      const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
       console.log('answer', ans);
-    }
-  }, [routecitys, casesByCity]);
+    // }
+  }, [routecitys, casesByCity, routecitySearch]);
 
   // React.useEffect(async () => {
   //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
@@ -241,6 +241,9 @@ const Map = () => {
 
   // const origin = centerCoords['New York, USA'];
   // const destination = centerCoords['Ohio, USA'];
+  // const sleep = (ms) => {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -275,7 +278,7 @@ const Map = () => {
     return null;
   }
 
-  const AllCityfinder = () => {
+  const AllCityfinder = async () => {
     if (response !== null && response.routes && !routecitySearch ) {
       setRoutecitysSearch(true);
 
@@ -332,6 +335,9 @@ const Map = () => {
       setRoutecitys(se);
       console.log("se",se);
       console.log("rctiys:",routecitys);
+      // const a = await sleep(1000);
+      const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
+      console.log('answer', ans);
 
     } 
     return null;
