@@ -386,37 +386,44 @@ const Map = () => {
 
       for (let i1 = 0; i1 < response.routes.length ; i1++){
         const se1 = [];
+        let qq = 0;//reduce call api number
         for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
           for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
-
+            qq = qq + 1;
             var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
             var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
-            
-            Geocode.fromLatLng(q1(), q2()).then(
-              (response) => {
-                const address = response.results[0].formatted_address;
-                let city, state, country;
-                for (let i = 0; i < response.results[0].address_components.length; i++) {
-                  for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
-                    switch (response.results[0].address_components[i].types[j]) {
-                      case "locality":
-                        city = response.results[0].address_components[i].long_name;
-                        break;
-                      case "administrative_area_level_1":
-                        state = response.results[0].address_components[i].long_name;
-                        break;
-                      case "country":
-                        country = response.results[0].address_components[i].long_name;
-                        break;
+            if( qq == 3){
+
+              Geocode.fromLatLng(q1(), q2()).then(
+                (response) => {
+                  const address = response.results[0].formatted_address;
+                  let city, state, country;
+                  for (let i = 0; i < response.results[0].address_components.length; i++) {
+                    for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
+                      switch (response.results[0].address_components[i].types[j]) {
+                        case "locality":
+                          city = response.results[0].address_components[i].long_name;
+                          break;
+                        case "administrative_area_level_1":
+                          state = response.results[0].address_components[i].long_name;
+                          break;
+                        case "country":
+                          country = response.results[0].address_components[i].long_name;
+                          break;
+                      }
                     }
                   }
+                  se1.push([city,state,country]);
+                },
+                (error) => {
+                  console.error('error');
                 }
-                se1.push([city,state,country]);
-              },
-              (error) => {
-                console.error('error');
-              }
-            );
+              );
+
+              qq = 0;
+
+            }
+
           }
 
         }
