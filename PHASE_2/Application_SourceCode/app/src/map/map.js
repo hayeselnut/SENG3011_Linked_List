@@ -41,6 +41,14 @@ import { CasesChart } from "./casesChart";
 import { CasesChartModal } from "./casesChartModal";
 import { getcoord } from "./getcoord";
 
+import Geocode from "react-geocode";
+Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+
+Geocode.setRegion("es");
+Geocode.setLanguage("en");
+Geocode.setLocationType("ROOFTOP");
+
+
 let clicked;
 
 const changeSidebar = (state) => {
@@ -197,6 +205,8 @@ const Map = () => {
   const [originLatLng, setOriginLatLng] = React.useState({});
   const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
   const [gotDirections, setGotDirections] = React.useState(false); 
+  const [routecitys, setRoutecitys] = React.useState({});
+  const [routecitySearch, setRoutecitysSearch] = React.useState(true);
 
 
   React.useEffect(() => {
@@ -321,7 +331,7 @@ const Map = () => {
       if (response.status === 'OK') {
         console.log("Positive response", response);
         // if (response.)
-        setResponse(
+        setResponse(  
           response
         )
         setGotDirections(true);
@@ -349,8 +359,9 @@ const Map = () => {
   // );
   const AllRouteRenderer = () => {
     if (response !== null && response.routes) {
-      console.log('routes', response.routes)
+      //console.log('routes', response.routes)
       const routes = response.routes.map((_, i) => {
+        console.log('routes', response.routes)
         return (
           <DirectionsRenderer
             options={{
@@ -361,6 +372,62 @@ const Map = () => {
         )
       })
       return routes;
+    } 
+    return null;
+  }
+
+
+  const AllCityfinder = () => {
+    if (response !== null && response.routes && !routecitySearch ) {
+      setRoutecitysSearch(true);
+
+     // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
+     const se = [];
+
+      for (let i1 = 0; i1 < response.routes.length ; i1++){
+        const se1 = [];
+        for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
+          for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
+
+            var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
+            var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
+            
+            Geocode.fromLatLng(q1(), q2()).then(
+              (response) => {
+                const address = response.results[0].formatted_address;
+                let city, state, country;
+                for (let i = 0; i < response.results[0].address_components.length; i++) {
+                  for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
+                    switch (response.results[0].address_components[i].types[j]) {
+                      case "locality":
+                        city = response.results[0].address_components[i].long_name;
+                        break;
+                      case "administrative_area_level_1":
+                        state = response.results[0].address_components[i].long_name;
+                        break;
+                      case "country":
+                        country = response.results[0].address_components[i].long_name;
+                        break;
+                    }
+                  }
+                }
+                se1.push([city,state,country]);
+              },
+              (error) => {
+                console.error('error');
+              }
+            );
+          }
+
+        }
+        se.push(se1);
+
+      }
+
+      setRoutecitys(se);
+      console.log(se);
+      
+
     } 
     return null;
   }
@@ -376,7 +443,7 @@ const Map = () => {
               </Typography>
               <Search setFunc={setOrigin}/>
               <Search setFunc={setDest}/>
-              <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
+              <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false)}}>
                 Find the safest route!
               </Button>
             </div>
@@ -410,6 +477,7 @@ const Map = () => {
               }}
             />} */}
             <AllRouteRenderer/>
+            <AllCityfinder/>
             {markers()}
             { <Polygon id = "poly"
               paths={getcoord("Alabama","Autauga")}
