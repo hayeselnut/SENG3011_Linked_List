@@ -9,7 +9,7 @@ import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/cases.js"
+import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/cases.js"
 import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
@@ -110,14 +110,16 @@ const Map = () => {
   const [gotDirections, setGotDirections] = React.useState(false); 
   const [routecitys, setRoutecitys] = React.useState({});
   const [routecitySearch, setRoutecitysSearch] = React.useState(true);
+  const [cases, setcases] = React.useState({});
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
-    });
 
+    });
+    
     getCasesByCity(country).then(x => console.log(x));
 
   }, [country]);
@@ -145,6 +147,7 @@ const Map = () => {
 
 
   // },[origin])
+
 
   const getDirectionCoords = async () => {
       console.log('og', origin)
@@ -213,7 +216,7 @@ const Map = () => {
     strokeColor: '#FF000',
     strokeOpacity: 0.8,
     strokeWeight: 3,
-    fillcolor: '#FF0000',
+    fillcolor: '#FFFF00',
     fillOpacity: 0.35,
     zIndex: 1
   };
@@ -325,6 +328,84 @@ const Map = () => {
     return null;
   }
 
+
+
+  function percentToRGB(percent) { 
+    if (percent === 100) { 
+     percent = 99 
+    } 
+    var r, g, b; 
+
+    if (percent < 50) { 
+     // green to yellow 
+     r = Math.floor(255 * (percent/50)); 
+     g = 255; 
+
+    } else { 
+     // yellow to red 
+     r = 255; 
+     g = Math.floor(255 * ((100 - percent)/50)); 
+    } 
+    b = 0; 
+    var rr,gg,bb;
+    rr = Number(r).toString(16);
+    gg = Number(g).toString(16);
+    bb = Number(b).toString(16);
+    if (rr.length < 2) {
+        rr = '0' + rr;
+    }
+    if (gg.length < 2) {
+        gg = '0' + gg;
+    }
+    if (bb.length < 2) {
+        bb = '0' + bb;
+    }
+    return '#' + rr + gg + bb;
+  } 
+
+  function checkcolor(data){
+
+    var color = percentToRGB(data);
+    var modelOptions = {
+      strokeColor: color,
+      strokeOpacity: 0.8,
+      strokeWeight: 3,
+      fillcolor: color,
+      fillOpacity: 0.35,
+      zIndex: 1
+    };
+
+    return modelOptions;
+  }
+
+  const Heatmap = () => {
+  /*  if (response !== null) {
+
+      const heats = response.map((curr, i) => {
+        return (
+          <Polygon 
+            id = {i}
+            paths={getcoord(curr.country,curr.province)} 
+            options={checkcolor(curr.percent)}
+            onLoad={ohioOnLoad}
+         />
+        )
+      })
+      return heats;
+    } 
+  
+    return null; */
+
+    return(
+      <Polygon 
+        id = {1}
+        paths={getcoord('us','Alabama')} 
+        options={checkcolor(10)}
+        onLoad={ohioOnLoad}
+      />
+      )
+  }
+
   return (
     <div style={mapPageStyle}>
       <EpiWatchToolBar
@@ -371,6 +452,7 @@ const Map = () => {
             />}
             <AllRouteRenderer/>
             <AllCityfinder/>
+
             {markers()}
             <Polygon id = "poly"
               paths={getcoord(country,province)} 
@@ -378,57 +460,9 @@ const Map = () => {
               options={ohioOptions}
               onLoad={ohioOnLoad}
             />
-            {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
-              because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
-              I can do it, but the system can't save it. Unless we have a database.
-              
-              
-              I don't know what the variables of our destination country and state are, so I wrote an example. 
-              You only need to change the variables in getcoord to display the corresponding continent. 
-              The continent that cannot be displayed does not match the characters, and the name may be different.
-              */
 
-              // for future
-            /*  <Polygon id = "poly"
-              paths={getcoord(destination_country,destination_province)} //
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            /> */
-  
+            <Heatmap/>          
 
-            /*
-            <Polygon
-              paths={nyDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny2Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny3Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny4Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={connectDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={massDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-          </GoogleMap> */}
-          
           </GoogleMap>
         </Grid>
       </Grid>
