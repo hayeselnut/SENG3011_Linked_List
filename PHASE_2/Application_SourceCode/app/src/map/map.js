@@ -4,7 +4,6 @@ import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
 
-import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
@@ -14,6 +13,7 @@ import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
+import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
 
 const markers = () => {
   let listt = []
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     height: '100vh',
   },
   paper: {
-    marginTop: '2rem',
+    marginTop: '2em',
     width: '100%',
   }
 }));
@@ -46,30 +46,27 @@ const useStyles = makeStyles((theme) => ({
 const libraries = ["places"];
 
 function useAsyncHook(location) {
-  // Result is a list of event_date, url and headline
-  const [result, setResult] = React.useState([])
-  const [loading, setLoading] = React.useState("false");
-  const [caseLoading, setCaseLoading] = React.useState("false");
+  const [articles, setArticles] = React.useState([])
+  const [articlesLoading, setArticlesLoading] = React.useState(true);
 
   React.useEffect(() => {
     const getReports = async (poi, keyTerms, location) => {
       let myData;
+      setArticlesLoading(true);
       try {
         myData = await epiwatchApi.articles(poi, keyTerms, location);
-
-        setResult(
-          [myData.articles[0].headline, myData.articles[0].url, myData.articles[0].reports[0].event_date]
-        )
-
+        console.log(myData);
+        setArticles(myData.articles);
+        setArticlesLoading(false);
       } catch {
-        setLoading("null");
+        setArticlesLoading(true);
       }
     }
 
     getReports("2010-01-01 11:11:11 to 2021-05-05 11:11:11", "", location)
 
   }, [location])
-  return [result, loading];
+  return [articles, articlesLoading];
 }
 
 const supportedCountries = {
@@ -90,7 +87,7 @@ const supportedCountries = {
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
-  const [result, loading] = useAsyncHook(province);
+  const [articles, articlesLoading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
   const [predictedCases, setPredictedCases] = React.useState({});
   const [direct, setDirect] = React.useState({});
@@ -112,30 +109,6 @@ const Map = () => {
     getCasesByCity(country).then(x => console.log(x));
 
   }, [country]);
-
-  // React.useEffect(async () => {
-  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
-  //   const destPara = {
-  //     address: dest,
-  //   };
-  //   console.log('dest', dest);
-  //   try {
-
-  //     const results = await getGeocode(destPara);
-  //     const coords = await getLatLng(results[0]);
-  //     console.log('coords', coords);
-  //     setDestLatLng(coords);
-  //   } catch (error) {
-  //     console.log("Error: ", error);
-  //   }
-
-  // },[dest])
-
-  // React.useEffect(async () => {
-  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
-
-
-  // },[origin])
 
   const getDirectionCoords = async () => {
       console.log('og', origin)
@@ -164,20 +137,8 @@ const Map = () => {
     } catch (error) {
       console.log("Error: ", error);
     }
-
-
   }
 
-  // console.log(result,loading);
-  let eventDate, headline, url;
-  let results = false;
-  if (result.length !== 0) {
-    eventDate = result[2].split('T')[0];
-    // console.log(eventDate);
-    headline = result[0];
-    url = result[1];
-    results = true;
-  }
   const classes = useStyles();
   const mapContainerStyle = {
     width: "100%",
@@ -212,15 +173,6 @@ const Map = () => {
 
   const ohioOnLoad = (polygon) => {
   }
-
-  // const latlngs = {
-  //     "state": {lat: lng:}
-  // }
-
-  // const directionsService = new window.google.maps.DirectionsService();
-
-  // const origin = centerCoords['New York, USA'];
-  // const destination = centerCoords['Ohio, USA'];
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -266,9 +218,9 @@ const Map = () => {
         recordedCases={recordedCases}
         predictedCases={predictedCases}
       />
-      <Grid container className={classes.root}  spacing={2}>
+      <Grid container className={classes.root} spacing={2}>
         <Grid container item direction="column" xs={12} sm={3} md={3} >
-          <Grid item xs>
+          <Grid item>
             <div className={classes.paper}>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <Typography component="h1" variant="h4">
@@ -290,7 +242,7 @@ const Map = () => {
             </div>
           </Grid>
           <Grid item align="center">
-            <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
+            <ArticlesShowcase articles={articles} articlesLoading={articlesLoading} province={province} />
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9} style={{position: "static"}}>
@@ -327,42 +279,7 @@ const Map = () => {
               paths={getcoord(destination_country,destination_province)} //
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            /> */
-  
-
-            /*
-            <Polygon
-              paths={nyDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny2Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny3Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={ny4Delim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={connectDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            <Polygon
-              paths={massDelim}
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-          </GoogleMap> */}
-          
+            /> */}
           </GoogleMap>
         </Grid>
       </Grid>
