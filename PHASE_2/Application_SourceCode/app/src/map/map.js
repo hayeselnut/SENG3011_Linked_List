@@ -9,7 +9,6 @@ import { centerCoords } from "./centerCoords.js";
 import epiwatchApi from "../apis/epiwatchApi.js"
 
 import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/cases.js"
-import { getcoord} from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
@@ -17,6 +16,7 @@ import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
 import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
 import Geocode from "react-geocode";
+import Heatmap from "../components/heatmap/heatmap.js";
 Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
 
 Geocode.setRegion("es");
@@ -77,21 +77,6 @@ function useAsyncHook(location) {
   return [articles, articlesLoading];
 }
 
-const supportedCountries = {
-  "united-states": {
-    "Country": "USA",
-    "Slug": "united-states",
-    "ISO2": "US",
-    "Provinces": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virgin Islands", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
-  },
-  "india": {
-    "Country": "India",
-    "Slug": "india",
-    "ISO2": "IN",
-    "Provinces": ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
-  },
-}
-
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
@@ -114,13 +99,7 @@ const Map = () => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
-
-      console.log("111111111",aggregateDangerIndexes(recorded));
     });
-
-    
-    getCasesByCity(country).then(x => console.log(x));
-
   }, [country]);
 
 
@@ -185,9 +164,6 @@ const Map = () => {
     fillOpacity: 0,
     zIndex: 1
   };
-
-  const ohioOnLoad = (polygon) => {
-  }
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -284,87 +260,6 @@ const Map = () => {
     return null;
   }
 
-
-
-  function percentToRGB(percent) { 
-
-    var r, g, b; 
-
-    if (percent < 50) { 
-     // green to yellow 
-     r = Math.floor(255 * (percent/50)); 
-     g = 255; 
-
-    } else { 
-     // yellow to red 
-     r = 255; 
-     g = Math.floor(255 * ((100 - percent)/50)); 
-    } 
-    b = 0; 
-    var rr,gg,bb;
-    rr = Number(r).toString(16);
-    gg = Number(g).toString(16);
-    bb = Number(b).toString(16);
-    if (rr.length < 2) {
-        rr = '0' + rr;
-    }
-    if (gg.length < 2) {
-        gg = '0' + gg;
-    }
-    if (bb.length < 2) {
-        bb = '0' + bb;
-    }
-    return '#' + rr + gg + bb;
-  } 
-
-  function checkcolor(data){
-
-    var color = percentToRGB(data);
-    var modelOptions = {
-      strokeColor: '#FFFFFF',
-      strokeOpacity: 0.8,
-      strokeWeight: 3,
-      fillColor: color,
-      fillOpacity: 0.35,
-      zIndex: 1
-    };
-
-    return modelOptions;
-  }
-
-  
-  const Heatmap =  () => {
-   
-
-    getDataAndPredictions(country).then(([recorded, predicted]) => {
-      aggregateDangerIndexes(recorded).then((res) => {
-
-        console.log(res);
-        if (res !== null) {
-    
-    
-          const routes = Object.entries(res).map(([reasonKey, reasonText]) => {
-            return (
-              <Polygon
-              paths={getcoord(country,reasonKey)} 
-              options={checkcolor(reasonText)}
-              onLoad={ohioOnLoad}
-            />   
-            )
-          })
-    
-          console.log("map",routes);
-          return routes;
-        }
-      });
-      
-    });
-
-
-  
-    return null; 
-  }
-
   return (
     <div style={mapPageStyle}>
       <EpiWatchToolBar
@@ -417,15 +312,13 @@ const Map = () => {
             <AllRouteRenderer/>
             <AllCityfinder/>
 
-            {markers()}
-
-            <Heatmap/>       
-            <Polygon id = "poly"
+            {/* {markers()} */}
+            <Heatmap country={country} recorded={recordedCases}/>
+            {/* <Polygon id = "poly"
               paths={getcoord(country,province)} 
 
               options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />   
+            />    */}
 
 
           </GoogleMap>
