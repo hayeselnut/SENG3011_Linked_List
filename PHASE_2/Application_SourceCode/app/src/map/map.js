@@ -359,10 +359,11 @@ const Map = () => {
   // }
   // );
   const AllRouteRenderer = () => {
+    console.log(routecitys);
     if (response !== null && response.routes) {
       //console.log('routes', response.routes)
       const routes = response.routes.map((_, i) => {
-        console.log('routes', response.routes)
+       // console.log('routes', response.routes)
         return (
           <DirectionsRenderer
             options={{
