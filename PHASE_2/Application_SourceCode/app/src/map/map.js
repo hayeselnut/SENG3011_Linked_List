@@ -133,13 +133,15 @@ const Map = () => {
 
   }
 
-  const getChooseCoords = async (province) => {
-    if(province = 'undefined'){
-      province = 'ohio';
+  const getChooseCoords = async (p) => {
+    
+    if(p == undefined ){
+      p = province;
     }
-  const destPara = {
-    address: province+','+country,
-  };
+    const destPara = {
+      address: p+','+country,
+    };
+
   console.log('put', destPara);
   try {
 
