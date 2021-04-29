@@ -1,6 +1,6 @@
 import React from "react";
 import { GoogleMap, useLoadScript, Marker, Polygon, DirectionsService, DirectionsRenderer } from "@react-google-maps/api";
-import { Grid, Paper } from "@material-ui/core";
+import { Grid, Paper, Typography, Button } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
 
@@ -13,6 +13,7 @@ import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/
 import { getcoord } from "./getcoord";
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
+import { getGeocode, getLatLng } from "use-places-autocomplete";
 
 const markers = () => {
   let listt = []
@@ -289,36 +290,6 @@ const Map = () => {
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
             <div className={classes.paper}>
-              <div>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="country-label">Country</InputLabel>
-                  <Select
-                    labelId="country-label"
-                    id="country-select"
-                    value={country}
-                    onChange={(e) => {setCountry(e.target.value); setProvince(supportedCountries[e.target.value].Provinces[0])}}
-                  >
-                    {Object.keys(supportedCountries).map((key, index) => (
-                      <MenuItem key={index} value={supportedCountries[key].Slug}>{supportedCountries[key].Country}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="state-label">State</InputLabel>
-                  <Select
-                    labelId="state-label"
-                    id="state-select"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                  >
-                    {console.log(country)}
-                    {supportedCountries[country].Provinces.map((province, index) => (
-                      <MenuItem key={index} value={province}>{province}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </div>
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
