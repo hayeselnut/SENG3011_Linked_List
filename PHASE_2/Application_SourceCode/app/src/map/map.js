@@ -14,6 +14,7 @@ import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
+import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
 const markers = () => {
   let listt = []
@@ -101,9 +102,9 @@ const Map = () => {
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
-      console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
+      console.log(aggregateDangerIndexes(recorded));
     });
 
     getCasesByCity(country).then(x => console.log(x));
