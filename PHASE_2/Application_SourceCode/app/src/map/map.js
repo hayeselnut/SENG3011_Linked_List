@@ -356,22 +356,7 @@ const Map = () => {
     }
   }
 
-  // directionsService.route(
-  // {
-  //     origin: origin,
-  //     destination: destination,
-  //     travelMode: window.google.maps.TravelMode.DRIVING
-  // },
-  // (result, status) => {
-  //     if (status === window.google.maps.DirectionsStatus.OK) {
-  //     setDirect({
-  //         directions: result
-  //     });
-  //     } else {
-  //     console.error(`error fetching directions ${result}`);
-  //     }
-  // }
-  // );
+
   const AllRouteRenderer = () => {
     if (response !== null && response.routes) {
       console.log('routes', response.routes)
@@ -459,15 +444,6 @@ const Map = () => {
               options={{origin: originLatLng, destination: destLatLng, travelMode: "DRIVING", provideRouteAlternatives:true }}
               callback={directionsCallback}
             />}
-<<<<<<< HEAD
-            {response !== null && <DirectionsRenderer
-=======
-            {/* {response !== null && <DirectionsRenderer
->>>>>>> d14e94b4af6b90d1894a3675a524fe09efb79a22
-              options={{
-                directions: response
-              }}
-            />} */}
             <AllRouteRenderer/>
             {markers()}
             { <Polygon id = "poly"
