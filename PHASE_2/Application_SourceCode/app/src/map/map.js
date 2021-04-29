@@ -370,7 +370,7 @@ const Map = () => {
       strokeColor: color,
       strokeOpacity: 0.8,
       strokeWeight: 3,
-      fillcolor: color,
+      fillColor: color,
       fillOpacity: 0.35,
       zIndex: 1
     };
