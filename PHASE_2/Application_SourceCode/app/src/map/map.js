@@ -16,6 +16,8 @@ import { getGeocode, getLatLng } from "use-places-autocomplete";
 import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
 import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
+import SupportedCountries from "../assets/SupportedCountries.json";
+
 const markers = () => {
   let listt = []
   Object.keys(centerCoords).forEach((element, index) => {
@@ -163,17 +165,14 @@ const Map = () => {
     height: "100%"
   }
 
-  const ohioOptions = {
-    strokeColor: '#FF000',
+  const stateOutlineOptions = {
+    strokeColor: '#000000',
     strokeOpacity: 0.8,
     strokeWeight: 3,
-    fillcolor: '#FF0000',
+    fillColor: '#FF0000',
     fillOpacity: 0.35,
     zIndex: 1
   };
-
-  const ohioOnLoad = (polygon) => {
-  }
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -259,12 +258,14 @@ const Map = () => {
             />}
             <AllRouteRenderer/>
             {/* {markers()} */}
-            <Polygon id = "poly"
-              paths={getcoord(country,province)} 
 
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
+            {SupportedCountries[country].Provinces.map(Province => (
+              <Polygon
+              paths={getcoord(country, Province)} 
+              options={stateOutlineOptions}
             />
+            ))}
+
             {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
               because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
               I can do it, but the system can't save it. Unless we have a database.
