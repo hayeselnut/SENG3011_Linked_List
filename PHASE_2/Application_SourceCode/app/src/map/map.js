@@ -124,7 +124,7 @@ const Map = () => {
 
       const results = await getGeocode(destPara);
       const coords = await getLatLng(results[0]);
-      // console.log('coords', coords);
+      console.log('coords', coords);
       setDestLatLng(coords);
       setCenter(coords);
     } catch (error) {
@@ -132,6 +132,25 @@ const Map = () => {
     }
 
   }
+
+  const getChooseCoords = async () => {
+
+  const destPara = {
+    address: province+','+country,
+  };
+  console.log('put', dest);
+  try {
+
+    const results = await getGeocode(destPara);
+    const coords = await getLatLng(results[0]);
+    console.log('coords', coords);
+    setDestLatLng(coords);
+    setCenter(coords);
+  } catch (error) {
+    console.log("Error: ", error);
+  }
+
+}
 
   const classes = useStyles();
   const mapContainerStyle = {
@@ -255,6 +274,7 @@ const Map = () => {
         setProvince={setProvince}
         recordedCases={recordedCases}
         predictedCases={predictedCases}
+        getChooseCoords={getChooseCoords}
       />
       <Grid container className={classes.root} spacing={2}>
         <Grid container item direction="column" xs={12} sm={3} md={3} >
