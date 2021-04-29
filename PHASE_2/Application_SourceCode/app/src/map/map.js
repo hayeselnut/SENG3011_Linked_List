@@ -217,6 +217,7 @@ const Map = () => {
           />
         )
       })
+      console.log('rr',routes);
       return routes;
     } 
     return null;
@@ -277,8 +278,7 @@ const Map = () => {
       }
 
       setRoutecitys(se);
-      console.log("se",se);
-      console.log("rctiys:",routecitys);
+    
 
     } 
     return null;
@@ -321,7 +321,7 @@ const Map = () => {
 
     var color = percentToRGB(data);
     var modelOptions = {
-      strokeColor: '#000000',
+      strokeColor: '#FFFFFF',
       strokeOpacity: 0.8,
       strokeWeight: 3,
       fillColor: color,
@@ -334,7 +334,8 @@ const Map = () => {
 
   const Heatmap = () => {
 
-    var res = aggregateDangerIndexes(recordedCases);
+  aggregateDangerIndexes(recordedCases).then((res) => {
+
   //  var datac = getuscoord();
     if (res !== null) {
 
@@ -351,9 +352,9 @@ const Map = () => {
         );
         heats.push(qq) 
       }
-      console.log(heats);
       return heats;
     } 
+  });
   
     return null; 
   }
