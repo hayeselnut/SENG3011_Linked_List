@@ -26,6 +26,7 @@ const getDataAndPredictions = async (country) => {
   const predictionsByProvince = getPredictionsByProvinces(recordedActiveCasesByProvince);
   return [recordedActiveCasesByProvince, predictionsByProvince];
 }
+
 const getLastMonth = () => {
   const ONE_DAY = 86400000;
   const ONE_MONTH = ONE_DAY * 31;

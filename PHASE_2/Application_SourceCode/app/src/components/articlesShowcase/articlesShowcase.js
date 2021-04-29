@@ -5,7 +5,6 @@ import { Typography, CircularProgress } from "@material-ui/core";
 
 const ArticlesShowcase = (props) => {
   const { articles, articlesLoading, province } = props;
-  console.log(articles);
 
   return (
     <div style={{ marginTop: "4em" }}>
