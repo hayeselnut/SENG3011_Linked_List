@@ -55,7 +55,7 @@ const EpiWatchToolBar = (props) => {
             id="state-select"
             value={province}
             style={{ backgroundColor: "white" }}
-            onChange={(e) => {setProvince(e.target.value);getChooseCoords();}}
+            onChange={(e) => {setProvince(e.target.value);getChooseCoords(e.target.value);}}
           >
             {SupportedCountries[country].Provinces.map((province, index) => (
               <MenuItem key={index} value={province}>{province}</MenuItem>

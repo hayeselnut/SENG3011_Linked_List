@@ -133,12 +133,14 @@ const Map = () => {
 
   }
 
-  const getChooseCoords = async () => {
-
+  const getChooseCoords = async (province) => {
+    if(province = 'undefined'){
+      province = 'ohio';
+    }
   const destPara = {
     address: province+','+country,
   };
-  console.log('put', dest);
+  console.log('put', destPara);
   try {
 
     const results = await getGeocode(destPara);
