@@ -35,7 +35,6 @@ export const CasesChartModal = (props) => {
         className={classes.menuButton}
         color="inherit"
         aria-label="show-cases-chart"
-        size="large"
         disabled={recorded === undefined || predicted === undefined}
         onClick={handleOpen}
       >

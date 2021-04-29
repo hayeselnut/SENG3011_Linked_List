@@ -373,7 +373,7 @@ const Map = () => {
           <Grid item>
             <div className={classes.paper}>
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <Typography component="h1" variant="h4">
+                <Typography style={{marginLeft: '1em', marginRight: '1em'}} component="h1" variant="h4">
                   Route Planner
                 </Typography>
               </div>
