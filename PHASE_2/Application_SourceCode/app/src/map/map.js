@@ -115,7 +115,7 @@ const Map = () => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
 
-      console.log(aggregateDangerIndexes(recorded));
+      console.log("111111111",aggregateDangerIndexes(recorded));
     });
 
     
@@ -332,29 +332,35 @@ const Map = () => {
     return modelOptions;
   }
 
-  const Heatmap = () => {
+  
+  const Heatmap =  () => {
+   
 
-  aggregateDangerIndexes(recordedCases).then((res) => {
+    getDataAndPredictions(country).then(([recorded, predicted]) => {
+      aggregateDangerIndexes(recorded).then((res) => {
 
-  //  var datac = getuscoord();
-    if (res !== null) {
-
-      const heats = [];
-
-      for (var key in res){
-       var qq = (            
-          <Polygon id = "poly"
-              paths={getcoord("us",key)} 
-              options={checkcolor(res[key])}
+        console.log(res);
+        if (res !== null) {
+    
+    
+          const routes = Object.entries(res).map(([reasonKey, reasonText]) => {
+            return (
+              <Polygon
+              paths={getcoord(country,reasonKey)} 
+              options={checkcolor(reasonText)}
               onLoad={ohioOnLoad}
             />   
+            )
+          })
+    
+          console.log("map",routes);
+          return routes;
+        }
+      });
+      
+    });
 
-        );
-        heats.push(qq) 
-      }
-      return heats;
-    } 
-  });
+
   
     return null; 
   }
