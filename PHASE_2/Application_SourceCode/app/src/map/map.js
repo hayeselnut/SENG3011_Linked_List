@@ -12,6 +12,7 @@ import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/c
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
+import { overallCalculatorOfRouteCases } from "../components/routes/routeColouring.js";
 import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
 import aggregateDangerIndexes from "../components/dangerIndexAggregator";
 
@@ -77,6 +78,67 @@ function useAsyncHook(location) {
   return [articles, articlesLoading];
 }
 
+const allCityfinder = (response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity) => {
+  if (response !== null && response.routes && !routecitySearch ) {
+    setRoutecitysSearch(true);
+
+   // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
+   const se = [];
+
+    for (let i1 = 0; i1 < response.routes.length ; i1++){
+      const se1 = [];
+      let qq = 0;//reduce call api number
+      for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
+        for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
+          qq = qq + 1;
+          var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
+          var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
+          if( qq == 3){
+
+            Geocode.fromLatLng(q1(), q2()).then(
+              (response) => {
+                const address = response.results[0].formatted_address;
+                let city, state, country;
+                for (let i = 0; i < response.results[0].address_components.length; i++) {
+                  for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
+                    switch (response.results[0].address_components[i].types[j]) {
+                      case "locality":
+                        city = response.results[0].address_components[i].long_name;
+                        break;
+                      case "administrative_area_level_1":
+                        state = response.results[0].address_components[i].long_name;
+                        break;
+                      case "country":
+                        country = response.results[0].address_components[i].long_name;
+                        break;
+                      default:
+                        break;
+                    }
+                  }
+                }
+                se1.push([city,state,country]);
+              },
+              (error) => {
+                console.error('error');
+              }
+            );
+            qq = 0;
+          }
+        }
+      }
+      se.push(se1);
+    }
+    setRoutecitys(se);
+    console.log("se",se);
+    console.log("rctiys:",routecitys);
+    // const a = await sleep(1000);
+    const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
+    console.log('answer', ans);
+
+  } 
+  return null;
+}
+
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
@@ -91,17 +153,62 @@ const Map = () => {
   const [originLatLng, setOriginLatLng] = React.useState({});
   const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
   const [gotDirections, setGotDirections] = React.useState(false); 
-  const [routecitys, setRoutecitys] = React.useState({});
+  const [routecitys, setRoutecitys] = React.useState([]);
   const [routecitySearch, setRoutecitysSearch] = React.useState(true);
+  const [casesByCity, setCasesByCity] = React.useState(true);
   const [cases, setcases] = React.useState({});
+  const [routeRank, setRouteRank] = React.useState({});
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
+
+    getCasesByCity(country).then(x => setCasesByCity(x));
+
   }, [country]);
 
+  React.useEffect(() => {
+
+    // calculate covid along this route everytime the cities is updated 
+    console.log('routecities', routecitys)
+    // if (routecitys.length > 0 && routecitySearch && routecitys) {
+      const ans = overallCalculatorOfRouteCases(routecitys, casesByCity);
+      console.log('answer', ans);
+      setRouteRank(ans); 
+    // }
+  }, [routecitys, casesByCity, routecitySearch]);
+
+
+  React.useEffect(() => { 
+    allCityfinder(response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity); 
+  },[gotDirections, response, routecitySearch, setRoutecitysSearch, setRoutecitys, routecitys, casesByCity]);
+
+
+  // React.useEffect(async () => {
+  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
+  //   const destPara = {
+  //     address: dest,
+  //   };
+  //   console.log('dest', dest);
+  //   try {
+
+  //     const results = await getGeocode(destPara);
+  //     const coords = await getLatLng(results[0]);
+  //     console.log('coords', coords);
+  //     setDestLatLng(coords);
+  //   } catch (error) {
+  //     console.log("Error: ", error);
+  //   }
+
+  // },[dest])
+
+  // React.useEffect(async () => {
+  //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
+
+
+  // },[origin])
 
   const getDirectionCoords = async () => {
       console.log('og', origin)
@@ -179,6 +286,30 @@ const Map = () => {
     height: "100%"
   }
 
+  const ohioOptions = {
+    strokeColor: '#FF000',
+    strokeOpacity: 0.8,
+    strokeWeight: 3,
+    fillcolor: '#FF0000',
+    fillOpacity: 0.35,
+    zIndex: 1
+  };
+
+  const ohioOnLoad = (polygon) => {
+  }
+
+  // const latlngs = {
+  //     "state": {lat: lng:}
+  // }
+
+  // const directionsService = new window.google.maps.DirectionsService();
+
+  // const origin = centerCoords['New York, USA'];
+  // const destination = centerCoords['Ohio, USA'];
+  // const sleep = (ms) => {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
+
   const directionsCallback = (response) => {
     if (response !== null) {
       if (response.status === 'OK') {
@@ -198,14 +329,52 @@ const Map = () => {
     if (response !== null && response.routes) {
       console.log('routes', response.routes)
       const routes = response.routes.map((_, i) => {
+        console.log('id', i);
+      if (i === routeRank.lowestId) {
+        console.log("rank", i)
         return (
           <DirectionsRenderer
             options={{
               directions: response,
               routeIndex: i,
+              polylineOptions: { strokeColor: '#FFFFFF' }
             }}
           />
         )
+      } else if (i === routeRank.highestId) {
+          console.log("rank", i)
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+                polylineOptions: { strokeColor: '#000000' },
+                zIndex: 1
+              }}
+            />
+          )
+
+        } else if (routeRank === {}) {
+          console.log("rank", "{}")
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+              }}
+            />
+          )
+        } else {
+          console.log("asdlkfj rank")
+          return (
+            <DirectionsRenderer
+              options={{
+                directions: response,
+                routeIndex: i,
+              }}
+            />
+          )
+        }
       })
       console.log('rr',routes);
       return routes;
@@ -213,60 +382,6 @@ const Map = () => {
     return null;
   }
 
-  const AllCityfinder = () => {
-    if (response !== null && response.routes && !routecitySearch ) {
-      setRoutecitysSearch(true);
-
-     // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
-     const se = [];
-
-      for (let i1 = 0; i1 < response.routes.length ; i1++){
-        const se1 = [];
-        let qq = 0;//reduce call api number
-        for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
-          for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
-            qq = qq + 1;
-            var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
-            var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
-            if( qq == 3){
-
-              Geocode.fromLatLng(q1(), q2()).then(
-                (response) => {
-                  const address = response.results[0].formatted_address;
-                  let city, state, country;
-                  for (let i = 0; i < response.results[0].address_components.length; i++) {
-                    for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
-                      switch (response.results[0].address_components[i].types[j]) {
-                        case "locality":
-                          city = response.results[0].address_components[i].long_name;
-                          break;
-                        case "administrative_area_level_1":
-                          state = response.results[0].address_components[i].long_name;
-                          break;
-                        case "country":
-                          country = response.results[0].address_components[i].long_name;
-                          break;
-                        default:
-                          break;
-                      }
-                    }
-                  }
-                  se1.push([city,state,country]);
-                },
-                (error) => {
-                  console.error('error');
-                }
-              );
-              qq = 0;
-            }
-          }
-        }
-        se.push(se1);
-      }
-      setRoutecitys(se);
-    } 
-    return null;
-  }
 
   return (
     <div style={mapPageStyle}>
@@ -319,7 +434,6 @@ const Map = () => {
               callback={directionsCallback}
             />}
             <AllRouteRenderer/>
-            <AllCityfinder/>
 
             {/* {markers()} */}
             <Heatmap country={country} province={province} recorded={recordedCases}/>

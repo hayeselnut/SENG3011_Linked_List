@@ -27,16 +27,14 @@ const getIndexesByArticles = async (listOfProvinces) => {
 const getIndexesByCases = (activeCasesByProvince) => {
     const mostRecentActiveCasesByProvince = {};
     const caseIndexesByProvinces = {};
-    let maxCases = 0;
     for (const Province in activeCasesByProvince) {
         mostRecentActiveCasesByProvince[Province] = activeCasesByProvince[Province][activeCasesByProvince[Province].length - 1];
-        if (maxCases < mostRecentActiveCasesByProvince[Province]) {
-            maxCases = mostRecentActiveCasesByProvince[Province];
-        }
     }
 
     for (const Province in mostRecentActiveCasesByProvince) {
-        caseIndexesByProvinces[Province] = mostRecentActiveCasesByProvince[Province] / maxCases
+        // Any cases above 1_000_000 are indexed at most dangerous (i.e. index = 1)
+        const loggedIndex = Math.log10(mostRecentActiveCasesByProvince[Province]) / 6;
+        caseIndexesByProvinces[Province] = Math.min(Math.max(loggedIndex, 0), 1);
     }
 
     return caseIndexesByProvinces;
@@ -47,7 +45,7 @@ const combineIndexes = (indexesByArticlesOnly, indexesByCasesOnly) => {
     const summedIndexes = {};
     for (const Province in indexesByArticlesOnly) {
         let outOf100 = indexesByArticlesOnly[Province] * 10 + indexesByCasesOnly[Province] * 90;
-        summedIndexes[Province] = Math.sqrt(10_000 - (outOf100 - 100) * (outOf100 - 100));
+        summedIndexes[Province] =  Math.min(Math.max(outOf100, 0), 100);
     }
 
     return summedIndexes;
