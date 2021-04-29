@@ -335,6 +335,7 @@ const Map = () => {
           response
         )
         setGotDirections(true);
+        AllCityfinder ();
       } else {
         console.log('Neg response: ', response)
       }
@@ -484,7 +485,6 @@ const Map = () => {
               }}
             />} */}
             <AllRouteRenderer/>
-            <AllCityfinder/>
             {markers()}
             { <Polygon id = "poly"
               paths={getcoord("Alabama","Autauga")}
