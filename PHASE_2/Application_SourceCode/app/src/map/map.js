@@ -333,7 +333,8 @@ const Map = () => {
             options={{
               directions: response,
               routeIndex: i,
-              polylineOptions: { strokeColor: '#FFFFFF' }
+              polylineOptions: { strokeColor: '#FFFFFF' },
+              zIndex: 10,
             }}
           />
         )
