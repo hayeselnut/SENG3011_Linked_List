@@ -7,6 +7,9 @@ import INBrain from "../../assets/INBrain.json";
 const getCasesByCity = async (country) => {
   const rawData = await covid19Api.cities(country);
   const formattedCityData = {};
+  
+  if (!Array.isArray(rawData)) return formattedCityData;
+
   rawData.forEach(cityData => {
     const { Active, City, CityCode, Confirmed, Country, CountryCode, Date, Deaths, Lat, Lon, Province, Recovered } = cityData;
     if (!(CityCode in formattedCityData)) {
@@ -103,18 +106,17 @@ const getPredictionsByDays = (country, trainingData) => {
 }
 
 const trainBrain = (country, trainingData) => {
+  const net = new brain.recurrent.LSTMTimeStep({
+    inputSize: trainingData[0].length,
+    hiddenLayers: [50],
+    outputSize: trainingData[0].length,
+  });
+  
   // FOR TRAINING ONLY:
-  // const net = new brain.recurrent.LSTMTimeStep({
-  //   inputSize: trainingData[0].length,
-  //   hiddenLayers: [50],
-  //   outputSize: trainingData[0].length,
-  // });
-
   // net.train(trainingData.map(INNormaliseCases), { log: true, logPeriod: 1000, iterations: 1_000 });
   // console.log(JSON.stringify(net.toJSON()))
   // alert();
 
-  const net = new brain.recurrent.LSTMTimeStep();
   net.fromJSON(country === "united-states" ? USBrain : INBrain);
 
   return net;

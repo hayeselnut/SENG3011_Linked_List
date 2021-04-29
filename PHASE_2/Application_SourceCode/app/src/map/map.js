@@ -39,20 +39,8 @@ const useStyles = makeStyles((theme) => ({
   },
   paper: {
     marginTop: '2rem',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: '100%'
-  },
-  search: {
-    padding: '0.5rem',
-    fontSize: '1.5rem',
     width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '10%'
-  },
+  }
 }));
 
 const libraries = ["places"];
@@ -114,22 +102,16 @@ const Map = () => {
   const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
   const [gotDirections, setGotDirections] = React.useState(false); 
 
-
-  React.useEffect(() => {
-    getDataAndPredictions("united-states").then(([recorded, predicted]) => {
-      // console.log('recorded and predicted', recorded, predicted)
-      setRecordedCases(recorded);
-      setPredictedCases(predicted);
-    });
-  }, []);
-
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       console.log('recorded and predicted', recorded, predicted)
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
-  }, [country, province])
+
+    getCasesByCity(country).then(x => console.log(x));
+
+  }, [country]);
 
   // React.useEffect(async () => {
   //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
@@ -273,8 +255,6 @@ const Map = () => {
     return null;
   }
 
-  getCasesByCity(country).then(x => console.log(x));
-
   return (
     <div style={mapPageStyle}>
       <EpiWatchToolBar
@@ -293,19 +273,23 @@ const Map = () => {
               <Typography component="h1" variant="h4">
                 Route Planner
               </Typography>
+
               <Search setFunc={setOrigin}/>
               <Search setFunc={setDest}/>
-              <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
-                Find the safest route!
-              </Button>
+
+              <div style={{width: "100%", display: "flex", justifyContent: "center"}} >
+                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
+                  Find safe route
+                </Button>
+              </div>
             </div>
           </Grid>
           <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
           </Grid>
         </Grid>
-        <Grid item xs={12} sm={9} md={9}>
-          { <GoogleMap
+        <Grid item xs={12} sm={9} md={9} style={{position: "static"}}>
+          <GoogleMap
             mapContainerStyle={mapContainerStyle}
             zoom={5}
             center={center}
@@ -317,12 +301,12 @@ const Map = () => {
             />}
             <AllRouteRenderer/>
             {markers()}
-            { <Polygon id = "poly"
+            <Polygon id = "poly"
               paths={getcoord(country,province)} 
 
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            /> }
+            />
             {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
               because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
               I can do it, but the system can't save it. Unless we have a database.
@@ -374,7 +358,7 @@ const Map = () => {
             />
           </GoogleMap> */}
           
-          </GoogleMap>}
+          </GoogleMap>
         </Grid>
       </Grid>
     </div>

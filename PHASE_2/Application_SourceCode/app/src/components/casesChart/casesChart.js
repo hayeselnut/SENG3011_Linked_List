@@ -30,7 +30,6 @@ export const CasesChart = (props) => {
   const data = recorded.slice(-7).concat(predicted.slice(7, 14))
   console.log("MIN", Math.min(...data))
 
-
   const options = {
     chart: {
       type: 'line',

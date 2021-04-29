@@ -20,15 +20,9 @@ const useStyles = makeStyles((theme) => ({
   search: {
     padding: '0.5rem',
     fontSize: '1.5rem',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '10%'
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 120,
   },
   }));
 
@@ -63,38 +57,40 @@ const Search = (props) => {
     setFunc(value);
   }, [ready, setFunc, value])
 
-  return (
-    <div className={classes.search}>
-    <Combobox onSelect={ async (address) => {
-      setValue(address, false);
-      clearSuggestions();
-      console.log(address);
-      
-
-      try {
+  const handleSelect = async (address) => {
+    setValue(address, false);
+    clearSuggestions();
+    console.log(address);
+    
+    try {
       const results = await getGeocode({address});
       const { lat, lng } = await getLatLng(results[0]);
       panTo({ lat, lng });
       // Display the side bar for this place
-      } catch (error) {
+    } catch (error) {
       console.log('error trying to pan')
-      }
-    }}>
-      <ComboboxInput
-      value={value}
-      onChange={handleInput}
-      disabled={!ready}
-      placeholder="Enter a state"
-      />
-      <ComboboxPopover className={classes.popover}>
-      <ComboboxList className={classes.list}>
-        {status === "OK" && data.map(({id, description}) => {
-        // console.log(id, description)
-        return <ComboboxOption key={id} value={description}/>
-        })}
-      </ComboboxList>
-      </ComboboxPopover>
-    </Combobox>
+    }
+  }
+
+  return (
+    <div className={classes.search}>
+      <Combobox onSelect={handleSelect}>
+        <ComboboxInput
+          value={value}
+          onChange={handleInput}
+          disabled={!ready}
+          placeholder="Enter a state"
+          style={{width: "100%"}}
+        />
+        <ComboboxPopover className={classes.popover}>
+        <ComboboxList className={classes.list}>
+          {status === "OK" && data.map(({id, description}) => {
+          // console.log(id, description)
+          return <ComboboxOption key={id} value={description}/>
+          })}
+        </ComboboxList>
+        </ComboboxPopover>
+      </Combobox>
     </div>
   )
   }
