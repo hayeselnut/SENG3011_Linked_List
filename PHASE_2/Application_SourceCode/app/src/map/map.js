@@ -1,56 +1,18 @@
 import React from "react";
-import {
-  GoogleMap, 
-  useLoadScript, 
-  Marker,
-  InfoWindow,
-  Polygon,
-  DirectionsService,
-  DirectionsRenderer,
-} from "@react-google-maps/api";
-import {
-  Container,
-  Grid,
-  Select,
-  Paper,
-  Typography,
-  Link,
-  Button,
-  MenuItem,
-  InputLabel,
-  FormControl,
-} from "@material-ui/core";
+import { GoogleMap, useLoadScript, Marker, Polygon, DirectionsService, DirectionsRenderer } from "@react-google-maps/api";
+import { Grid, Paper } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { mapStyles } from './mapStyles';
-import usePlacesAutoComplete, {
-  getGeocode,
-  getLatLng,
-} from "use-places-autocomplete";
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxPopover,
-  ComboboxList,
-  ComboboxOption,
-} from "@reach/combobox";
-import "@reach/combobox/styles.css";
+
 import { Report } from "./report.js";
 import { centerCoords } from "./centerCoords.js";
 
-import covid19Api from "../apis/covid19Api.js"
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import getDataAndPredictions from "./cases.js"
-import { CasesChart } from "./casesChart";
-import { CasesChartModal } from "./casesChartModal";
+import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/cases.js"
 import { getcoord } from "./getcoord";
-
-let clicked;
-
-const changeSidebar = (state) => {
-  // console.log("clicked", state);
-  clicked = true;
-}
+import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
+import Search from "../components/search/searchBar";
 
 const markers = () => {
   let listt = []
@@ -90,10 +52,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: '10%'
   },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
 }));
 
 const libraries = ["places"];
@@ -125,74 +83,6 @@ function useAsyncHook(location) {
   return [result, loading];
 }
 
-
-
-const Search = (props) => {
-  console.log('search')
-  const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
-    requestOptions: {
-      location: {
-        lat: () => 40.7128,
-        lng: () => -74.0060,
-      },
-      radius: 200 * 1000,
-    }
-  })
-  const { setFunc } = props;
-  const handleInput = (e) => {
-    console.log('getting input');
-    setValue(e.target.value);
-    console.log("intput is", value, ready, status, e.target.value);
-    // console.log(e.target.value); 
-    setFunc(e.target.value);
-  }
-  const classes = useStyles();
-
-  const mapRef = React.useRef();
-  // const onMapLoad = React.useCallback((map) => {
-  //   mapRef.current = map;
-  // }, []);
-
-  // const panTo = React.useCallback(({ lat, lng }) => {
-  //   mapRef.current.panTo({ lat, lng });
-  //   mapRef.current.setZoom(14);
-  // }, []);
-
-  return (
-    <div className={classes.search}>
-      <Combobox onSelect={ async (address) => {
-        setValue(address, false); 
-        clearSuggestions();
-        // console.log(address);
-
-        try {
-          const results = await getGeocode({address});
-          // const { lat, lng } = await getLatLng(results[0]);
-          // panTo({ lat, lng });
-          // Display the side bar for this place
-        } catch (error) {
-          console.log('error trying to pan')
-        }
-      }}>
-        <ComboboxInput
-          value={value}
-          onChange={(e) => handleInput(e)}
-          disabled={!ready}
-          placeholder="Enter a state"
-        />
-        <ComboboxPopover className={classes.popover}>
-          <ComboboxList className={classes.list}>
-            {status === "OK" && data.map(({id, description}) => {
-              // console.log(id, description)
-              return <ComboboxOption key={id} value={description}/>
-            })}
-          </ComboboxList>
-        </ComboboxPopover>
-      </Combobox>
-    </div>
-  )
-}
-
 const supportedCountries = {
   "united-states": {
     "Country": "USA",
@@ -209,7 +99,7 @@ const supportedCountries = {
 }
 
 const Map = () => {
-  const [province, setProvince] = React.useState("Ohio") // a province is a state
+  const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
   const [result, loading] = useAsyncHook(province);
   const [recordedCases, setRecordedCases] = React.useState({});
@@ -230,7 +120,15 @@ const Map = () => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
     });
-  }, [])
+  }, []);
+
+  React.useEffect(() => {
+    getDataAndPredictions(country).then(([recorded, predicted]) => {
+      console.log('recorded and predicted', recorded, predicted)
+      setRecordedCases(recorded);
+      setPredictedCases(predicted);
+    });
+  }, [country, province])
 
   // React.useEffect(async () => {
   //   // everytime dest ort origin is updated then we have toi call the api to get the geocode and the latlng 
@@ -356,7 +254,6 @@ const Map = () => {
     }
   }
 
-
   const AllRouteRenderer = () => {
     if (response !== null && response.routes) {
       console.log('routes', response.routes)
@@ -375,8 +272,19 @@ const Map = () => {
     return null;
   }
 
+  getCasesByCity(country).then(x => console.log(x));
+
   return (
     <div style={mapPageStyle}>
+      <EpiWatchToolBar
+        pageName={"Route Planner"}
+        country={country}
+        setCountry={setCountry}
+        province={province}
+        setProvince={setProvince}
+        recordedCases={recordedCases}
+        predictedCases={predictedCases}
+      />
       <Grid container className={classes.root}>
         <Grid container item direction="column" xs={12} sm={3} md={3} spacing={2} component={Paper} elevation={3}>
           <Grid item xs>
@@ -422,15 +330,7 @@ const Map = () => {
             </div>
           </Grid>
           <Grid item align="center">
-            <CasesChartModal state={province} recorded={recordedCases[province]} predicted={predictedCases[province]} />
-          </Grid>
-          <Grid item align="center">
             <Report result={result} headline={headline} url={url} eventDate={eventDate}/>
-          </Grid>
-          <Grid item component={Paper} align="center">
-            <Typography variant="body2" gutterBottom>
-              By <Link href="https://github.com/hayeselnut/SENG3011_Linked_List" target="_blank">SENG3011 Linked List</Link>
-            </Typography>
           </Grid>
         </Grid>
         <Grid item xs={12} sm={9} md={9}>
@@ -451,8 +351,8 @@ const Map = () => {
 
               options={ohioOptions}
               onLoad={ohioOnLoad}
-            /> 
-            /*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
+            /> }
+            {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
               because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
               I can do it, but the system can't save it. Unless we have a database.
               
