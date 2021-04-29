@@ -33,7 +33,7 @@ const percentToRGB = (percent) => {
 } 
 
 const Heatmap = (props) => {
-  const { country, recorded } = props;
+  const { country, province, recorded } = props;
 
   const [dangerIndexes, setDangerIndexes] = React.useState({});
 
@@ -43,34 +43,35 @@ const Heatmap = (props) => {
     });
   }, [recorded]);
 
-  const checkcolor = (data) => ({
+  const getOptions = (provinceIndex, outline) => ({
     strokeColor: '#000000',
     strokeOpacity: 0.8,
-    strokeWeight: 3,
-    fillColor: percentToRGB(data),
-    fillOpacity: 0.35,
-    zIndex: 10
-  });
-
-  const getOptions = (provinceIndex) => ({
-    strokeColor: '#000000',
-    strokeOpacity: 0.8,
-    strokeWeight: 3,
-    fillColor: '#000000',
+    strokeWeight: outline ? 2 : 0,
+    fillColor: percentToRGB(provinceIndex),
     fillOpacity: 0.35,
   })
 
   console.log(dangerIndexes);
 
+  // {SupportedCountries[country].Provinces.map(Province => (
+  //   <Polygon
+  //   paths={getcoord(country, Province)} 
+  //   options={stateOutlineOptions}
+  // />
+  // ))}
+
   return (
     <>
-      {Object.entries(dangerIndexes).map((Province, index) => (
+      {Object.keys(dangerIndexes).map((Province, index) => (
         <Polygon
           key={index}
           paths={getcoord(country, Province)}
-          options={getOptions(dangerIndexes[Province])}
+          options={getOptions(dangerIndexes[Province], Province === province)}
         />
       ))}
+      {/* {Object.entries(dangerIndexes).map((Province, index) => (
+        "Polygon " +"
+      ))} */}
     </>
   );
 };

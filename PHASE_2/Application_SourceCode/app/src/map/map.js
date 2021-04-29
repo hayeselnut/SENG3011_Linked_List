@@ -232,6 +232,8 @@ const Map = () => {
                         case "country":
                           country = response.results[0].address_components[i].long_name;
                           break;
+                        default:
+                          break;
                       }
                     }
                   }
@@ -241,21 +243,13 @@ const Map = () => {
                   console.error('error');
                 }
               );
-
               qq = 0;
-
             }
-           // console.log(se1);
           }
-
         }
         se.push(se1);
-
       }
-
       setRoutecitys(se);
-    
-
     } 
     return null;
   }
@@ -313,13 +307,7 @@ const Map = () => {
             <AllCityfinder/>
 
             {/* {markers()} */}
-            <Heatmap country={country} recorded={recordedCases}/>
-            {/* <Polygon id = "poly"
-              paths={getcoord(country,province)} 
-
-              options={ohioOptions}
-            />    */}
-
+            <Heatmap country={country} province={province} recorded={recordedCases}/>
 
           </GoogleMap>
         </Grid>
