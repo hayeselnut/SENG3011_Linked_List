@@ -120,6 +120,7 @@ function useAsyncHook(location) {
 
 
 const Search = (props) => {
+  console.log('search')
   const { ready, value, suggestions: {status, data}, setValue, clearSuggestions} = usePlacesAutoComplete({
     requestOptions: {
       location: {
@@ -131,8 +132,9 @@ const Search = (props) => {
   })
   const { setFunc } = props;
   const handleInput = (e) => {
+    console.log('getting input');
     setValue(e.target.value);
-    // console.log("intput is", value, ready, status);
+    console.log("intput is", value, ready, status, e.target.value);
     // console.log(e.target.value); 
     setFunc(e.target.value);
   }
@@ -157,7 +159,7 @@ const Search = (props) => {
 
         try {
           const results = await getGeocode({address});
-          const { lat, lng } = await getLatLng(results[0]);
+          // const { lat, lng } = await getLatLng(results[0]);
           // panTo({ lat, lng });
           // Display the side bar for this place
         } catch (error) {
@@ -166,7 +168,7 @@ const Search = (props) => {
       }}>
         <ComboboxInput
           value={value}
-          onChange={handleInput}
+          onChange={(e) => handleInput(e)}
           disabled={!ready}
           placeholder="Enter a state"
         />
@@ -232,7 +234,7 @@ const Map = () => {
   // },[origin])
 
   const getDirectionCoords = async () => {
-    // console.log('og', origin)
+      console.log('og', origin)
     const originPara = {
       address: origin,
     };
@@ -247,7 +249,7 @@ const Map = () => {
     const destPara = {
       address: dest,
     };
-    // console.log('dest', dest);
+    console.log('dest', dest);
     try {
 
       const results = await getGeocode(destPara);
