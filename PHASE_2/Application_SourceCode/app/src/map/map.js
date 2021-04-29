@@ -8,13 +8,20 @@ import { centerCoords } from "./centerCoords.js";
 
 import epiwatchApi from "../apis/epiwatchApi.js"
 
-import { getDataAndPredictions, getCasesByCity } from "../components/casesChart/cases.js"
-import { getcoord } from "./getcoord";
+import { getDataAndPredictions, getCasesByCity} from "../components/casesChart/cases.js"
 import EpiWatchToolBar from "../components/toolbar/epiwatchToolbar";
 import Search from "../components/search/searchBar";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
 import ArticlesShowcase from "../components/articlesShowcase/articlesShowcase";
 import aggregateDangerIndexes from "../components/dangerIndexAggregator";
+
+import Geocode from "react-geocode";
+import Heatmap from "../components/heatmap/heatmap.js";
+Geocode.setApiKey(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
+
+Geocode.setRegion("es");
+Geocode.setLanguage("en");
+Geocode.setLocationType("ROOFTOP");
 
 const markers = () => {
   let listt = []
@@ -70,21 +77,6 @@ function useAsyncHook(location) {
   return [articles, articlesLoading];
 }
 
-const supportedCountries = {
-  "united-states": {
-    "Country": "USA",
-    "Slug": "united-states",
-    "ISO2": "US",
-    "Provinces": ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virgin Islands", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
-  },
-  "india": {
-    "Country": "India",
-    "Slug": "india",
-    "ISO2": "IN",
-    "Provinces": ["Andaman and Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu and Kashmir", "Jharkhand", "Karnataka", "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"],
-  },
-}
-
 const Map = () => {
   const [province, setProvince] = React.useState("Ohio")
   const [country, setCountry] = React.useState("united-states");
@@ -99,17 +91,17 @@ const Map = () => {
   const [originLatLng, setOriginLatLng] = React.useState({});
   const [center, setCenter] = React.useState({lat: 37.0902, lng: -95.7129});
   const [gotDirections, setGotDirections] = React.useState(false); 
+  const [routecitys, setRoutecitys] = React.useState({});
+  const [routecitySearch, setRoutecitysSearch] = React.useState(true);
+  const [cases, setcases] = React.useState({});
 
   React.useEffect(() => {
     getDataAndPredictions(country).then(([recorded, predicted]) => {
       setRecordedCases(recorded);
       setPredictedCases(predicted);
-      console.log(aggregateDangerIndexes(recorded));
     });
-
-    getCasesByCity(country).then(x => console.log(x));
-
   }, [country]);
+
 
   const getDirectionCoords = async () => {
       console.log('og', origin)
@@ -138,6 +130,7 @@ const Map = () => {
     } catch (error) {
       console.log("Error: ", error);
     }
+
   }
 
   const classes = useStyles();
@@ -164,16 +157,13 @@ const Map = () => {
   }
 
   const ohioOptions = {
-    strokeColor: '#FF000',
+    strokeColor: '#000000',
     strokeOpacity: 0.8,
     strokeWeight: 3,
-    fillcolor: '#FF0000',
-    fillOpacity: 0.35,
+    fillcolor: '#000000',
+    fillOpacity: 0,
     zIndex: 1
   };
-
-  const ohioOnLoad = (polygon) => {
-  }
 
   const directionsCallback = (response) => {
     if (response !== null) {
@@ -203,7 +193,63 @@ const Map = () => {
           />
         )
       })
+      console.log('rr',routes);
       return routes;
+    } 
+    return null;
+  }
+
+  const AllCityfinder = () => {
+    if (response !== null && response.routes && !routecitySearch ) {
+      setRoutecitysSearch(true);
+
+     // console.log(response.routes[0].legs[0].steps[0].end_location.lat);
+     const se = [];
+
+      for (let i1 = 0; i1 < response.routes.length ; i1++){
+        const se1 = [];
+        let qq = 0;//reduce call api number
+        for(let i2 = 0; i2 < response.routes[i1].legs.length; i2++){
+          for(let i3 = 0; i3 < response.routes[i1].legs[i2].steps.length; i3++){
+            qq = qq + 1;
+            var q1 = response.routes[i1].legs[i2].steps[i3].end_location.lat;
+            var q2 = response.routes[i1].legs[i2].steps[i3].end_location.lng;
+            if( qq == 3){
+
+              Geocode.fromLatLng(q1(), q2()).then(
+                (response) => {
+                  const address = response.results[0].formatted_address;
+                  let city, state, country;
+                  for (let i = 0; i < response.results[0].address_components.length; i++) {
+                    for (let j = 0; j < response.results[0].address_components[i].types.length; j++) {
+                      switch (response.results[0].address_components[i].types[j]) {
+                        case "locality":
+                          city = response.results[0].address_components[i].long_name;
+                          break;
+                        case "administrative_area_level_1":
+                          state = response.results[0].address_components[i].long_name;
+                          break;
+                        case "country":
+                          country = response.results[0].address_components[i].long_name;
+                          break;
+                        default:
+                          break;
+                      }
+                    }
+                  }
+                  se1.push([city,state,country]);
+                },
+                (error) => {
+                  console.error('error');
+                }
+              );
+              qq = 0;
+            }
+          }
+        }
+        se.push(se1);
+      }
+      setRoutecitys(se);
     } 
     return null;
   }
@@ -236,7 +282,7 @@ const Map = () => {
                 </div>
               </div>
               <div style={{ width: "100%", display: "flex", justifyContent: "center" }} >
-                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();}}>
+                <Button variant="contained" color="primary" onClick={() => {setGotDirections(false); getDirectionCoords();setRoutecitysSearch(false)}}>
                   Find safe route
                 </Button>
               </div>
@@ -258,29 +304,11 @@ const Map = () => {
               callback={directionsCallback}
             />}
             <AllRouteRenderer/>
+            <AllCityfinder/>
+
             {/* {markers()} */}
-            <Polygon id = "poly"
-              paths={getcoord(country,province)} 
+            <Heatmap country={country} province={province} recorded={recordedCases}/>
 
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            />
-            {/*The country and province of the follower are automatically changed. Don't ask me why I didn't write the city, 
-              because we didn't find the city in our query... and storing a large file of 100m is really a problem. 
-              I can do it, but the system can't save it. Unless we have a database.
-              
-              
-              I don't know what the variables of our destination country and state are, so I wrote an example. 
-              You only need to change the variables in getcoord to display the corresponding continent. 
-              The continent that cannot be displayed does not match the characters, and the name may be different.
-              */
-
-              // for future
-            /*  <Polygon id = "poly"
-              paths={getcoord(destination_country,destination_province)} //
-              options={ohioOptions}
-              onLoad={ohioOnLoad}
-            /> */}
           </GoogleMap>
         </Grid>
       </Grid>
